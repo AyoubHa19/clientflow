@@ -5,6 +5,7 @@ import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { selectClassName } from "./styles";
 
 type FieldProps = Omit<React.ComponentProps<"input">, "id"> & {
   label: string;
@@ -74,6 +75,91 @@ export function FormMessage({ children }: { children?: React.ReactNode }) {
           {children}
         </p>
       ) : null}
+    </div>
+  );
+}
+
+function FieldMessage({ id, error, hint }: { id: string; error?: string; hint?: string }) {
+  if (error) {
+    return (
+      <p id={`${id}-error`} className="text-sm text-destructive">
+        {error}
+      </p>
+    );
+  }
+  if (hint) {
+    return (
+      <p id={`${id}-hint`} className="text-sm text-muted-foreground">
+        {hint}
+      </p>
+    );
+  }
+  return null;
+}
+
+/** A labelled native select (accessible everywhere, phones included). */
+export function SelectField({
+  label,
+  error,
+  hint,
+  options,
+  className,
+  ...props
+}: Omit<React.ComponentProps<"select">, "id"> & {
+  label: string;
+  error?: string;
+  hint?: string;
+  options: { value: string; label: string }[];
+}) {
+  const id = useId();
+  return (
+    <div className="grid content-start gap-2">
+      <Label htmlFor={id}>{label}</Label>
+      <select
+        id={id}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
+        className={cn(selectClassName, className)}
+        {...props}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+      <FieldMessage id={id} error={error} hint={hint} />
+    </div>
+  );
+}
+
+/** A labelled multi-line text box. */
+export function TextareaField({
+  label,
+  error,
+  hint,
+  className,
+  ...props
+}: Omit<React.ComponentProps<"textarea">, "id"> & {
+  label: string;
+  error?: string;
+  hint?: string;
+}) {
+  const id = useId();
+  return (
+    <div className="grid content-start gap-2">
+      <Label htmlFor={id}>{label}</Label>
+      <textarea
+        id={id}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
+        className={cn(
+          "min-h-28 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-2 text-base outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30",
+          className,
+        )}
+        {...props}
+      />
+      <FieldMessage id={id} error={error} hint={hint} />
     </div>
   );
 }

@@ -6,7 +6,7 @@ projects and tasks in one place.
 > **Status:** in development, built one stage at a time (see `PRD.md`,
 > section 14). Done so far: **Stage 1**, project foundation; **Stage 2**,
 > database; **Stage 3**, sign-up, sign-in and sign-out; **Stage 4**,
-> workspaces and data isolation. Clients come next.
+> workspaces and data isolation; **Stage 5**, clients. Leads come next.
 
 ## Stack
 
@@ -56,6 +56,16 @@ colours.
   the browser**: forms send only names and values, and every query filters
   by `ctx.workspace.id`. Tests try to reach another workspace on purpose.
 
+## Clients
+
+- `/clients`: search (name, company, email, phone), a status filter
+  (active and inactive by default), sorting, 20 a page. The settings live
+  in the address, so a filtered list can be bookmarked or shared.
+- Add, view, edit; archive (hidden from the usual list) and restore;
+  delete for good after confirming (owners only; their projects stay).
+- Every change is written to the activity log in the same transaction.
+- Another workspace's client, or a malformed id, shows "Page not found".
+
 ## Signing in
 
 - `/sign-up` and `/sign-in` (Better Auth, email and password). Passwords
@@ -96,17 +106,17 @@ The schema is in `prisma/schema.prisma`, with a comment on each rule.
 
 ## Checks
 
-| Command                  | What it does                                      |
-| ------------------------ | ------------------------------------------------- |
-| `npm run check`          | All of the below except the end-to-end tests      |
-| `npm run format:check`   | Prettier formatting                               |
-| `npm run lint`           | ESLint                                            |
-| `npm run typecheck`      | Prisma client and route types, then TypeScript    |
-| `npm test`               | Unit tests (Vitest)                               |
-| `npm run test:db`        | Database tests on Neon's `test` branch            |
-| `npm run check:contrast` | Colour contrast of the theme tokens (WCAG)        |
-| `npm run test:e2e`       | Browser tests on desktop and phone sizes, and axe |
-| `npm run build`          | Production build                                  |
+| Command                  | What it does                                                    |
+| ------------------------ | --------------------------------------------------------------- |
+| `npm run check`          | All of the below except the end-to-end tests                    |
+| `npm run format:check`   | Prettier formatting                                             |
+| `npm run lint`           | ESLint                                                          |
+| `npm run typecheck`      | Prisma client and route types, then TypeScript                  |
+| `npm test`               | Unit tests (Vitest)                                             |
+| `npm run test:db`        | Database tests on Neon's `test` branch                          |
+| `npm run check:contrast` | Colour contrast of the theme tokens (WCAG)                      |
+| `npm run test:e2e`       | Builds the app, then browser tests (desktop and phone) with axe |
+| `npm run build`          | Production build                                                |
 
 The first time, `npx playwright install chromium` downloads the browser
 the end-to-end tests use. Next allows one dev server per folder, so if
@@ -194,6 +204,9 @@ scripts/            small tools (contrast check)
   quiet spell takes a moment longer while it wakes.
 - A project's client must be in the same workspace: the database can't
   check that on its own, so the server will (Stage 7, with a test).
+- A "not found" record answers with status 200, not 404: the page streams,
+  and the status is sent before the server knows. Nothing of the record is
+  shown, and the page carries `noindex`.
 - Signing up says when an email already has an account: friendlier, but it
   lets someone check whether an address is registered. Hiding it needs
   email verification, which needs a domain to send mail from (later).

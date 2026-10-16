@@ -97,11 +97,22 @@ end of every stage.
   requests at once); `context.ts` has `requireWorkspace()` (session +
   membership; no workspace → /onboarding); `actions.ts` the Server
   Actions (read only name and timezone from the form). One workspace per
-  person for now (serializable transaction). The sample account owns
-  "Bennani Design Studio (sample)" (Africa/Casablanca).
-- **Next: Stage 5, client management** (CRUD, search, filters,
-  pagination). Every query filters by `ctx.workspace.id` from
-  `requireWorkspace()`; another workspace's record answers "not found".
+  person for now (a per-user advisory lock; Stage 5 replaced a
+  serializable transaction that failed under load). The sample account
+  owns "Bennani Design Studio (sample)" (Africa/Casablanca).
+- **Stage 5, clients: done (2026-10-16).** `/clients` (search, status
+  filter, sort, 20 a page, all in the URL via `parseClientListParams`),
+  `/clients/new`, `/clients/[id]`, `/clients/[id]/edit`; archive/restore,
+  delete (owner, confirm dialog). Rules in `src/server/clients/service.ts`
+  (every query `{ id, workspaceId }`, activity logged in the same
+  transaction), actions in `actions.ts` (redirect with `?notice=` for the
+  toast, `NoticeToast`). Shared: `src/server/result.ts`,
+  `src/lib/validation/ids.ts`, `src/components/forms/` (FormField,
+  SelectField, TextareaField; `styles.ts` for Server Components),
+  `src/components/pagination.tsx`, `src/lib/dates.ts`. The sample
+  workspace has 7 "(sample)" clients (one archived).
+- **Next: Stage 6, leads** (CRUD, status changes, the Kanban pipeline,
+  converting a lead into a client once). Follow the clients pattern.
 
 ## Running it
 
@@ -141,9 +152,19 @@ npx next start -p 3200` after a build (rate limiting is on only there).
   cookies are there too): never print `document.cookie`.
 - Browser tests make `e2e-...@example.com` accounts on the dev branch;
   `e2e/global-teardown.ts` deletes them and their workspaces.
-- The full e2e suite takes ~6 minutes on the dev server: while fixing,
-  run one spec (`npx playwright test e2e/x.spec.ts`), and the full suite
-  once at the end. Timeouts are raised (60 s a test, 15 s an expect).
+- `npm run test:e2e` builds the app and runs `next start` on 3100 (with
+  AUTH_RATE_LIMIT=off, only there), 3 workers: ~3 minutes. On the dev
+  server it was twice as slow and flaky. While fixing one spec, run it
+  against the dev server: `E2E_BASE_URL=http://localhost:3001 npx
+playwright test e2e/x.spec.ts`; the full suite once at the end.
+  `/design` is dev-only, so no test uses it.
+- `notFound()` inside `<Suspense>` streams: the page shows "Page not
+  found" with `noindex`, but the status is 200 (Next can't change it once
+  streaming started). Tests check the content, not the status.
+- In Playwright, `getByRole("button", { name: "Next" })` also matches
+  Next.js's dev-tools button: use `exact: true`.
+- With the pg adapter, a serialization failure surfaces as
+  `DriverAdapterError` (TransactionWriteConflict), not P2034.
 - Time zone lists differ between Node and browsers: the server renders
   the options (`timeZoneOptions()`) and passes them to the form.
 - **The C: drive is almost full** (it hit 0 GB during Stage 2). If npm

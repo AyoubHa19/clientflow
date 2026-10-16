@@ -1,18 +1,18 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { isActive, NAV_ITEMS } from "./nav-items";
 
-/** The main navigation, used by the side bar and the phone menu. */
-export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
-  const pathname = usePathname();
+type NavProps = { onNavigate?: () => void };
 
+function NavList({ pathname, onNavigate }: NavProps & { pathname: string | null }) {
   return (
     <ul className="flex flex-col gap-0.5">
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-        const active = isActive(href, pathname);
+        const active = pathname !== null && isActive(href, pathname);
         return (
           <li key={href}>
             <Link
@@ -32,5 +32,22 @@ export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
         );
       })}
     </ul>
+  );
+}
+
+function CurrentNavList(props: NavProps) {
+  return <NavList {...props} pathname={usePathname()} />;
+}
+
+/**
+ * The main navigation, used by the side bar and the phone menu. The current
+ * page is only known per request, so on pages like /clients/[id] the links
+ * render first and the highlight streams in (Next asks for the Suspense).
+ */
+export function NavLinks(props: NavProps) {
+  return (
+    <Suspense fallback={<NavList {...props} pathname={null} />}>
+      <CurrentNavList {...props} />
+    </Suspense>
   );
 }

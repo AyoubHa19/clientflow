@@ -2,16 +2,19 @@ import { defineConfig, devices } from "@playwright/test";
 
 const PORT = 3100;
 
-// End-to-end tests drive a real browser against the app. They start their
-// own dev server on port 3100. Next allows only one dev server per folder,
-// so if `npm run dev` is already running, point the tests at it instead:
-//   E2E_BASE_URL=http://localhost:3001 npm run test:e2e
+// End-to-end tests drive a real browser against the app. By default they
+// build it and run the production server on port 3100: much faster than a
+// dev server, and what people will actually use. While working on one test,
+// point it at the running dev server instead:
+//   E2E_BASE_URL=http://localhost:3001 npx playwright test e2e/clients.spec.ts
 const existingServer = process.env.E2E_BASE_URL;
 
 export default defineConfig({
   testDir: "./e2e",
   globalTeardown: "./e2e/global-teardown.ts",
   fullyParallel: true,
+  // One server serves every test: more than three at once overloads it.
+  workers: 3,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "github" : "list",
@@ -30,12 +33,15 @@ export default defineConfig({
   webServer: existingServer
     ? undefined
     : {
-        // `npx next dev`, not `npm run dev`, which fixes the port at 3001.
-        command: `npx next dev --port ${PORT}`,
-        // Better Auth checks that requests come from its own address.
-        env: { BETTER_AUTH_URL: `http://localhost:${PORT}` },
+        command: `npm run build && npx next start --port ${PORT}`,
+        env: {
+          // Better Auth checks that requests come from its own address.
+          BETTER_AUTH_URL: `http://localhost:${PORT}`,
+          // The tests sign up many accounts from one address (see auth/index.ts).
+          AUTH_RATE_LIMIT: "off",
+        },
         url: `http://localhost:${PORT}`,
         reuseExistingServer: !process.env.CI,
-        timeout: 120_000,
+        timeout: 300_000,
       },
 });

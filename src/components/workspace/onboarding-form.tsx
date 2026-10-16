@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { Loader2Icon } from "lucide-react";
-import { focusFirstError, FormMessage } from "@/components/auth/form-field";
+import { focusFirstError, FormMessage } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { createWorkspaceAction, type WorkspaceFormState } from "@/server/workspace/actions";
 import { WorkspaceFields } from "./workspace-fields";

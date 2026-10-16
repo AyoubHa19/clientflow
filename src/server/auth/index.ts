@@ -12,7 +12,10 @@ export const auth = createAuth({
   db,
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
-  rateLimit: process.env.NODE_ENV === "production",
+  // On in production. AUTH_RATE_LIMIT=off exists only for the browser tests,
+  // which run a production build and sign up many accounts from one address;
+  // never set it on the live site.
+  rateLimit: process.env.NODE_ENV === "production" && process.env.AUTH_RATE_LIMIT !== "off",
   // Lets Server Actions set the session cookie. Must stay the last plugin.
   plugins: [nextCookies()],
 });

@@ -1,7 +1,7 @@
-import { Prisma, type MemberRole } from "@/generated/prisma/client";
-import { fieldErrors } from "@/lib/validation/errors";
+import type { MemberRole } from "@/generated/prisma/client";
 import { workspaceSchema } from "@/lib/validation/workspace";
 import type { Db } from "@/server/db/client";
+import { forbidden, invalid, ok, type ServiceResult } from "@/server/result";
 
 // Workspace rules, kept apart from Next (no cookies, no redirects) so the
 // tests can run them against the test database. The pages and Server
@@ -19,15 +19,6 @@ export type WorkspaceContext = {
   role: MemberRole;
 };
 
-export type ServiceResult<T> =
-  | { ok: true; value: T }
-  | {
-      ok: false;
-      code: "INVALID" | "ALREADY_HAS_WORKSPACE" | "FORBIDDEN";
-      message: string;
-      errors?: Record<string, string>;
-    };
-
 const summary = { id: true, name: true, timezone: true } as const;
 
 /** The user's workspace and role there, or null if they have none yet. */
@@ -42,8 +33,9 @@ export async function findMembership(db: Db, userId: string) {
 
 /**
  * Creates the user's workspace with them as its owner. One workspace per
- * person for now: a second one is refused, even from two requests at once
- * (the check and the insert run in one serializable transaction).
+ * person for now: a second one is refused, even from two requests at once.
+ * An advisory lock on the user id makes their requests take turns (others
+ * aren't slowed down), so the check and the insert can't interleave.
  */
 export async function createWorkspace(
   db: Db,
@@ -51,42 +43,25 @@ export async function createWorkspace(
   input: unknown,
 ): Promise<ServiceResult<WorkspaceSummary>> {
   const parsed = workspaceSchema.safeParse(input);
-  if (!parsed.success) {
-    return {
-      ok: false,
-      code: "INVALID",
-      message: "Check the form and try again.",
-      errors: fieldErrors(parsed.error),
-    };
-  }
+  if (!parsed.success) return invalid(parsed.error);
 
-  const alreadyHas = {
-    ok: false,
-    code: "ALREADY_HAS_WORKSPACE",
-    message: "You already have a workspace.",
-  } as const;
-
-  try {
-    return await db.$transaction(
-      async (tx) => {
-        const existing = await tx.workspaceMembership.findFirst({ where: { userId } });
-        if (existing) return alreadyHas;
-        const workspace = await tx.workspace.create({
-          data: { ...parsed.data, memberships: { create: { userId, role: "OWNER" } } },
-          select: summary,
-        });
-        return { ok: true, value: workspace } as const;
-      },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
-    );
-  } catch (error) {
-    // Two requests at once: PostgreSQL lets one through and stops the
-    // other with a serialization failure (P2034).
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
-      return alreadyHas;
+  return db.$transaction(async (tx) => {
+    // Held until this transaction ends; a second request waits here.
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${userId}, 0))`;
+    const existing = await tx.workspaceMembership.findFirst({ where: { userId } });
+    if (existing) {
+      return {
+        ok: false,
+        code: "ALREADY_HAS_WORKSPACE",
+        message: "You already have a workspace.",
+      } as const;
     }
-    throw error;
-  }
+    const workspace = await tx.workspace.create({
+      data: { ...parsed.data, memberships: { create: { userId, role: "OWNER" } } },
+      select: summary,
+    });
+    return ok(workspace);
+  });
 }
 
 /**
@@ -100,25 +75,14 @@ export async function updateWorkspaceSettings(
   input: unknown,
 ): Promise<ServiceResult<WorkspaceSummary>> {
   if (ctx.role !== "OWNER") {
-    return {
-      ok: false,
-      code: "FORBIDDEN",
-      message: "Only the workspace owner can change these settings.",
-    };
+    return forbidden("Only the workspace owner can change these settings.");
   }
   const parsed = workspaceSchema.safeParse(input);
-  if (!parsed.success) {
-    return {
-      ok: false,
-      code: "INVALID",
-      message: "Check the form and try again.",
-      errors: fieldErrors(parsed.error),
-    };
-  }
+  if (!parsed.success) return invalid(parsed.error);
   const workspace = await db.workspace.update({
     where: { id: ctx.workspace.id },
     data: { name: parsed.data.name, timezone: parsed.data.timezone },
     select: summary,
   });
-  return { ok: true, value: workspace };
+  return ok(workspace);
 }

@@ -43,10 +43,10 @@ test("visitors are sent to sign in, then back where they were going", async ({ p
   await createWorkspace(page);
   await signOut(page);
 
-  await page.goto("/design");
-  await expect(page).toHaveURL(/\/sign-in\?next=%2Fdesign$/);
+  await page.goto("/settings");
+  await expect(page).toHaveURL(/\/sign-in\?next=%2Fsettings$/);
   await fillSignIn(page, user.email, user.password);
-  await expect(page).toHaveURL(/\/design$/);
+  await expect(page).toHaveURL(/\/settings$/);
 });
 
 test("sign up, sign out and sign in again", async ({ page }) => {

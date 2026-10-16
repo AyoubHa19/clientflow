@@ -79,7 +79,7 @@ for (const colorScheme of ["light", "dark"] as const) {
   test.describe(`accessibility (${colorScheme})`, () => {
     test.use({ colorScheme });
 
-    for (const path of ["/", "/settings", "/design", "/no-such-page"]) {
+    for (const path of ["/", "/settings", "/no-such-page"]) {
       test(`axe finds no problems on ${path}`, async ({ page }) => {
         await page.goto(path);
         await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -87,16 +87,11 @@ for (const colorScheme of ["light", "dark"] as const) {
       });
     }
 
-    test("axe finds no problems in the open dialog and account menu", async ({ page }) => {
-      await page.goto("/design");
-      await page.getByRole("button", { name: "Open a dialog" }).click();
-      await expect(page.getByRole("dialog")).toBeVisible();
-      await expectNoAxeViolations(page);
-      await page.keyboard.press("Escape");
-
+    test("axe finds no problems in the open account menu", async ({ page }) => {
+      await page.goto("/");
       await page
         .getByRole("button", { name: /^Account:/ })
-        .first()
+        .filter({ visible: true })
         .click();
       await expect(page.getByRole("menuitem", { name: "Sign out" })).toBeVisible();
       await expectNoAxeViolations(page);

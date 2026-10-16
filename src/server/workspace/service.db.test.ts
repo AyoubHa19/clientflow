@@ -155,3 +155,20 @@ describe("workspace isolation", () => {
     expect(unchanged.name).toBe("A Studio (sample)");
   });
 });
+
+describe("busy moments", () => {
+  it("creates every workspace when many people sign up at once", async () => {
+    const users = await Promise.all(
+      Array.from({ length: 8 }, (_, n) => makeUser(`Busy ${n} (sample)`)),
+    );
+    const results = await Promise.all(
+      users.map((user) =>
+        createWorkspace(db, user.id, { name: `Busy Studio (sample)`, timezone: "UTC" }),
+      ),
+    );
+    expect(results.every((result) => result.ok)).toBe(true);
+    for (const user of users) {
+      expect(await db.workspaceMembership.count({ where: { userId: user.id } })).toBe(1);
+    }
+  });
+});

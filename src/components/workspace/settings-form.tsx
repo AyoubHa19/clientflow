@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
-import { focusFirstError, FormMessage } from "@/components/auth/form-field";
+import { focusFirstError, FormMessage } from "@/components/forms/form-field";
 import { Button } from "@/components/ui/button";
 import { updateWorkspaceAction, type WorkspaceFormState } from "@/server/workspace/actions";
 import { WorkspaceFields } from "./workspace-fields";

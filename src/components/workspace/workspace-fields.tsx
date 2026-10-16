@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useId, useRef } from "react";
-import { FormField } from "@/components/auth/form-field";
+import { FormField } from "@/components/forms/form-field";
+import { selectClassName } from "@/components/forms/styles";
 import { Label } from "@/components/ui/label";
 import { WORKSPACE_NAME_MAX } from "@/lib/validation/workspace";
 
@@ -67,7 +68,7 @@ export function WorkspaceFields({
           disabled={disabled}
           aria-invalid={errors.timezone ? true : undefined}
           aria-describedby={errors.timezone ? errorId : hintId}
-          className="h-10 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30"
+          className={selectClassName}
         >
           {zones.map((zone) => (
             <option key={zone} value={zone}>

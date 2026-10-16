@@ -7,7 +7,7 @@ import { Loader2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { authClient, authErrorMessage } from "@/lib/auth-client";
 import { fieldErrors, safeNextPath, signInSchema } from "@/lib/validation/auth";
-import { focusFirstError, FormField, FormMessage } from "./form-field";
+import { focusFirstError, FormField, FormMessage } from "@/components/forms/form-field";
 
 export function SignInForm() {
   const router = useRouter();
