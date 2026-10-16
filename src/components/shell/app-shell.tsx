@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { CurrentUserMenu } from "./current-user-menu";
+import { CurrentWorkspace } from "./current-workspace";
 import { MobileNav } from "./mobile-nav";
 import { NavLinks } from "./nav-links";
 
@@ -20,9 +21,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </a>
 
       <aside className="sticky top-0 hidden h-dvh flex-col gap-6 px-3 py-4 lg:flex">
-        <Link href="/" aria-label="ClientFlow home" className="w-fit rounded-lg px-2 py-1">
-          <Logo />
-        </Link>
+        <div className="grid gap-1 px-2">
+          <Link href="/" aria-label="ClientFlow home" className="w-fit rounded-lg py-1">
+            <Logo />
+          </Link>
+          <div className="pl-10.5">
+            <CurrentWorkspace />
+          </div>
+        </div>
         <nav aria-label="Main" className="flex-1">
           <NavLinks />
         </nav>
@@ -37,7 +43,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-dvh min-w-0 flex-col lg:py-2 lg:pr-2">
         <header className="sticky top-0 z-40 grid h-14 grid-cols-[1fr_auto_1fr] items-center border-b bg-background/85 px-2 backdrop-blur lg:hidden">
           <div>
-            <MobileNav />
+            <MobileNav workspace={<CurrentWorkspace />} />
           </div>
           <Link href="/" aria-label="ClientFlow home" className="rounded-lg px-1 py-1">
             <Logo />

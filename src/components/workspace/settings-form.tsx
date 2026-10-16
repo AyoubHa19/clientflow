@@ -1,0 +1,60 @@
+"use client";
+
+import { useActionState, useEffect, useRef } from "react";
+import { Loader2Icon } from "lucide-react";
+import { toast } from "sonner";
+import { focusFirstError, FormMessage } from "@/components/auth/form-field";
+import { Button } from "@/components/ui/button";
+import { updateWorkspaceAction, type WorkspaceFormState } from "@/server/workspace/actions";
+import { WorkspaceFields } from "./workspace-fields";
+
+export function SettingsForm({
+  zones,
+  name,
+  timezone,
+  canEdit,
+}: {
+  zones: string[];
+  name: string;
+  timezone: string;
+  canEdit: boolean;
+}) {
+  const form = useRef<HTMLFormElement>(null);
+  const [state, formAction, pending] = useActionState<WorkspaceFormState, FormData>(
+    updateWorkspaceAction,
+    {},
+  );
+
+  useEffect(() => {
+    if (state.saved) toast.success("Workspace settings saved");
+    else if (state.errors && form.current) focusFirstError(form.current);
+  }, [state]);
+
+  const values = state.values ?? { name, timezone };
+
+  return (
+    <form ref={form} action={formAction} noValidate className="grid gap-5">
+      <FormMessage>{state.errors ? undefined : state.message}</FormMessage>
+      <WorkspaceFields
+        zones={zones}
+        key={JSON.stringify(values)}
+        defaultName={values.name}
+        defaultTimeZone={values.timezone}
+        errors={state.errors}
+        disabled={pending || !canEdit}
+      />
+      {canEdit ? (
+        <div>
+          <Button type="submit" disabled={pending}>
+            {pending && <Loader2Icon aria-hidden className="animate-spin" />}
+            {pending ? "Saving…" : "Save changes"}
+          </Button>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          Only the workspace owner can change these settings.
+        </p>
+      )}
+    </form>
+  );
+}

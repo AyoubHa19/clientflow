@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { expectNoAxeViolations, isPhone, signUpViaApi } from "./helpers";
+import { expectNoAxeViolations, isPhone, signUpWithWorkspace } from "./helpers";
 
-// The app's frame, for a signed-in user (a fresh account per test).
+// The app's frame, for a signed-in user with a workspace (fresh per test).
 test.beforeEach(async ({ page }) => {
-  await signUpViaApi(page);
+  await signUpWithWorkspace(page);
 });
 
 test("the overview opens inside the shell", async ({ page }) => {
@@ -79,7 +79,7 @@ for (const colorScheme of ["light", "dark"] as const) {
   test.describe(`accessibility (${colorScheme})`, () => {
     test.use({ colorScheme });
 
-    for (const path of ["/", "/design", "/no-such-page"]) {
+    for (const path of ["/", "/settings", "/design", "/no-such-page"]) {
       test(`axe finds no problems on ${path}`, async ({ page }) => {
         await page.goto(path);
         await expect(page.getByRole("heading", { level: 1 })).toBeVisible();

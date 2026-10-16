@@ -19,6 +19,13 @@ async function fillSignIn(page: Page, email: string, password: string) {
   await page.getByRole("button", { name: "Sign in" }).click();
 }
 
+async function createWorkspace(page: Page) {
+  await expect(page).toHaveURL(/\/onboarding$/);
+  await field(page, "Workspace name").fill("Tester Studio (sample)");
+  await page.getByRole("button", { name: "Create workspace" }).click();
+  await expect(page).toHaveURL("/");
+}
+
 async function signOut(page: Page) {
   // The side bar's account button on desktop, the top bar's on phones.
   await page
@@ -33,7 +40,7 @@ test("visitors are sent to sign in, then back where they were going", async ({ p
   const user = newTestUser();
   await page.goto("/sign-up");
   await fillSignUp(page, user);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Sara");
+  await createWorkspace(page);
   await signOut(page);
 
   await page.goto("/design");
@@ -49,7 +56,8 @@ test("sign up, sign out and sign in again", async ({ page }) => {
 
   await page.getByRole("link", { name: "Create an account" }).click();
   await fillSignUp(page, user);
-  await expect(page).toHaveURL("/");
+  // A new account names its workspace first.
+  await createWorkspace(page);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Sara");
 
   await signOut(page);
@@ -110,7 +118,8 @@ test("the password can be shown and hidden", async ({ page }) => {
 test("signed-in people skip the sign-in page", async ({ page }) => {
   await signUpViaApi(page);
   await page.goto("/sign-in");
-  await expect(page).toHaveURL("/");
+  // Into the app, which first asks this new account for a workspace.
+  await expect(page).toHaveURL(/\/onboarding$/);
 });
 
 test("signed-out visitors to unknown pages are asked to sign in", async ({ page }) => {
@@ -129,7 +138,7 @@ test("the sign-in form works with the keyboard alone", async ({ page }) => {
   await page.keyboard.press("Tab");
   await page.keyboard.type(user.password);
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL("/");
+  await expect(page).toHaveURL(/\/onboarding$/);
 });
 
 for (const colorScheme of ["light", "dark"] as const) {

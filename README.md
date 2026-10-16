@@ -5,7 +5,8 @@ projects and tasks in one place.
 
 > **Status:** in development, built one stage at a time (see `PRD.md`,
 > section 14). Done so far: **Stage 1**, project foundation; **Stage 2**,
-> database; **Stage 3**, sign-up, sign-in and sign-out. Workspaces come next.
+> database; **Stage 3**, sign-up, sign-in and sign-out; **Stage 4**,
+> workspaces and data isolation. Clients come next.
 
 ## Stack
 
@@ -42,6 +43,18 @@ and open http://localhost:3001 (the port is fixed so it never clashes with
 another project on 3000). Create an account, or use the sample one from
 `.env.local`. In development, `/design` shows the shared components and
 colours.
+
+## Workspaces
+
+- After signing up, `/onboarding` asks for a workspace name and time zone
+  (the browser's is picked). The creator is its **owner**. For now each
+  person has one workspace; the tables already allow more later.
+- `/settings`: the owner renames the workspace or changes its time zone.
+- `requireWorkspace()` (`src/server/workspace/context.ts`) gives every
+  page and action the user, their workspace and role, read from the
+  session and the membership table. **The workspace id never comes from
+  the browser**: forms send only names and values, and every query filters
+  by `ctx.workspace.id`. Tests try to reach another workspace on purpose.
 
 ## Signing in
 
@@ -110,6 +123,7 @@ src/
   app/              pages and layouts (the (app) group sits in the shell)
   components/ui/    shadcn components (generated, then adjusted)
   components/auth/  sign-in and sign-up forms
+  components/workspace/ onboarding and settings forms
   components/shell/ side bar, phone menu, account menu, page header
   components/theme/ light / dark / system theme
   generated/        the Prisma client (generated, not committed)

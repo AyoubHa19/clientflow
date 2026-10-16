@@ -15,7 +15,7 @@ import {
 import { NavLinks } from "./nav-links";
 
 /** The menu button and slide-in navigation below the lg breakpoint. */
-export function MobileNav() {
+export function MobileNav({ workspace }: { workspace?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -30,6 +30,7 @@ export function MobileNav() {
           <SheetTitle>
             <Logo />
           </SheetTitle>
+          {workspace && <div className="pl-10.5">{workspace}</div>}
           <SheetDescription className="sr-only">Main navigation</SheetDescription>
         </SheetHeader>
         <nav aria-label="Main" className="px-3">

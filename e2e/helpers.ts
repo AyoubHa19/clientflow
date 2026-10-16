@@ -34,3 +34,16 @@ export async function expectNoAxeViolations(page: Page) {
     .analyze();
   expect(results.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
 }
+
+/** Signs a new account up and names its workspace, as onboarding does. */
+export async function signUpWithWorkspace(page: Page, workspaceName = "Tester Studio (sample)") {
+  const user = await signUpViaApi(page);
+  await page.goto("/onboarding");
+  await page
+    .getByLabel("Workspace name", { exact: true })
+    .filter({ visible: true })
+    .fill(workspaceName);
+  await page.getByRole("button", { name: "Create workspace" }).click();
+  await expect(page).toHaveURL("/");
+  return { ...user, workspaceName };
+}

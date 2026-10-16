@@ -3,15 +3,15 @@ import { SparklesIcon } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { PageContainer, PageHeader } from "@/components/shell/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
-import { requireUser } from "@/server/auth/session";
+import { requireWorkspace } from "@/server/workspace/context";
 
 async function Greeting() {
-  const user = await requireUser();
+  const { user, workspace } = await requireWorkspace();
   const firstName = user.name.trim().split(/\s+/)[0] ?? user.name;
   return (
     <PageHeader
       title={`Welcome, ${firstName}`}
-      description="Clients, leads, projects and tasks in one calm workspace."
+      description={`Here's what's happening in ${workspace.name}.`}
     />
   );
 }
@@ -33,8 +33,8 @@ export default function OverviewPage() {
       </Suspense>
       <EmptyState
         icon={SparklesIcon}
-        title="Your workspace is on its way"
-        description="Next you'll name your workspace, then add clients, leads, projects and tasks. This page will show your real numbers once they exist."
+        title="Your workspace is ready"
+        description="Clients, leads, projects and tasks come next. This page will show your real numbers once they exist."
       />
     </PageContainer>
   );

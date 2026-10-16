@@ -89,8 +89,19 @@ end of every stage.
   verifications, rate_limits) came from `npx auth@1.7.10 generate`
   (migration `auth`). The "(sample)" account is on the dev branch; its
   email and password are in `.env.local` (SAMPLE_USER_*).
-- **Next: Stage 4, workspace and authorization** (onboarding to name a
-  workspace, `requireWorkspace()`, isolation tests).
+- **Stage 4, workspace and authorization: done (2026-10-16).** `/onboarding`
+  (name + time zone, the browser's zone guessed), `/settings` (owner-only
+  rename and time zone), the workspace name under the logo. Rules in
+  `src/server/workspace/service.ts` (plain functions taking `db` and a
+  `WorkspaceContext`, tested on the test branch: isolation A/B, roles, two
+  requests at once); `context.ts` has `requireWorkspace()` (session +
+  membership; no workspace → /onboarding); `actions.ts` the Server
+  Actions (read only name and timezone from the form). One workspace per
+  person for now (serializable transaction). The sample account owns
+  "Bennani Design Studio (sample)" (Africa/Casablanca).
+- **Next: Stage 5, client management** (CRUD, search, filters,
+  pagination). Every query filters by `ctx.workspace.id` from
+  `requireWorkspace()`; another workspace's record answers "not found".
 
 ## Running it
 
@@ -129,7 +140,12 @@ npx next start -p 3200` after a build (rate limiting is on only there).
 - Cookies on localhost are shared by every port (Pocketwise's Clerk
   cookies are there too): never print `document.cookie`.
 - Browser tests make `e2e-...@example.com` accounts on the dev branch;
-  `e2e/global-teardown.ts` deletes them.
+  `e2e/global-teardown.ts` deletes them and their workspaces.
+- The full e2e suite takes ~6 minutes on the dev server: while fixing,
+  run one spec (`npx playwright test e2e/x.spec.ts`), and the full suite
+  once at the end. Timeouts are raised (60 s a test, 15 s an expect).
+- Time zone lists differ between Node and browsers: the server renders
+  the options (`timeZoneOptions()`) and passes them to the form.
 - **The C: drive is almost full** (it hit 0 GB during Stage 2). If npm
   fails with ENOSPC, delete `%LOCALAPPDATA%\npm-cache\_cacache` and
   `_npx` (only downloaded copies) and tell the user; never delete their

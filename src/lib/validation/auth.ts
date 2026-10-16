@@ -39,15 +39,7 @@ export const signUpSchema = z.object({
 export type SignInInput = z.infer<typeof signInSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 
-/** Field errors as { field: "first message" }, for showing under inputs. */
-export function fieldErrors(error: z.ZodError): Record<string, string> {
-  const errors: Record<string, string> = {};
-  for (const issue of error.issues) {
-    const field = String(issue.path[0] ?? "form");
-    errors[field] ??= issue.message;
-  }
-  return errors;
-}
+export { fieldErrors } from "./errors";
 
 /**
  * Where to go after signing in: only a path inside this app, so a link

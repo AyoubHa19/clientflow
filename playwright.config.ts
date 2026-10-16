@@ -15,6 +15,10 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "github" : "list",
+  // A dev server compiles pages on first visit and serves many tests at
+  // once, so give each step more time than the 5-second default.
+  timeout: 60_000,
+  expect: { timeout: 15_000 },
   use: {
     baseURL: existingServer ?? `http://localhost:${PORT}`,
     trace: "on-first-retry",

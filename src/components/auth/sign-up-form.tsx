@@ -38,7 +38,8 @@ export function SignUpForm() {
       setMessage(authErrorMessage(error));
       return;
     }
-    router.replace("/");
+    // Next: name the workspace.
+    router.replace("/onboarding");
     router.refresh();
   }
 
