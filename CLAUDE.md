@@ -69,8 +69,18 @@ end of every stage.
   The user's browser may be signed in to another GitHub account: a repo
   made there didn't appear under AyoubHa19, so this one was created
   through the API with Git's sign-in.
-- **Next: Stage 2, database and data access** (Neon, Prisma 7, schema,
-  migrations). The user creates the Neon account; Claude can't.
+- **Stage 2, database: done (2026-10-16).** Neon project "ClientFlow"
+  (`damp-voice-64696815`, org `org-rough-poetry-30609615`, Frankfurt) with
+  branches `production` (default, empty), `dev` and `test`. `neonctl` is
+  signed in on this PC (`npx neonctl@8.7.2 ...`); write connection strings
+  straight into `.env.local`, never print them (mask with sed when
+  checking). Prisma 7.10.1 + `@prisma/adapter-pg`, config in
+  `prisma.config.ts` (reads `.env.local` via `@next/env`), schema in
+  `prisma/schema.prisma`, first migration `init` applied to dev and test.
+  `src/server/db.ts` (server-only singleton), `src/server/env.ts` (Zod).
+  13 database tests (`npm run test:db`) on the test branch.
+- **Next: Stage 3, authentication** (Better Auth: sign up, sign in, sign
+  out, sessions, protected routes). Its tables come from its own CLI.
 
 ## Running it
 
@@ -79,7 +89,7 @@ end of every stage.
   directory is ClientFlow: from a Pocketwise session it starts Pocketwise's
   server instead. Then open the preview with its URL.
 - Before every commit: `npm run check` (format, lint, typecheck, unit
-  tests, contrast), `npm run test:e2e`, `npm run build`.
+  tests, database tests, contrast), `npm run test:e2e`, `npm run build`.
 - Next allows one dev server per folder: if `npm run dev` is running, run
   the browser tests against it with `E2E_BASE_URL=http://localhost:3001`.
 
@@ -94,3 +104,18 @@ end of every stage.
   `from "@/lib/utils"` and remove the `cn` package (see README).
 - Card lists and grids need `grid-cols-[minmax(0,1fr)]` on phones, or long
   text pushes them wider than the screen.
+- **The C: drive is almost full** (it hit 0 GB during Stage 2). If npm
+  fails with ENOSPC, delete `%LOCALAPPDATA%\npm-cache\_cacache` and
+  `_npx` (only downloaded copies) and tell the user; never delete their
+  own files.
+- Prisma 7: `migrate dev` doesn't regenerate the client (`db:migrate`
+  does both). `migrate reset` is refused when an AI agent runs it unless
+  the user consents (an env var with their exact words): ask first, and
+  never on production. The database tests use `migrate deploy` and delete
+  only their own records.
+- Vitest runs with NODE_ENV=test, where Next's env loader skips
+  `.env.local`; `src/test/test-database.ts` reads it with
+  `process.loadEnvFile`.
+- Neon URLs use `sslmode=verify-full` (pg warns about `require`).
+- The generated Prisma client is in `src/generated/prisma` (ignored by
+  Git, Prettier and ESLint); import from `@/generated/prisma/client`.

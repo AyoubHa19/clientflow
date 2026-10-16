@@ -1,0 +1,255 @@
+// ClientFlow's database. After changing this file run `npm run db:migrate`,
+// which writes a migration in prisma/migrations and regenerates the client.
+//
+// Rules every model follows (see README, "Decisions"):
+// - Everything a user creates belongs to a workspace (workspaceId), and
+//   every query filters by the workspace taken from the session.
+// - Ids are UUID v7: random, but in time order, which keeps indexes compact.
+// - Calendar dates (start, due) are DATE columns: no time, no time zone.
+// - Lengths are capped here too, not only in the forms.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// People and workspaces
+// ---------------------------------------------------------------------------
+
+// The fields Better Auth expects. Its sessions, accounts (which hold the
+// password hash) and verification tables are added in Stage 3.
+model User {
+  id            String   @id
+  name          String   @db.VarChar(200)
+  email         String   @unique @db.VarChar(320)
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  memberships WorkspaceMembership[]
+  activities  Activity[]
+
+  @@map("users")
+}
+
+model Workspace {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  name      String   @db.VarChar(100)
+  // An IANA time zone such as "Africa/Casablanca": decides what "today"
+  // and "overdue" mean for this workspace.
+  timezone  String   @default("UTC") @db.VarChar(64)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships WorkspaceMembership[]
+  clients     Client[]
+  leads       Lead[]
+  projects    Project[]
+  tasks       Task[]
+  activities  Activity[]
+
+  @@map("workspaces")
+}
+
+enum MemberRole {
+  OWNER
+  MEMBER
+}
+
+model WorkspaceMembership {
+  id          String     @id @default(uuid(7)) @db.Uuid
+  userId      String
+  workspaceId String     @db.Uuid
+  role        MemberRole @default(OWNER)
+  createdAt   DateTime   @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  // A person is in a workspace once. The index on userId comes from this.
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+  @@map("workspace_memberships")
+}
+
+// ---------------------------------------------------------------------------
+// Clients and leads
+// ---------------------------------------------------------------------------
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+model Client {
+  id          String       @id @default(uuid(7)) @db.Uuid
+  workspaceId String       @db.Uuid
+  name        String       @db.VarChar(200)
+  email       String?      @db.VarChar(320)
+  phone       String?      @db.VarChar(50)
+  company     String?      @db.VarChar(200)
+  notes       String?
+  status      ClientStatus @default(ACTIVE)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  projects          Project[]
+  convertedFromLead Lead?
+
+  @@index([workspaceId, status, updatedAt])
+  @@index([workspaceId, name])
+  @@map("clients")
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  WON
+  LOST
+}
+
+model Lead {
+  id                String     @id @default(uuid(7)) @db.Uuid
+  workspaceId       String     @db.Uuid
+  contactName       String     @db.VarChar(200)
+  company           String?    @db.VarChar(200)
+  email             String?    @db.VarChar(320)
+  phone             String?    @db.VarChar(50)
+  source            String?    @db.VarChar(100)
+  status            LeadStatus @default(NEW)
+  notes             String?
+  // Set when the lead becomes a client. Unique, so one lead can never turn
+  // into two clients.
+  convertedClientId String?    @unique @db.Uuid
+  convertedAt       DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  convertedClient Client?   @relation(fields: [convertedClientId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, status, updatedAt])
+  @@index([workspaceId, contactName])
+  @@map("leads")
+}
+
+// ---------------------------------------------------------------------------
+// Projects and tasks
+// ---------------------------------------------------------------------------
+
+enum ProjectStatus {
+  PLANNING
+  IN_PROGRESS
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+}
+
+model Project {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  workspaceId String        @db.Uuid
+  // Deleting the client keeps the project, without a client.
+  clientId    String?       @db.Uuid
+  name        String        @db.VarChar(200)
+  description String?
+  status      ProjectStatus @default(PLANNING)
+  startDate   DateTime?     @db.Date
+  dueDate     DateTime?     @db.Date
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  client    Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  tasks     Task[]
+
+  @@index([workspaceId, status, updatedAt])
+  @@index([workspaceId, dueDate])
+  @@index([clientId])
+  @@map("projects")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Task {
+  id          String       @id @default(uuid(7)) @db.Uuid
+  workspaceId String       @db.Uuid
+  // Deleting the project keeps the task, without a project.
+  projectId   String?      @db.Uuid
+  title       String       @db.VarChar(300)
+  description String?
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?    @db.Date
+  completedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project   Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, status, dueDate])
+  @@index([workspaceId, updatedAt])
+  @@index([projectId])
+  @@map("tasks")
+}
+
+// ---------------------------------------------------------------------------
+// Activity log (shown from Stage 9)
+// ---------------------------------------------------------------------------
+
+enum ActivityEntity {
+  CLIENT
+  LEAD
+  PROJECT
+  TASK
+}
+
+enum ActivityAction {
+  CREATED
+  UPDATED
+  STATUS_CHANGED
+  COMPLETED
+  CONVERTED
+  ARCHIVED
+  DELETED
+}
+
+// What happened, kept even after the record itself is deleted: entityId has
+// no foreign key on purpose, and `summary` keeps the name it had.
+model Activity {
+  id          String         @id @default(uuid(7)) @db.Uuid
+  workspaceId String         @db.Uuid
+  actorId     String?
+  entityType  ActivityEntity
+  entityId    String         @db.Uuid
+  action      ActivityAction
+  summary     String         @db.VarChar(300)
+  createdAt   DateTime       @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actor     User?     @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@index([workspaceId, entityType, entityId])
+  @@index([actorId])
+  @@map("activities")
+}
