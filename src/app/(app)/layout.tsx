@@ -1,7 +1,23 @@
+import { Suspense } from "react";
 import { AppShell } from "@/components/shell/app-shell";
+import { requireUser } from "@/server/auth/session";
 
-// Every page in the (app) group sits inside the shell. The group's name
-// isn't part of the URL. From Stage 3 these pages also require sign-in.
+// Every page in the (app) group needs a signed-in user. proxy.ts already
+// turns away visitors without a session cookie; this checks the session
+// itself in the database, for every page in the group, even one that
+// forgets to. (Data access checks again, from Stage 4.)
+async function RequireSignIn() {
+  await requireUser();
+  return null;
+}
+
 export default function AppLayout({ children }: LayoutProps<"/">) {
-  return <AppShell>{children}</AppShell>;
+  return (
+    <AppShell>
+      <Suspense fallback={null}>
+        <RequireSignIn />
+      </Suspense>
+      {children}
+    </AppShell>
+  );
 }

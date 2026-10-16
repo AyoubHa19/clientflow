@@ -4,24 +4,24 @@ A calm workspace for freelancers and small agencies: clients, leads,
 projects and tasks in one place.
 
 > **Status:** in development, built one stage at a time (see `PRD.md`,
-> section 14). Done so far: **Stage 1, project foundation** and **Stage 2,
-> database**. There is no sign-in yet.
+> section 14). Done so far: **Stage 1**, project foundation; **Stage 2**,
+> database; **Stage 3**, sign-up, sign-in and sign-out. Workspaces come next.
 
 ## Stack
 
 All free and open source, or a free plan.
 
-| Part              | Choice                                                    |
-| ----------------- | --------------------------------------------------------- |
-| Framework         | Next.js 16 (App Router, Cache Components)                 |
-| Language          | TypeScript, strict                                        |
-| Styling           | Tailwind CSS 4, colour tokens in `globals.css`            |
-| Components        | shadcn/ui on Radix (accessible), lucide icons             |
-| Database          | PostgreSQL on Neon (free plan, Frankfurt)                 |
-| ORM               | Prisma 7 with the `pg` driver adapter                     |
-| Validation        | Zod                                                       |
-| Tests             | Vitest (unit and database), Playwright + axe (end-to-end) |
-| Coming (Stage 3+) | Better Auth                                               |
+| Part           | Choice                                                    |
+| -------------- | --------------------------------------------------------- |
+| Framework      | Next.js 16 (App Router, Cache Components)                 |
+| Language       | TypeScript, strict                                        |
+| Styling        | Tailwind CSS 4, colour tokens in `globals.css`            |
+| Components     | shadcn/ui on Radix (accessible), lucide icons             |
+| Database       | PostgreSQL on Neon (free plan, Frankfurt)                 |
+| ORM            | Prisma 7 with the `pg` driver adapter                     |
+| Validation     | Zod                                                       |
+| Tests          | Vitest (unit and database), Playwright + axe (end-to-end) |
+| Authentication | Better Auth (email and password, sessions in PostgreSQL)  |
 
 ## Running it
 
@@ -31,15 +31,35 @@ Needs Node.js 20.9 or newer.
 npm install
 ```
 
-Copy `.env.example` to `.env.local` and fill in the three database URLs
-(the file says where to get them). Then:
+Copy `.env.example` to `.env.local` and fill it in (the file says where
+each value comes from). Then:
 
 ```bash
 npm run dev
 ```
 
-and open http://localhost:3000. In development, `/design` shows the shared
-components and colours.
+and open http://localhost:3001 (the port is fixed so it never clashes with
+another project on 3000). Create an account, or use the sample one from
+`.env.local`. In development, `/design` shows the shared components and
+colours.
+
+## Signing in
+
+- `/sign-up` and `/sign-in` (Better Auth, email and password). Passwords
+  are hashed with scrypt; the database never holds them as text.
+- A session lasts 7 days and is extended (at most daily) while in use. It
+  lives in the `sessions` table: signing out deletes it.
+- `src/proxy.ts` sends visitors without a session cookie to `/sign-in`
+  (with `?next=` to come back). That is only a quick first check: every
+  signed-in page checks the session itself on the server
+  (`requireUser()` in `src/server/auth/session.ts`).
+- Wrong email or password gets one message, "Email or password is
+  incorrect", whichever was wrong.
+- In production, five sign-in or sign-up attempts a minute per address,
+  then "too many attempts" (counted in the database, since serverless
+  functions share no memory).
+- Requests that carry the session cookie must come from this site (an
+  Origin check against cross-site request forgery).
 
 ## The database
 
@@ -78,7 +98,9 @@ The schema is in `prisma/schema.prisma`, with a comment on each rule.
 The first time, `npx playwright install chromium` downloads the browser
 the end-to-end tests use. Next allows one dev server per folder, so if
 `npm run dev` is already running, point the browser tests at it:
-`E2E_BASE_URL=http://localhost:3000 npm run test:e2e`.
+`E2E_BASE_URL=http://localhost:3001 npm run test:e2e`. The browser tests
+make accounts named `e2e-...@example.com` on the dev branch and delete
+them at the end (`e2e/global-teardown.ts`).
 
 ## Project structure
 
@@ -87,11 +109,13 @@ prisma/             schema and migrations
 src/
   app/              pages and layouts (the (app) group sits in the shell)
   components/ui/    shadcn components (generated, then adjusted)
-  components/shell/ side bar, phone menu, page header
+  components/auth/  sign-in and sign-up forms
+  components/shell/ side bar, phone menu, account menu, page header
   components/theme/ light / dark / system theme
   generated/        the Prisma client (generated, not committed)
   lib/              shared helpers (each with its own *.test.ts)
-  server/           server-only code: database client, settings
+  server/           server-only code: database, auth, settings
+  proxy.ts          sends signed-out visitors to /sign-in
   test/             test helpers (database setup)
 e2e/                Playwright tests
 scripts/            small tools (contrast check)
@@ -123,6 +147,17 @@ scripts/            small tools (contrast check)
 - **Database tests clean up after themselves** instead of wiping the
   branch: Prisma 7 refuses `migrate reset` from an AI agent without the
   user's consent, and each test deleting its own records is safer anyway.
+- **Sign-in goes through Better Auth's HTTP endpoints** (the forms call
+  them with `authClient`), not Server Actions calling `auth.api`: rate
+  limiting and the Origin check only run on the endpoints. The server
+  checks the sign-up form with the same Zod schema as the browser
+  (`src/lib/validation/auth.ts`, used in a Better Auth hook).
+- **Better Auth makes its own tables** (`npx auth generate`); only their
+  names were changed to match ours. Its ids are random strings, ours UUIDs.
+- **After signing in, `?next=` only accepts paths inside the app**
+  (`safeNextPath`), so a link can't bounce someone to another site.
+- **Pages read the session inside `<Suspense>`** (Cache Components needs
+  it): the frame shows at once, the account menu and greeting stream in.
 - **Theme without a flash:** an inline script in `<head>` sets the `dark`
   class before the first paint (`src/lib/theme.ts`), as in Next's guide
   "Preventing flash before hydration". No theme library is needed.
@@ -145,6 +180,10 @@ scripts/            small tools (contrast check)
   quiet spell takes a moment longer while it wakes.
 - A project's client must be in the same workspace: the database can't
   check that on its own, so the server will (Stage 7, with a test).
+- Signing up says when an email already has an account: friendlier, but it
+  lets someone check whether an address is registered. Hiding it needs
+  email verification, which needs a domain to send mail from (later).
+- No password reset yet, for the same reason.
 - `npm audit` reports a "high" advisory in `braces`, used by
   `eslint-config-next` through `fast-glob`. It only affects the lint tool
   on your own machine, not the app (`npm audit --omit=dev` finds nothing),

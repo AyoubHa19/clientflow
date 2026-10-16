@@ -1,19 +1,15 @@
-import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { expectNoAxeViolations, isPhone, signUpViaApi } from "./helpers";
 
-const isPhone = (page: Page) => (page.viewportSize()?.width ?? 0) < 1024;
-
-async function expectNoAxeViolations(page: Page) {
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-    .analyze();
-  expect(results.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
-}
+// The app's frame, for a signed-in user (a fresh account per test).
+test.beforeEach(async ({ page }) => {
+  await signUpViaApi(page);
+});
 
 test("the overview opens inside the shell", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveTitle("ClientFlow");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome to ClientFlow");
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Sara");
 
   if (isPhone(page)) {
     await page.getByRole("button", { name: "Open menu" }).click();
@@ -86,14 +82,23 @@ for (const colorScheme of ["light", "dark"] as const) {
     for (const path of ["/", "/design", "/no-such-page"]) {
       test(`axe finds no problems on ${path}`, async ({ page }) => {
         await page.goto(path);
+        await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
         await expectNoAxeViolations(page);
       });
     }
 
-    test("axe finds no problems in the open dialog", async ({ page }) => {
+    test("axe finds no problems in the open dialog and account menu", async ({ page }) => {
       await page.goto("/design");
       await page.getByRole("button", { name: "Open a dialog" }).click();
       await expect(page.getByRole("dialog")).toBeVisible();
+      await expectNoAxeViolations(page);
+      await page.keyboard.press("Escape");
+
+      await page
+        .getByRole("button", { name: /^Account:/ })
+        .first()
+        .click();
+      await expect(page.getByRole("menuitem", { name: "Sign out" })).toBeVisible();
       await expectNoAxeViolations(page);
     });
   });

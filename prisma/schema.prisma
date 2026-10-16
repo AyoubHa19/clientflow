@@ -21,8 +21,7 @@ datasource db {
 // People and workspaces
 // ---------------------------------------------------------------------------
 
-// The fields Better Auth expects. Its sessions, accounts (which hold the
-// password hash) and verification tables are added in Stage 3.
+// The fields Better Auth expects. Its own tables are at the end of this file.
 model User {
   id            String   @id
   name          String   @db.VarChar(200)
@@ -34,6 +33,8 @@ model User {
 
   memberships WorkspaceMembership[]
   activities  Activity[]
+  sessions    Session[]
+  accounts    Account[]
 
   @@map("users")
 }
@@ -252,4 +253,72 @@ model Activity {
   @@index([workspaceId, entityType, entityId])
   @@index([actorId])
   @@map("activities")
+}
+
+// ---------------------------------------------------------------------------
+// Authentication: written by Better Auth's CLI (`npx auth generate`), only
+// the table names changed. Better Auth makes the ids itself.
+// ---------------------------------------------------------------------------
+
+// A signed-in browser. The cookie holds `token`; deleting the row signs it out.
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("sessions")
+}
+
+// How a user signs in. For email and password, `password` is the scrypt
+// hash (never the password itself).
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("accounts")
+}
+
+// Short-lived codes (email checks, password resets) for later stages.
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verifications")
+}
+
+// Counts recent sign-in and sign-up attempts per IP address and path.
+model RateLimit {
+  id          String @id
+  key         String
+  count       Int
+  lastRequest BigInt
+
+  @@unique([key])
+  @@map("rate_limits")
 }

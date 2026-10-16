@@ -79,15 +79,27 @@ end of every stage.
   `prisma/schema.prisma`, first migration `init` applied to dev and test.
   `src/server/db.ts` (server-only singleton), `src/server/env.ts` (Zod).
   13 database tests (`npm run test:db`) on the test branch.
-- **Next: Stage 3, authentication** (Better Auth: sign up, sign in, sign
-  out, sessions, protected routes). Its tables come from its own CLI.
+- **Stage 3, authentication: done (2026-10-16).** Better Auth 1.7.10
+  (pinned exactly): `src/server/auth/config.ts` (`createAuth`, used by the
+  app and the tests), `index.ts` (the app's instance, server-only),
+  `session.ts` (`getCurrentUser`, `requireUser`, `redirectIfSignedIn`),
+  `src/app/api/auth/[...all]`, `src/proxy.ts` (cookie check only),
+  `/sign-in` and `/sign-up` in the `(auth)` group, the account menu
+  (`src/components/shell/user-menu.tsx`). Its tables (sessions, accounts,
+  verifications, rate_limits) came from `npx auth@1.7.10 generate`
+  (migration `auth`). The "(sample)" account is on the dev branch; its
+  email and password are in `.env.local` (SAMPLE_USER_*).
+- **Next: Stage 4, workspace and authorization** (onboarding to name a
+  workspace, `requireWorkspace()`, isolation tests).
 
 ## Running it
 
-- `npm run dev` in a Terminal tab (port 3000, or 3001 if Pocketwise is on
-  3000). preview_start "clientflow" only works when the session's working
-  directory is ClientFlow: from a Pocketwise session it starts Pocketwise's
-  server instead. Then open the preview with its URL.
+- `npm run dev` in a Terminal tab: always port 3001 (BETTER_AUTH_URL
+  matches it). preview_start "clientflow" only works when the session's
+  working directory is ClientFlow: from a Pocketwise session it starts
+  Pocketwise's server instead. Then open the preview with its URL.
+- Production mode locally: `$env:BETTER_AUTH_URL = 'http://localhost:3200';
+npx next start -p 3200` after a build (rate limiting is on only there).
 - Before every commit: `npm run check` (format, lint, typecheck, unit
   tests, database tests, contrast), `npm run test:e2e`, `npm run build`.
 - Next allows one dev server per folder: if `npm run dev` is running, run
@@ -104,6 +116,20 @@ end of every stage.
   `from "@/lib/utils"` and remove the `cn` package (see README).
 - Card lists and grids need `grid-cols-[minmax(0,1fr)]` on phones, or long
   text pushes them wider than the screen.
+- Better Auth: rate limiting and the Origin (CSRF) check run only in its
+  HTTP router, not in `auth.api.*` calls, so sign-in/up must go through
+  `/api/auth` (the forms use `authClient`). It skips the Origin check when
+  NODE_ENV=test unless `advanced.disableOriginCheck: false` (set).
+- Cache Components keeps the previous page in the DOM, hidden (Activity):
+  in Playwright, filter locators with `{ visible: true }`. Next's route
+  announcer also has role="alert": scope alerts to `main`.
+- Radix menus are `modal={false}`: modal ones put aria-hidden on the page
+  (axe "aria-hidden-focus"). Buttons showing text (initials) are named by
+  sr-only text, not aria-label (axe "label-content-name-mismatch").
+- Cookies on localhost are shared by every port (Pocketwise's Clerk
+  cookies are there too): never print `document.cookie`.
+- Browser tests make `e2e-...@example.com` accounts on the dev branch;
+  `e2e/global-teardown.ts` deletes them.
 - **The C: drive is almost full** (it hit 0 GB during Stage 2). If npm
   fails with ENOSPC, delete `%LOCALAPPDATA%\npm-cache\_cacache` and
   `_npx` (only downloaded copies) and tell the user; never delete their

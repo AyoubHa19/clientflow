@@ -61,12 +61,16 @@ describe("migrations", () => {
       WHERE table_schema = 'public' AND table_name <> '_prisma_migrations'
       ORDER BY table_name`;
     expect(rows.map((row) => row.table_name)).toEqual([
+      "accounts",
       "activities",
       "clients",
       "leads",
       "projects",
+      "rate_limits",
+      "sessions",
       "tasks",
       "users",
+      "verifications",
       "workspace_memberships",
       "workspaces",
     ]);

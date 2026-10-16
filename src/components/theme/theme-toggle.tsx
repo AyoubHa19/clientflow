@@ -25,7 +25,7 @@ export function ThemeToggle() {
 
   return (
     // The saved choice is read when the menu opens: the server can't see it.
-    <DropdownMenu onOpenChange={(open) => open && setTheme(readStoredTheme())}>
+    <DropdownMenu modal={false} onOpenChange={(open) => open && setTheme(readStoredTheme())}>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="Change theme">
           {/* CSS picks the icon, so it is right from the first paint. */}
