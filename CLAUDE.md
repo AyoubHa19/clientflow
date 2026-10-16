@@ -124,8 +124,18 @@ end of every stage.
   stays Won. Shared field rules in `src/lib/validation/fields.ts`. The
   sample workspace has 8 "(sample)" leads; Karim Benali was converted (so
   there are 8 clients now).
-- **Next: Stage 7, projects** (CRUD, link to a client of the same
-  workspace, status, start/due dates as DATE, a project's tasks later).
+- **Stage 7, projects: done (2026-10-17).** `/projects` (status and client
+  filters, search in project and client names, sort by due date with
+  undated last, 20 a page), new/details/edit, status select, delete
+  (owner). `src/server/projects/service.ts` checks a project's client is in
+  the same workspace (`invalidFields({ clientId })`). Dates: DATE columns
+  read in UTC (`toDateOnly`, `formatDateOnly`); "today" with
+  `todayIn(workspace.timezone)`; `dueState` → Overdue / Due today / Due in
+  N days (`DueBadge`). The client page lists its projects with "New
+  project" (`?clientId=`). The sample workspace has 5 "(sample)" projects.
+- **Next: Stage 8, tasks** (CRUD, link to a project of the same workspace,
+  status, priority, due dates with the same badges, filters; mark done
+  sets `completedAt`).
 
 ## Running it
 
@@ -176,6 +186,10 @@ playwright test e2e/x.spec.ts`; the full suite once at the end.
   streaming started). Tests check the content, not the status.
 - In Playwright, `getByRole("button", { name: "Next" })` also matches
   Next.js's dev-tools button: use `exact: true`.
+- After big edits (new exports), the dev server can keep an old module
+  ("x is not a function" while typecheck passes): restart `npm run dev`.
+- On this PC, Windows and Node agree Africa/Casablanca is UTC+0 in October
+  2026; "today" follows the runtime's time zone data.
 - Neon (or the connection) sometimes drops for a minute: P1001 "Can't
   reach database server" or "Unable to start a transaction in the given
   time". Rerun what failed (`npx playwright test --last-failed`) before

@@ -2,16 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, PlusIcon } from "lucide-react";
 import { ClientActions } from "@/components/clients/client-actions";
 import { ClientStatusBadge } from "@/components/clients/client-status-badge";
 import { NoticeToast } from "@/components/notice-toast";
+import { ProjectList } from "@/components/projects/project-list";
 import { PageContainer } from "@/components/shell/page-header";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDate } from "@/lib/dates";
+import { formatDate, todayIn } from "@/lib/dates";
 import { getClient } from "@/server/clients/service";
 import { db } from "@/server/db";
+import { projectsForClient } from "@/server/projects/service";
 import { requireWorkspace } from "@/server/workspace/context";
 
 export const metadata: Metadata = { title: "Client" };
@@ -40,6 +43,7 @@ async function ClientDetails({ params }: { params: PageProps<"/clients/[id]">["p
   const client = await getClient(db, ctx, id);
   // Missing, malformed, or another workspace's: the same "not found".
   if (!client) notFound();
+  const projects = await projectsForClient(db, ctx, client.id);
 
   return (
     <>
@@ -118,6 +122,32 @@ async function ClientDetails({ params }: { params: PageProps<"/clients/[id]">["p
               <p className="text-sm break-words whitespace-pre-wrap">{client.notes}</p>
             ) : (
               <p className="text-sm text-muted-foreground">No notes yet.</p>
+            )}
+          </CardContent>
+        </Card>
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>
+              <h2>Projects</h2>
+            </CardTitle>
+            <CardAction>
+              <Button asChild size="sm" variant="outline">
+                <Link href={`/projects/new?clientId=${client.id}`}>
+                  <PlusIcon aria-hidden data-icon="inline-start" />
+                  New project
+                </Link>
+              </Button>
+            </CardAction>
+          </CardHeader>
+          <CardContent>
+            {projects.length > 0 ? (
+              <ProjectList
+                projects={projects}
+                today={todayIn(ctx.workspace.timezone)}
+                showClient={false}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">No projects for this client yet.</p>
             )}
           </CardContent>
         </Card>

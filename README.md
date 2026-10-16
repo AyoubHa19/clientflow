@@ -6,8 +6,8 @@ projects and tasks in one place.
 > **Status:** in development, built one stage at a time (see `PRD.md`,
 > section 14). Done so far: **Stage 1**, project foundation; **Stage 2**,
 > database; **Stage 3**, sign-up, sign-in and sign-out; **Stage 4**,
-> workspaces and data isolation; **Stage 5**, clients; **Stage 6**, leads.
-> Projects come next.
+> workspaces and data isolation; **Stage 5**, clients; **Stage 6**, leads;
+> **Stage 7**, projects. Tasks come next.
 
 ## Stack
 
@@ -81,6 +81,18 @@ colours.
   or, when a client already has the same email, links to it instead of
   making a duplicate. The lead becomes Won and stays Won. Two clicks at once
   still make one client (the lead row is locked during the conversion).
+
+## Projects
+
+- `/projects`: open projects by default (planning, in progress, on hold),
+  soonest due first (undated last); filters by status and client (or
+  "no client"), search in project and client names, 20 a page.
+- A project can belong to a client of the **same workspace** only (the
+  server checks it; a test tries another workspace's client).
+- Start and due dates are calendar days. Badges say "Overdue by N days",
+  "Due today" or "Due in N days", counted from today **in the workspace's
+  time zone**, and disappear once a project is completed or cancelled.
+- A client's page lists their projects and starts a new one for them.
 
 ## Signing in
 
@@ -218,8 +230,6 @@ scripts/            small tools (contrast check)
 
 - Neon's free plan pauses an idle database, so the first request after a
   quiet spell takes a moment longer while it wakes.
-- A project's client must be in the same workspace: the database can't
-  check that on its own, so the server will (Stage 7, with a test).
 - A "not found" record answers with status 200, not 404: the page streams,
   and the status is sent before the server knows. Nothing of the record is
   shown, and the page carries `noindex`.
