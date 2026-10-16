@@ -6,7 +6,8 @@ projects and tasks in one place.
 > **Status:** in development, built one stage at a time (see `PRD.md`,
 > section 14). Done so far: **Stage 1**, project foundation; **Stage 2**,
 > database; **Stage 3**, sign-up, sign-in and sign-out; **Stage 4**,
-> workspaces and data isolation; **Stage 5**, clients. Leads come next.
+> workspaces and data isolation; **Stage 5**, clients; **Stage 6**, leads.
+> Projects come next.
 
 ## Stack
 
@@ -65,6 +66,21 @@ colours.
   delete for good after confirming (owners only; their projects stay).
 - Every change is written to the activity log in the same transaction.
 - Another workspace's client, or a malformed id, shows "Page not found".
+
+## Leads
+
+- `/leads` opens on a **board**: New → Contacted → Qualified → Won → Lost.
+  Move a card by dragging its grip (mouse or touch), with the keyboard
+  (space to pick up, left/right arrows to choose a column, space to drop;
+  each step is announced to screen readers), or with its "Move" menu.
+  The card moves at once and goes back if saving fails; moves are saved in
+  the order made.
+- **List view** (`?view=list`): search, stage and source filters, sorting,
+  20 a page.
+- **Convert to client** (once): creates the client from the lead's details,
+  or, when a client already has the same email, links to it instead of
+  making a duplicate. The lead becomes Won and stays Won. Two clicks at once
+  still make one client (the lead row is locked during the conversion).
 
 ## Signing in
 

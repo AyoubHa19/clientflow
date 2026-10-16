@@ -1,4 +1,14 @@
 import { z } from "zod";
+import {
+  choiceParam,
+  CONTACT_LIMITS,
+  firstParam,
+  optionalEmail,
+  optionalPhone,
+  optionalText,
+  pageParam,
+  requiredName,
+} from "./fields";
 
 // Client rules, shared by the forms and the server (which checks again).
 
@@ -11,38 +21,14 @@ export const CLIENT_STATUS_LABELS: Record<ClientStatus, string> = {
   ARCHIVED: "Archived",
 };
 
-export const CLIENT_LIMITS = { name: 200, email: 320, phone: 50, company: 200, notes: 5000 };
-
-/** An optional text field: trimmed, and empty means "none" (null). */
-function optionalText(max: number, tooLong: string) {
-  return z
-    .string()
-    .trim()
-    .max(max, { error: tooLong })
-    .optional()
-    .nullable()
-    .transform((value) => (value ? value : null));
-}
+export const CLIENT_LIMITS = CONTACT_LIMITS;
 
 export const clientSchema = z.object({
-  name: z
-    .string({ error: "Enter the client's name." })
-    .trim()
-    .min(1, { error: "Enter the client's name." })
-    .max(CLIENT_LIMITS.name, { error: `Use ${CLIENT_LIMITS.name} characters or fewer.` }),
-  email: optionalText(CLIENT_LIMITS.email, "That email address is too long.")
-    .transform((value) => value?.toLowerCase() ?? null)
-    .refine((value) => value === null || z.email().safeParse(value).success, {
-      error: "Enter a valid email address, or leave it empty.",
-    }),
-  phone: optionalText(
-    CLIENT_LIMITS.phone,
-    `Use ${CLIENT_LIMITS.phone} characters or fewer.`,
-  ).refine((value) => value === null || /^\+?[0-9\s().-]*[0-9][0-9\s().-]*$/.test(value), {
-    error: "Use digits, spaces and + - ( ) only.",
-  }),
-  company: optionalText(CLIENT_LIMITS.company, `Use ${CLIENT_LIMITS.company} characters or fewer.`),
-  notes: optionalText(CLIENT_LIMITS.notes, `Use ${CLIENT_LIMITS.notes} characters or fewer.`),
+  name: requiredName("Enter the client's name."),
+  email: optionalEmail,
+  phone: optionalPhone,
+  company: optionalText(CONTACT_LIMITS.company),
+  notes: optionalText(CONTACT_LIMITS.notes),
   status: z.enum(CLIENT_STATUSES, { error: "Choose a status from the list." }).default("ACTIVE"),
 });
 
@@ -81,8 +67,6 @@ export type ClientListParams = {
   page: number;
 };
 
-const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
-
 /**
  * The list's settings from the URL. Anything missing or invalid quietly
  * falls back to the default, so an edited or old link still works.
@@ -90,19 +74,11 @@ const first = (value: string | string[] | undefined) => (Array.isArray(value) ? 
 export function parseClientListParams(
   params: Record<string, string | string[] | undefined>,
 ): ClientListParams {
-  const q = (first(params.q) ?? "").trim().slice(0, 100);
-  const status = first(params.status);
-  const sort = first(params.sort);
-  const page = Number(first(params.page));
   return {
-    q,
-    status: (CLIENT_STATUS_FILTERS as readonly string[]).includes(status ?? "")
-      ? (status as ClientStatusFilter)
-      : "open",
-    sort: (CLIENT_SORTS as readonly string[]).includes(sort ?? "")
-      ? (sort as ClientSort)
-      : "updated",
-    page: Number.isInteger(page) && page >= 1 && page <= 100_000 ? page : 1,
+    q: (firstParam(params.q) ?? "").trim().slice(0, 100),
+    status: choiceParam(params.status, CLIENT_STATUS_FILTERS, "open"),
+    sort: choiceParam(params.sort, CLIENT_SORTS, "updated"),
+    page: pageParam(params.page),
   };
 }
 

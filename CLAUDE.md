@@ -111,8 +111,21 @@ end of every stage.
   SelectField, TextareaField; `styles.ts` for Server Components),
   `src/components/pagination.tsx`, `src/lib/dates.ts`. The sample
   workspace has 7 "(sample)" clients (one archived).
-- **Next: Stage 6, leads** (CRUD, status changes, the Kanban pipeline,
-  converting a lead into a client once). Follow the clients pattern.
+- **Stage 6, leads: done (2026-10-17).** `/leads` board (default) and
+  `?view=list`; `/leads/new`, `/leads/[id]`, `/leads/[id]/edit`. The board
+  (`src/components/leads/lead-board.tsx`, @dnd-kit/core 6.3.1): drag by the
+  grip (mouse, touch, keyboard with announcements), or the "Move …" menu;
+  `useOptimistic` + `setLeadStatusAction` (which calls `refresh()`), moves
+  saved in order through a promise queue, `aria-busy` while saving, a
+  stable `id` on DndContext (hydration). Rules in
+  `src/server/leads/service.ts`: `lockLead` (SELECT … FOR UPDATE) for
+  changes; `convertLead` once (lock + unique), linking to a same-email
+  client (`findMatchingClient`) instead of duplicating; a converted lead
+  stays Won. Shared field rules in `src/lib/validation/fields.ts`. The
+  sample workspace has 8 "(sample)" leads; Karim Benali was converted (so
+  there are 8 clients now).
+- **Next: Stage 7, projects** (CRUD, link to a client of the same
+  workspace, status, start/due dates as DATE, a project's tasks later).
 
 ## Running it
 
@@ -163,6 +176,14 @@ playwright test e2e/x.spec.ts`; the full suite once at the end.
   streaming started). Tests check the content, not the status.
 - In Playwright, `getByRole("button", { name: "Next" })` also matches
   Next.js's dev-tools button: use `exact: true`.
+- Neon (or the connection) sometimes drops for a minute: P1001 "Can't
+  reach database server" or "Unable to start a transaction in the given
+  time". Rerun what failed (`npx playwright test --last-failed`) before
+  hunting for a bug, and say so in the report.
+- A sr-only element inside an `overflow-x-auto` box escapes it unless the
+  box is `relative` (it widened the whole page on /leads).
+- In e2e, wait for dnd-kit announcements between key presses (the live
+  region is `getByRole("status")`); a press right after another is lost.
 - With the pg adapter, a serialization failure surfaces as
   `DriverAdapterError` (TransactionWriteConflict), not P2034.
 - Time zone lists differ between Node and browsers: the server renders
