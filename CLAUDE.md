@@ -64,9 +64,11 @@ end of every stage.
   (`src/components/shell`: side bar from lg, top bar and slide-in menu
   below), the 404 page, a dev-only `/design` reference page, security
   headers, Prettier, Vitest, Playwright + axe, and Git (branch `main`).
-- **GitHub:** `gh` isn't installed, so the user creates the empty private
-  repo `AyoubHa19/clientflow` on github.com; then add it as `origin` and
-  push (Git's credential manager already signs in, as for Pocketwise).
+- **GitHub:** private repo `AyoubHa19/clientflow`, branch `main` (origin).
+  `gh` isn't installed; Git's credential manager signs in as AyoubHa19.
+  The user's browser may be signed in to another GitHub account: a repo
+  made there didn't appear under AyoubHa19, so this one was created
+  through the API with Git's sign-in.
 - **Next: Stage 2, database and data access** (Neon, Prisma 7, schema,
   migrations). The user creates the Neon account; Claude can't.
 
