@@ -71,7 +71,9 @@ test("add a project for a client, with dates, then edit and complete it", async 
 
   // The client's page lists it.
   await page.getByRole("main").getByRole("link", { name: "Menu design (sample)" }).first().click();
+  await expect(page.getByRole("heading", { level: 1, name: "Menu design (sample)" })).toBeVisible();
   await page.getByRole("link", { name: "Atlas Café (sample)" }).click();
+  await expect(page).toHaveURL(/\/clients\/[0-9a-f-]+$/);
   await expect(page.getByRole("heading", { level: 2, name: "Projects" })).toBeVisible();
   await expect(
     page.getByRole("main").getByRole("link", { name: "Menu design (sample)" }).first(),

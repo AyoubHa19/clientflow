@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { formatDateOnly, toDateOnly } from "@/lib/dates";
+import { ProgressBar } from "@/components/progress-bar";
 import type { ProjectRecord } from "@/server/projects/service";
+import type { Progress } from "@/server/tasks/service";
 import { DueBadge, ProjectStatusBadge } from "./project-badges";
 
 const dash = <span className="text-muted-foreground">—</span>;
@@ -10,14 +12,25 @@ export function ProjectList({
   projects,
   today,
   showClient = true,
+  progress,
 }: {
   projects: ProjectRecord[];
   /** Today in the workspace's time zone, "YYYY-MM-DD". */
   today: string;
   showClient?: boolean;
+  /** Tasks done per project id, when known. */
+  progress?: Record<string, Progress>;
 }) {
   const due = (project: ProjectRecord) => (project.dueDate ? toDateOnly(project.dueDate) : null);
-  const headings = ["Project", ...(showClient ? ["Client"] : []), "Status", "Start", "Due"];
+  const headings = [
+    "Project",
+    ...(showClient ? ["Client"] : []),
+    "Status",
+    ...(progress ? ["Tasks"] : []),
+    "Start",
+    "Due",
+  ];
+  const progressOf = (project: ProjectRecord) => progress?.[project.id] ?? { done: 0, total: 0 };
 
   return (
     <>
@@ -50,6 +63,11 @@ export function ProjectList({
                 <td className="px-4 py-3">
                   <ProjectStatusBadge status={project.status} />
                 </td>
+                {progress && (
+                  <td className="px-4 py-3">
+                    <ProgressBar {...progressOf(project)} compact />
+                  </td>
+                )}
                 <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
                   {project.startDate ? formatDateOnly(project.startDate) : dash}
                 </td>
@@ -78,6 +96,11 @@ export function ProjectList({
               </div>
               {showClient && project.client && (
                 <p className="mt-1 truncate text-sm text-muted-foreground">{project.client.name}</p>
+              )}
+              {progress && (
+                <div className="mt-3">
+                  <ProgressBar {...progressOf(project)} compact />
+                </div>
               )}
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 {project.dueDate ? `Due ${formatDateOnly(project.dueDate)}` : "No due date"}

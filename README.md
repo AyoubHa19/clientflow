@@ -7,7 +7,7 @@ projects and tasks in one place.
 > section 14). Done so far: **Stage 1**, project foundation; **Stage 2**,
 > database; **Stage 3**, sign-up, sign-in and sign-out; **Stage 4**,
 > workspaces and data isolation; **Stage 5**, clients; **Stage 6**, leads;
-> **Stage 7**, projects. Tasks come next.
+> **Stage 7**, projects; **Stage 8**, tasks. The dashboard comes next.
 
 ## Stack
 
@@ -93,6 +93,19 @@ colours.
   "Due today" or "Due in N days", counted from today **in the workspace's
   time zone**, and disappear once a project is completed or cancelled.
 - A client's page lists their projects and starts a new one for them.
+
+## Tasks
+
+- `/tasks`: add a task in one line (title, and if wanted a project, due
+  date and priority), tick it off with its checkbox (mouse or keyboard;
+  shown at once, undone if saving fails).
+- Filters: status (open by default), priority, project, and due: overdue,
+  today, the next 7 days or no date, all counted from today in the
+  workspace's time zone. Sorted by due date, then priority.
+- A task can belong to a project of the same workspace only. Done tasks
+  remember when they were completed.
+- Project pages list their tasks (with their own quick add) and show
+  progress, "3 of 5 tasks done"; the projects list shows it too.
 
 ## Signing in
 
@@ -229,7 +242,9 @@ scripts/            small tools (contrast check)
 ## Known limits
 
 - Neon's free plan pauses an idle database, so the first request after a
-  quiet spell takes a moment longer while it wakes.
+  quiet spell takes a moment longer while it wakes. Transactions wait up to
+  5 seconds for a connection (Prisma's default of 2 was sometimes too short
+  under load).
 - A "not found" record answers with status 200, not 404: the page streams,
   and the status is sent before the server knows. Nothing of the record is
   shown, and the page carries `noindex`.

@@ -56,3 +56,30 @@ export function choiceParam<T extends string>(
   const raw = firstParam(value) ?? "";
   return (allowed as readonly string[]).includes(raw) ? (raw as T) : fallback;
 }
+
+/**
+ * An optional calendar day from a date input ("YYYY-MM-DD"), as a Date at
+ * midnight UTC (how Prisma stores DATE columns), or null when empty.
+ */
+export function optionalDay(invalid: string) {
+  return z
+    .string()
+    .trim()
+    .optional()
+    .nullable()
+    .transform((value, ctx) => {
+      if (!value) return null;
+      const date = new Date(`${value}T00:00:00Z`);
+      // Rejects bad formats, impossible months (2026-13-01, which is an
+      // invalid Date) and days that roll over (2026-02-30).
+      const valid =
+        /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+        !Number.isNaN(date.getTime()) &&
+        date.toISOString().slice(0, 10) === value;
+      if (!valid) {
+        ctx.addIssue({ code: "custom", message: invalid });
+        return z.NEVER;
+      }
+      return date;
+    });
+}

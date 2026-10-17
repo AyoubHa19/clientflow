@@ -133,9 +133,22 @@ end of every stage.
   `todayIn(workspace.timezone)`; `dueState` → Overdue / Due today / Due in
   N days (`DueBadge`). The client page lists its projects with "New
   project" (`?clientId=`). The sample workspace has 5 "(sample)" projects.
-- **Next: Stage 8, tasks** (CRUD, link to a project of the same workspace,
-  status, priority, due dates with the same badges, filters; mark done
-  sets `completedAt`).
+- **Stage 8, tasks: done (2026-10-17).** `/tasks`: quick add
+  (`TaskQuickAdd`, also on a project's page with the project fixed),
+  checkboxes (`TaskList`, `useOptimistic` + `setTaskDoneAction`), filters
+  (status, priority, project, due: overdue/today/7 days/none via
+  `dueRange(filter, today)`), search, sort; `/tasks/[id]` is the edit form
+  plus delete (owner). Done sets `completedAt` (kept while it stays done).
+  Project pages show tasks and a `ProgressBar`; the projects list has a
+  Tasks column (`projectProgress`). `DueBadge` now lives in
+  `src/components/due-badge.tsx` (finished: boolean). The sample workspace
+  has 11 "(sample)" tasks.
+- For Stage 10 (UX polish): on phones, /tasks shows quick add and all
+  filters before any task; collapse the filters (and maybe the quick add
+  options) on small screens.
+- **Next: Stage 9, dashboard and activity** (real numbers: active clients,
+  open leads, active projects, pending and overdue tasks; recent activity
+  from the `activities` table; upcoming deadlines; the leads funnel).
 
 ## Running it
 
@@ -186,10 +199,17 @@ playwright test e2e/x.spec.ts`; the full suite once at the end.
   streaming started). Tests check the content, not the status.
 - In Playwright, `getByRole("button", { name: "Next" })` also matches
   Next.js's dev-tools button: use `exact: true`.
+- Date inputs: `optionalDay` (fields.ts) must check `Number.isNaN(date)`
+  before `toISOString()`: "2026-13-01" crashed the server before Stage 8.
+- Two forms on one page with the same label (quick add and filters):
+  scope Playwright locators to the form (`getByRole("form", { name })`).
 - After big edits (new exports), the dev server can keep an old module
   ("x is not a function" while typecheck passes): restart `npm run dev`.
 - On this PC, Windows and Node agree Africa/Casablanca is UTC+0 in October
   2026; "today" follows the runtime's time zone data.
+- Prisma transactions wait 5 s for a connection and run up to 10 s
+  (`transactionOptions` in `src/server/db/client.ts`): the 2 s default
+  failed under load on Neon's free plan.
 - Neon (or the connection) sometimes drops for a minute: P1001 "Can't
   reach database server" or "Unable to start a transaction in the given
   time". Rerun what failed (`npx playwright test --last-failed`) before

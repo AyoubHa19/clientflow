@@ -1,5 +1,12 @@
 import { z } from "zod";
-import { choiceParam, firstParam, optionalText, pageParam, requiredName } from "./fields";
+import {
+  choiceParam,
+  firstParam,
+  optionalDay,
+  optionalText,
+  pageParam,
+  requiredName,
+} from "./fields";
 import { isUuid } from "./ids";
 
 // Project rules, shared by the forms and the server.
@@ -27,28 +34,6 @@ export const isFinishedProject = (status: ProjectStatus) =>
   FINISHED_PROJECT_STATUSES.includes(status);
 
 export const PROJECT_LIMITS = { name: 200, description: 5000 };
-
-/**
- * An optional calendar day from a date input ("YYYY-MM-DD"), as a Date at
- * midnight UTC (how Prisma stores DATE columns), or null when empty.
- */
-function optionalDay(invalid: string) {
-  return z
-    .string()
-    .trim()
-    .optional()
-    .nullable()
-    .transform((value, ctx) => {
-      if (!value) return null;
-      const date = new Date(`${value}T00:00:00Z`);
-      // Rejects both bad formats and impossible days like 2026-02-30.
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(value) || date.toISOString().slice(0, 10) !== value) {
-        ctx.addIssue({ code: "custom", message: invalid });
-        return z.NEVER;
-      }
-      return date;
-    });
-}
 
 export const projectSchema = z
   .object({

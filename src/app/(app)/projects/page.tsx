@@ -14,6 +14,7 @@ import { todayIn } from "@/lib/dates";
 import { parseProjectListParams, projectsHref } from "@/lib/validation/project";
 import { db } from "@/server/db";
 import { clientOptions, listProjects } from "@/server/projects/service";
+import { projectProgress } from "@/server/tasks/service";
 import { requireWorkspace } from "@/server/workspace/context";
 
 export const metadata: Metadata = { title: "Projects" };
@@ -31,6 +32,11 @@ async function Projects({
     listProjects(db, ctx, params),
     clientOptions(db, ctx, params.client !== "none" ? params.client : null),
   ]);
+  const progress = await projectProgress(
+    db,
+    ctx,
+    result.items.map((project) => project.id),
+  );
   const filtered = params.q !== "" || params.client !== "" || params.status !== "open";
 
   return (
@@ -62,7 +68,11 @@ async function Projects({
         )
       ) : (
         <>
-          <ProjectList projects={result.items} today={todayIn(ctx.workspace.timezone)} />
+          <ProjectList
+            projects={result.items}
+            today={todayIn(ctx.workspace.timezone)}
+            progress={progress}
+          />
           <Pagination
             page={result.page}
             pageCount={result.pageCount}

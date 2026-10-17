@@ -1,6 +1,7 @@
 import {
   FolderKanbanIcon,
   LayoutDashboardIcon,
+  ListChecksIcon,
   SettingsIcon,
   TargetIcon,
   UsersIcon,
@@ -10,12 +11,13 @@ import {
 export type NavItem = { href: string; label: string; icon: LucideIcon };
 
 // A page joins this list in the stage that builds it, so no link ever leads
-// nowhere. Coming: Tasks (8).
+// nowhere.
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Overview", icon: LayoutDashboardIcon },
   { href: "/clients", label: "Clients", icon: UsersIcon },
   { href: "/leads", label: "Leads", icon: TargetIcon },
   { href: "/projects", label: "Projects", icon: FolderKanbanIcon },
+  { href: "/tasks", label: "Tasks", icon: ListChecksIcon },
   { href: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 

@@ -83,3 +83,10 @@ describe("parseProjectListParams", () => {
     );
   });
 });
+
+describe("date fields", () => {
+  it("refuses a month that doesn't exist instead of crashing", () => {
+    const result = projectSchema.safeParse({ name: "A", dueDate: "2026-13-01" });
+    expect(result.success).toBe(false);
+  });
+});

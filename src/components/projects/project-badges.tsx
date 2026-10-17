@@ -1,5 +1,4 @@
-import { AlarmClockIcon, CalendarClockIcon } from "lucide-react";
-import { dueState } from "@/lib/dates";
+import { DueBadge as SharedDueBadge } from "@/components/due-badge";
 import {
   isFinishedProject,
   PROJECT_STATUS_LABELS,
@@ -22,10 +21,7 @@ export function ProjectStatusBadge({ status }: { status: ProjectStatus }) {
   return <span className={cn(badge, STATUS_STYLES[status])}>{PROJECT_STATUS_LABELS[status]}</span>;
 }
 
-/**
- * "Overdue by 3 days", "Due today" or "Due in 2 days", against today in the
- * workspace's time zone. Nothing for later dates or finished projects.
- */
+/** The due badge for a project (finished projects have none). */
 export function DueBadge({
   due,
   today,
@@ -35,22 +31,5 @@ export function DueBadge({
   today: string;
   status: ProjectStatus;
 }) {
-  const state = dueState(due, today, isFinishedProject(status));
-  if (!state || state.kind === "later") return null;
-  if (state.kind === "overdue") {
-    return (
-      <span className={cn(badge, "bg-destructive/10 text-destructive ring-destructive/25")}>
-        <AlarmClockIcon aria-hidden className="size-3" />
-        Overdue by {state.days} {state.days === 1 ? "day" : "days"}
-      </span>
-    );
-  }
-  return (
-    <span className={cn(badge, "bg-warning/10 text-warning ring-warning/25")}>
-      <CalendarClockIcon aria-hidden className="size-3" />
-      {state.kind === "today"
-        ? "Due today"
-        : `Due in ${state.days} ${state.days === 1 ? "day" : "days"}`}
-    </span>
-  );
+  return <SharedDueBadge due={due} today={today} finished={isFinishedProject(status)} />;
 }

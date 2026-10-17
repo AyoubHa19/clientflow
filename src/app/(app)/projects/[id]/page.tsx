@@ -4,14 +4,19 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { ArrowLeftIcon } from "lucide-react";
 import { NoticeToast } from "@/components/notice-toast";
+import { ProgressBar } from "@/components/progress-bar";
 import { DueBadge, ProjectStatusBadge } from "@/components/projects/project-badges";
 import { ProjectActions } from "@/components/projects/project-actions";
 import { PageContainer } from "@/components/shell/page-header";
+import { TaskList } from "@/components/tasks/task-list";
+import { TaskQuickAdd } from "@/components/tasks/task-quick-add";
+import { toTaskItems } from "@/components/tasks/to-task-items";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate, formatDateOnly, todayIn, toDateOnly } from "@/lib/dates";
 import { db } from "@/server/db";
 import { getProject } from "@/server/projects/service";
+import { projectProgress, tasksForProject } from "@/server/tasks/service";
 import { requireWorkspace } from "@/server/workspace/context";
 
 export const metadata: Metadata = { title: "Project" };
@@ -35,6 +40,12 @@ async function ProjectDetails({ params }: { params: PageProps<"/projects/[id]">[
   const project = await getProject(db, ctx, id);
   if (!project) notFound();
   const tz = ctx.workspace.timezone;
+  const today = todayIn(tz);
+  const [tasks, progressById] = await Promise.all([
+    tasksForProject(db, ctx, project.id),
+    projectProgress(db, ctx, [project.id]),
+  ]);
+  const progress = progressById[project.id] ?? { done: 0, total: 0 };
 
   return (
     <>
@@ -45,7 +56,7 @@ async function ProjectDetails({ params }: { params: PageProps<"/projects/[id]">[
             <ProjectStatusBadge status={project.status} />
             <DueBadge
               due={project.dueDate ? toDateOnly(project.dueDate) : null}
-              today={todayIn(tz)}
+              today={today}
               status={project.status}
             />
           </div>
@@ -99,6 +110,24 @@ async function ProjectDetails({ params }: { params: PageProps<"/projects/[id]">[
               <Detail label="Added">{formatDate(project.createdAt, tz)}</Detail>
               <Detail label="Updated">{formatDate(project.updatedAt, tz)}</Detail>
             </dl>
+          </CardContent>
+        </Card>
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>
+              <h2>Tasks</h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <ProgressBar done={progress.done} total={progress.total} />
+            <TaskQuickAdd projects={[]} projectId={project.id} />
+            {tasks.length > 0 ? (
+              <TaskList tasks={toTaskItems(tasks)} today={today} showProject={false} />
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No tasks yet: add the first one above.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
