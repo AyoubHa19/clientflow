@@ -21,10 +21,14 @@ export function PageHeader({
   );
 }
 
-/** The standard padding and width of a page inside the shell. */
+/**
+ * The standard padding and width of a page inside the shell. A page slides
+ * up a few pixels as it opens (movement only: fading would briefly lower the
+ * text contrast); with reduced motion it simply appears.
+ */
 export function PageContainer({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 duration-200 ease-out motion-safe:animate-in motion-safe:slide-in-from-bottom-2 sm:px-6 lg:px-8 lg:py-8">
       {children}
     </div>
   );

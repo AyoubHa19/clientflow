@@ -4,6 +4,7 @@ import { ProjectForm } from "@/components/projects/project-form";
 import { PageContainer, PageHeader } from "@/components/shell/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { firstParam } from "@/lib/validation/fields";
 import { db } from "@/server/db";
 import { createProjectAction } from "@/server/projects/actions";
@@ -37,6 +38,10 @@ async function NewProject({
 export default function NewProjectPage({ searchParams }: PageProps<"/projects/new">) {
   return (
     <PageContainer>
+      <Breadcrumbs
+        list={{ label: "Projects", href: "/projects" }}
+        items={[{ label: "New project" }]}
+      />
       <PageHeader title="New project" description="Only the name is required." />
       <Card className="max-w-3xl">
         <CardContent>

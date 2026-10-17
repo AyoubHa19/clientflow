@@ -1,8 +1,4 @@
-import { SearchIcon } from "lucide-react";
-import { selectClassName } from "@/components/forms/styles";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { FilterBar, FilterSelect } from "@/components/filter-bar";
 import {
   LEAD_SORT_LABELS,
   LEAD_SORTS,
@@ -11,93 +7,56 @@ import {
   type LeadListParams,
 } from "@/lib/validation/lead";
 
-/**
- * Search and filters as a plain GET form (shareable URL, works without
- * JavaScript). The board only uses search and source; the list adds status
- * and sort.
- */
+/** Search and filters. The board only uses search and source; the list adds status and sort. */
 export function LeadFilters({ params, sources }: { params: LeadListParams; sources: string[] }) {
   const isList = params.view === "list";
+  const activeCount = (params.source ? 1 : 0) + (isList && params.status !== "all" ? 1 : 0);
   return (
-    <form
-      method="get"
+    <FilterBar
       action="/leads"
-      role="search"
-      aria-label="Find leads"
-      className="grid grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2 lg:auto-cols-fr lg:grid-flow-col lg:grid-cols-none lg:items-end"
+      label="Find leads"
+      searchId="leads-q"
+      searchValue={params.q}
+      searchPlaceholder="Name, company, email or phone"
+      activeCount={activeCount}
+      className={
+        isList
+          ? "lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto]"
+          : "lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto]"
+      }
+      hidden={isList && <input type="hidden" name="view" value="list" />}
     >
-      {isList && <input type="hidden" name="view" value="list" />}
-      <div className="grid gap-2 sm:col-span-2 lg:col-span-1">
-        <Label htmlFor="leads-q">Search</Label>
-        <div className="relative">
-          <SearchIcon
-            aria-hidden
-            className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
-          />
-          <Input
-            id="leads-q"
-            name="q"
-            type="search"
-            defaultValue={params.q}
-            placeholder="Name, company, email or phone"
-            maxLength={100}
-            className="h-10 pl-8"
-          />
-        </div>
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="leads-source">Source</Label>
-        <select
-          id="leads-source"
-          name="source"
-          defaultValue={params.source}
-          className={selectClassName}
-        >
-          <option value="">Any source</option>
-          {sources.map((source) => (
-            <option key={source} value={source}>
-              {source}
-            </option>
-          ))}
-        </select>
-      </div>
+      <FilterSelect
+        id="leads-source"
+        label="Source"
+        name="source"
+        value={params.source}
+        options={[
+          { value: "", label: "Any source" },
+          ...sources.map((source) => ({ value: source, label: source })),
+        ]}
+      />
       {isList && (
         <>
-          <div className="grid gap-2">
-            <Label htmlFor="leads-status">Status</Label>
-            <select
-              id="leads-status"
-              name="status"
-              defaultValue={params.status}
-              className={selectClassName}
-            >
-              {LEAD_STATUS_FILTERS.map((value) => (
-                <option key={value} value={value}>
-                  {LEAD_STATUS_FILTER_LABELS[value]}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="leads-sort">Sort by</Label>
-            <select
-              id="leads-sort"
-              name="sort"
-              defaultValue={params.sort}
-              className={selectClassName}
-            >
-              {LEAD_SORTS.map((value) => (
-                <option key={value} value={value}>
-                  {LEAD_SORT_LABELS[value]}
-                </option>
-              ))}
-            </select>
-          </div>
+          <FilterSelect
+            id="leads-status"
+            label="Status"
+            name="status"
+            value={params.status}
+            options={LEAD_STATUS_FILTERS.map((value) => ({
+              value,
+              label: LEAD_STATUS_FILTER_LABELS[value],
+            }))}
+          />
+          <FilterSelect
+            id="leads-sort"
+            label="Sort by"
+            name="sort"
+            value={params.sort}
+            options={LEAD_SORTS.map((value) => ({ value, label: LEAD_SORT_LABELS[value] }))}
+          />
         </>
       )}
-      <Button type="submit" variant="secondary" size="lg" className="sm:col-span-2 lg:col-span-1">
-        Apply
-      </Button>
-    </form>
+    </FilterBar>
   );
 }

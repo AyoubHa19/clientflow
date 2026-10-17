@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowLeftIcon, PlusIcon } from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { ClientActions } from "@/components/clients/client-actions";
 import { ClientStatusBadge } from "@/components/clients/client-status-badge";
 import { NoticeToast } from "@/components/notice-toast";
@@ -11,13 +11,19 @@ import { PageContainer } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { formatDate, todayIn } from "@/lib/dates";
 import { getClient } from "@/server/clients/service";
 import { db } from "@/server/db";
 import { projectsForClient } from "@/server/projects/service";
 import { requireWorkspace } from "@/server/workspace/context";
 
-export const metadata: Metadata = { title: "Client" };
+// The record's name in the browser tab (it streams in with the page).
+export async function generateMetadata({ params }: PageProps<"/clients/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  const record = await getClient(db, await requireWorkspace(), id);
+  return { title: record ? record.name : "Not found" };
+}
 
 const NOTICES = {
   created: "Client added",
@@ -47,6 +53,7 @@ async function ClientDetails({ params }: { params: PageProps<"/clients/[id]">["p
 
   return (
     <>
+      <Breadcrumbs list={{ label: "Clients", href: "/clients" }} items={[{ label: client.name }]} />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
@@ -168,13 +175,6 @@ function DetailsFallback() {
 export default function ClientPage({ params }: PageProps<"/clients/[id]">) {
   return (
     <PageContainer>
-      <Link
-        href="/clients"
-        className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-      >
-        <ArrowLeftIcon aria-hidden className="size-4" />
-        All clients
-      </Link>
       <Suspense fallback={<DetailsFallback />}>
         <ClientDetails params={params} />
         <NoticeToast messages={NOTICES} />

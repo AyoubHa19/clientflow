@@ -10,6 +10,7 @@ import {
   SelectField,
   TextareaField,
 } from "@/components/forms/form-field";
+import { useUnsavedChanges } from "@/components/forms/use-unsaved-changes";
 import { Button } from "@/components/ui/button";
 import {
   LEAD_LIMITS,
@@ -53,9 +54,12 @@ export function LeadForm({
   const form = useRef<HTMLFormElement>(null);
   const sourcesId = useId();
   const [state, formAction, pending] = useActionState(action, {});
+  useUnsavedChanges(form, state);
 
   useEffect(() => {
-    if (state.errors && form.current) focusFirstError(form.current);
+    if (state.errors && form.current) {
+      focusFirstError(form.current);
+    }
   }, [state]);
 
   const values = { ...initial, ...state.values };

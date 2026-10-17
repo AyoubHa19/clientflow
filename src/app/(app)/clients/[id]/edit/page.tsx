@@ -5,12 +5,20 @@ import { ClientForm } from "@/components/clients/client-form";
 import { PageContainer, PageHeader } from "@/components/shell/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { updateClientAction } from "@/server/clients/actions";
 import { getClient } from "@/server/clients/service";
 import { db } from "@/server/db";
 import { requireWorkspace } from "@/server/workspace/context";
 
-export const metadata: Metadata = { title: "Edit client" };
+// The record's name in the browser tab (it streams in with the page).
+export async function generateMetadata({
+  params,
+}: PageProps<"/clients/[id]/edit">): Promise<Metadata> {
+  const { id } = await params;
+  const record = await getClient(db, await requireWorkspace(), id);
+  return { title: record ? `Edit ${record.name}` : "Not found" };
+}
 
 async function EditClient({ params }: { params: PageProps<"/clients/[id]/edit">["params"] }) {
   const { id } = await params;
@@ -20,6 +28,10 @@ async function EditClient({ params }: { params: PageProps<"/clients/[id]/edit">[
 
   return (
     <>
+      <Breadcrumbs
+        list={{ label: "Clients", href: "/clients" }}
+        items={[{ label: client.name, href: `/clients/${client.id}` }, { label: "Edit" }]}
+      />
       <PageHeader title={`Edit ${client.name}`} />
       <Card className="max-w-3xl">
         <CardContent>

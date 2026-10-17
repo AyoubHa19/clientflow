@@ -122,6 +122,19 @@ colours.
 - `/activity`: every change in the workspace, newest first, filtered by
   type, 25 per page. An entry links to its record while it still exists.
 
+## Using it on any screen
+
+- Lists fold their filters behind a "Filters" button on phones and tablets
+  (it shows how many are set), so the list comes first. The task quick add
+  folds its extras behind "More options" the same way.
+- Detail pages show where you are ("Clients › Atlas Café › Edit"). The
+  list crumb takes you back to the list as you left it, with the same
+  search, filters and page. The browser tab shows the record's name.
+- Leaving a form with unsaved changes asks first.
+- If a page fails to load (often a brief database hiccup), it says so and
+  offers "Try again", without losing the navigation.
+- Pages slide in gently; with "reduce motion" turned on, nothing moves.
+
 ## Signing in
 
 - `/sign-up` and `/sign-in` (Better Auth, email and password). Passwords
@@ -267,6 +280,8 @@ scripts/            small tools (contrast check)
   lets someone check whether an address is registered. Hiding it needs
   email verification, which needs a domain to send mail from (later).
 - No password reset yet, for the same reason.
+- The warning about unsaved changes doesn't cover the browser's back
+  button: a web app can't stop it cleanly.
 - `npm audit` reports a "high" advisory in `braces`, used by
   `eslint-config-next` through `fast-glob`. It only affects the lint tool
   on your own machine, not the app (`npm audit --omit=dev` finds nothing),

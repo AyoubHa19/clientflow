@@ -46,8 +46,9 @@ test("add, find, edit, archive, restore and delete a client", async ({ page }) =
 
   // Search by company, any case.
   await page.goto("/clients");
+  // Enter searches (the Apply button is folded away on phones).
   await field(page, "Search").fill("nour sarl");
-  await page.getByRole("button", { name: "Apply" }).click();
+  await field(page, "Search").press("Enter");
   await expect(page).toHaveURL(/q=nour\+sarl/);
   await expect(listedNames(page)).toHaveText(["Nour Architects (sample)"]);
 

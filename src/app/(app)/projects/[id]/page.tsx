@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowLeftIcon } from "lucide-react";
 import { NoticeToast } from "@/components/notice-toast";
 import { ProgressBar } from "@/components/progress-bar";
 import { DueBadge, ProjectStatusBadge } from "@/components/projects/project-badges";
@@ -13,13 +12,19 @@ import { TaskQuickAdd } from "@/components/tasks/task-quick-add";
 import { toTaskItems } from "@/components/tasks/to-task-items";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { formatDate, formatDateOnly, todayIn, toDateOnly } from "@/lib/dates";
 import { db } from "@/server/db";
 import { getProject } from "@/server/projects/service";
 import { projectProgress, tasksForProject } from "@/server/tasks/service";
 import { requireWorkspace } from "@/server/workspace/context";
 
-export const metadata: Metadata = { title: "Project" };
+// The record's name in the browser tab (it streams in with the page).
+export async function generateMetadata({ params }: PageProps<"/projects/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  const record = await getProject(db, await requireWorkspace(), id);
+  return { title: record ? record.name : "Not found" };
+}
 
 const NOTICES = { created: "Project added", saved: "Changes saved" };
 
@@ -49,6 +54,10 @@ async function ProjectDetails({ params }: { params: PageProps<"/projects/[id]">[
 
   return (
     <>
+      <Breadcrumbs
+        list={{ label: "Projects", href: "/projects" }}
+        items={[{ label: project.name }]}
+      />
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
@@ -138,13 +147,6 @@ async function ProjectDetails({ params }: { params: PageProps<"/projects/[id]">[
 export default function ProjectPage({ params }: PageProps<"/projects/[id]">) {
   return (
     <PageContainer>
-      <Link
-        href="/projects"
-        className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-      >
-        <ArrowLeftIcon aria-hidden className="size-4" />
-        All projects
-      </Link>
       <Suspense
         fallback={
           <div className="grid gap-4" aria-hidden>

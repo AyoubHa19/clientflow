@@ -143,9 +143,6 @@ end of every stage.
   Tasks column (`projectProgress`). `DueBadge` now lives in
   `src/components/due-badge.tsx` (finished: boolean). The sample workspace
   has 11 "(sample)" tasks.
-- For Stage 10 (UX polish): on phones, /tasks shows quick add and all
-  filters before any task; collapse the filters (and maybe the quick add
-  options) on small screens.
 - **Stage 9, dashboard and activity: done (2026-10-17).** The overview
   (`src/app/(app)/page.tsx`) reads `getDashboard(db, ctx, today)` and
   `listActivity` (`src/server/dashboard/service.ts`; date helpers in
@@ -161,9 +158,31 @@ end of every stage.
   `/activity` (in the nav): every change, type filter (links), 25 per
   page; an entry links to its record only while it still exists. Nothing
   new in the database.
-- **Next: Stage 10, UX and responsive polish** (PRD 14): responsive
-  behaviour, accessibility, loading and error states, forms, navigation,
-  motion. Include the /tasks phone note above.
+- **Stage 10, UX and responsive polish: done (2026-10-17).**
+  - Errors: `src/app/(app)/error.tsx` (inside the shell), `src/app/error.tsx`
+    and `global-error.tsx`, all showing `ErrorView` ("Try again" calls
+    `retry()`, plus the error's digest). Checked by making /tasks throw on
+    purpose, then removing that; there's no browser test for it.
+  - Filters: `FilterBar` + `FilterSelect` (`src/components/filter-bar.tsx`).
+    Below lg only the search shows, with "Filters (N set)" opening the rest
+    (`wideFrom="xl"` on /tasks). The task quick add folds its extras behind
+    "More options" the same way (below xl, or lg on a project's page).
+  - Forms: `useUnsavedChanges(form, state)` asks before leaving with
+    unsaved changes (closing the tab, or a link inside the app). The
+    browser's back button isn't covered.
+  - Navigation: `Breadcrumbs` on the detail, edit and new pages; the list
+    crumb goes back to the list as it was left (`RememberListUrl` on list
+    pages, kept in sessionStorage, `src/components/shell/list-memory.tsx`).
+    Detail and edit pages put the record's name in the tab title
+    (`generateMetadata`).
+  - Motion: pages slide up 8px as they open (no fade, so contrast never
+    dips); task rows have a hover colour. Everything stops with reduced
+    motion (the rule in `globals.css`).
+  - Task rows put their badges under the title in a narrow list (a
+    container query, `@md`).
+- **Next: Stage 11, security and quality review** (PRD 14): access
+  control, workspace isolation, validation, dependencies, error handling,
+  test coverage, production configuration.
 
 ## Running it
 
@@ -249,6 +268,12 @@ playwright test e2e/x.spec.ts`; the full suite once at the end.
 - Vitest runs with NODE_ENV=test, where Next's env loader skips
   `.env.local`; `src/test/test-database.ts` reads it with
   `process.loadEnvFile`.
+- On phones some fields are folded away: in browser tests, call
+  `openFilters(page)` or `openQuickAddOptions(form)` (`e2e/helpers.ts`)
+  before using them. Wait for the streamed form first (they do).
+- A record's tab title streams in after the page, and during an in-app
+  move the old title is gone for a moment. `expectNoAxeViolations` waits
+  for `networkidle` and a title first, or axe reports "document-title".
 - Neon URLs use `sslmode=verify-full` (pg warns about `require`).
 - The generated Prisma client is in `src/generated/prisma` (ignored by
   Git, Prettier and ESLint); import from `@/generated/prisma/client`.

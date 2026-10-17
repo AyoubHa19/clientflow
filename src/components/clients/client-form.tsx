@@ -10,6 +10,7 @@ import {
   SelectField,
   TextareaField,
 } from "@/components/forms/form-field";
+import { useUnsavedChanges } from "@/components/forms/use-unsaved-changes";
 import { Button } from "@/components/ui/button";
 import {
   CLIENT_LIMITS,
@@ -47,9 +48,12 @@ export function ClientForm({
 }) {
   const form = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(action, {});
+  useUnsavedChanges(form, state);
 
   useEffect(() => {
-    if (state.errors && form.current) focusFirstError(form.current);
+    if (state.errors && form.current) {
+      focusFirstError(form.current);
+    }
   }, [state]);
 
   // After a failed save, show what was typed rather than the old values.

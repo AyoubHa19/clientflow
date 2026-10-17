@@ -5,12 +5,20 @@ import { LeadForm } from "@/components/leads/lead-form";
 import { PageContainer, PageHeader } from "@/components/shell/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { db } from "@/server/db";
 import { updateLeadAction } from "@/server/leads/actions";
 import { getLead } from "@/server/leads/service";
 import { requireWorkspace } from "@/server/workspace/context";
 
-export const metadata: Metadata = { title: "Edit lead" };
+// The record's name in the browser tab (it streams in with the page).
+export async function generateMetadata({
+  params,
+}: PageProps<"/leads/[id]/edit">): Promise<Metadata> {
+  const { id } = await params;
+  const record = await getLead(db, await requireWorkspace(), id);
+  return { title: record ? `Edit ${record.contactName}` : "Not found" };
+}
 
 async function EditLead({ params }: { params: PageProps<"/leads/[id]/edit">["params"] }) {
   const { id } = await params;
@@ -20,6 +28,10 @@ async function EditLead({ params }: { params: PageProps<"/leads/[id]/edit">["par
 
   return (
     <>
+      <Breadcrumbs
+        list={{ label: "Leads", href: "/leads" }}
+        items={[{ label: lead.contactName, href: `/leads/${lead.id}` }, { label: "Edit" }]}
+      />
       <PageHeader title={`Edit ${lead.contactName}`} />
       <Card className="max-w-3xl">
         <CardContent>

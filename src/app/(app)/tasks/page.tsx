@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { ListChecksIcon, SearchXIcon } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { NoticeToast } from "@/components/notice-toast";
+import { RememberListUrl } from "@/components/shell/list-memory";
 import { Pagination } from "@/components/pagination";
 import { PageContainer, PageHeader } from "@/components/shell/page-header";
 import { TaskFilters } from "@/components/tasks/task-filters";
@@ -92,6 +93,7 @@ export default function TasksPage({ searchParams }: PageProps<"/tasks">) {
       >
         <Tasks searchParams={searchParams} />
         <NoticeToast messages={NOTICES} />
+        <RememberListUrl />
       </Suspense>
     </PageContainer>
   );

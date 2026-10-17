@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { expectNoAxeViolations, isPhone, signUpWithWorkspace } from "./helpers";
+import { expectNoAxeViolations, isPhone, openFilters, signUpWithWorkspace } from "./helpers";
 
 const field = (page: Page, label: string) =>
   page.getByLabel(label, { exact: true }).filter({ visible: true });
@@ -103,6 +103,7 @@ test("the list filters by client and sorts by due date", async ({ page }) => {
   const listed = isPhone(page) ? cards : names;
   await expect(listed).toHaveText(["Sooner (sample)", "Later (sample)", "Undated (sample)"]);
 
+  await openFilters(page);
   await field(page, "Client").selectOption("none");
   await page.getByRole("button", { name: "Apply" }).click();
   await expect(page).toHaveURL(/client=none/);

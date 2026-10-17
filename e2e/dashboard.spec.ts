@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { expectNoAxeViolations, signUpWithWorkspace } from "./helpers";
+import { expectNoAxeViolations, openQuickAddOptions, signUpWithWorkspace } from "./helpers";
 
 const field = (page: Page, label: string) =>
   page.getByLabel(label, { exact: true }).filter({ visible: true });
@@ -36,6 +36,7 @@ async function addOneOfEach(page: Page) {
   await page.goto("/tasks");
   const form = page.getByRole("form", { name: "Add a task" });
   await form.getByLabel("New task", { exact: true }).fill("Send proofs (sample)");
+  await openQuickAddOptions(form);
   await form.getByLabel("Due date", { exact: true }).fill("2020-01-15");
   await form.getByRole("button", { name: "Add task" }).click();
   await expect(form.getByLabel("New task", { exact: true })).toHaveValue("");

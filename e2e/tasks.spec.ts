@@ -1,5 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
-import { expectNoAxeViolations, isPhone, signUpWithWorkspace } from "./helpers";
+import {
+  expectNoAxeViolations,
+  isPhone,
+  openQuickAddOptions,
+  signUpWithWorkspace,
+} from "./helpers";
 
 const field = (page: Page, label: string) =>
   page.getByLabel(label, { exact: true }).filter({ visible: true });
@@ -18,6 +23,7 @@ async function quickAdd(
 ) {
   const form = page.getByRole("form", { name: "Add a task" });
   await form.getByLabel("New task", { exact: true }).fill(title);
+  if (extra.due || extra.priority) await openQuickAddOptions(form);
   if (extra.due) await form.getByLabel("Due date", { exact: true }).fill(extra.due);
   if (extra.priority)
     await form.getByLabel("Priority", { exact: true }).selectOption(extra.priority);

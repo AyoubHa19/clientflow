@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowLeftIcon } from "lucide-react";
 import { DueBadge } from "@/components/due-badge";
 import { NoticeToast } from "@/components/notice-toast";
 import { PageContainer } from "@/components/shell/page-header";
@@ -10,13 +9,19 @@ import { TaskDelete } from "@/components/tasks/task-delete";
 import { TaskForm } from "@/components/tasks/task-form";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { formatDate, todayIn, toDateOnly } from "@/lib/dates";
 import { db } from "@/server/db";
 import { updateTaskAction } from "@/server/tasks/actions";
 import { getTask, projectOptions } from "@/server/tasks/service";
 import { requireWorkspace } from "@/server/workspace/context";
 
-export const metadata: Metadata = { title: "Task" };
+// The record's name in the browser tab (it streams in with the page).
+export async function generateMetadata({ params }: PageProps<"/tasks/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  const record = await getTask(db, await requireWorkspace(), id);
+  return { title: record ? record.title : "Not found" };
+}
 
 const NOTICES = { saved: "Changes saved" };
 
@@ -30,6 +35,7 @@ async function TaskDetails({ params }: { params: PageProps<"/tasks/[id]">["param
 
   return (
     <>
+      <Breadcrumbs list={{ label: "Tasks", href: "/tasks" }} items={[{ label: task.title }]} />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
@@ -83,13 +89,6 @@ async function TaskDetails({ params }: { params: PageProps<"/tasks/[id]">["param
 export default function TaskPage({ params }: PageProps<"/tasks/[id]">) {
   return (
     <PageContainer>
-      <Link
-        href="/tasks"
-        className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-      >
-        <ArrowLeftIcon aria-hidden className="size-4" />
-        All tasks
-      </Link>
       <Suspense
         fallback={
           <div className="grid gap-4" aria-hidden>

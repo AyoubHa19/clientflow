@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef } from "react";
 import { Loader2Icon } from "lucide-react";
 import { toast } from "sonner";
 import { focusFirstError, FormMessage } from "@/components/forms/form-field";
+import { useUnsavedChanges } from "@/components/forms/use-unsaved-changes";
 import { Button } from "@/components/ui/button";
 import { updateWorkspaceAction, type WorkspaceFormState } from "@/server/workspace/actions";
 import { WorkspaceFields } from "./workspace-fields";
@@ -24,10 +25,14 @@ export function SettingsForm({
     updateWorkspaceAction,
     {},
   );
+  useUnsavedChanges(form, state);
 
   useEffect(() => {
-    if (state.saved) toast.success("Workspace settings saved");
-    else if (state.errors && form.current) focusFirstError(form.current);
+    if (state.saved) {
+      toast.success("Workspace settings saved");
+    } else if (state.errors && form.current) {
+      focusFirstError(form.current);
+    }
   }, [state]);
 
   const values = state.values ?? { name, timezone };

@@ -51,14 +51,17 @@ export function TaskList({
   }
 
   return (
-    <ul className="grid grid-cols-[minmax(0,1fr)] divide-y rounded-xl border">
+    <ul className="@container grid grid-cols-[minmax(0,1fr)] divide-y overflow-clip rounded-xl border">
       {items.map((task) => {
         const done = task.status === "DONE";
         const checkboxId = `task-done-${task.id}`;
+        const badges = task.status === "IN_PROGRESS" || !done;
         return (
+          // In a narrow list (a phone, or a project's card) the badges go
+          // under the title, so the title keeps its width.
           <li
             key={task.id}
-            className="flex items-start gap-3 px-4 py-3"
+            className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-1.5 px-4 py-3 transition-colors hover:bg-muted/40 @md:flex @md:gap-3"
             data-task-status={task.status}
           >
             <input
@@ -73,7 +76,7 @@ export function TaskList({
               <Link
                 href={`/tasks/${task.id}`}
                 className={cn(
-                  "block truncate text-sm font-medium underline-offset-4 hover:underline",
+                  "block truncate text-sm font-medium underline-offset-4 transition-colors hover:underline",
                   done && "text-muted-foreground line-through",
                 )}
               >
@@ -92,10 +95,12 @@ export function TaskList({
                 <DueBadge due={task.due} today={today} finished={done} />
               </div>
             </div>
-            <div className="flex shrink-0 flex-wrap justify-end gap-1.5">
-              {task.status === "IN_PROGRESS" && <InProgressBadge />}
-              {!done && <PriorityBadge priority={task.priority} />}
-            </div>
+            {badges && (
+              <div className="col-start-2 flex flex-wrap gap-1.5 @md:shrink-0 @md:justify-end">
+                {task.status === "IN_PROGRESS" && <InProgressBadge />}
+                {!done && <PriorityBadge priority={task.priority} />}
+              </div>
+            )}
           </li>
         );
       })}

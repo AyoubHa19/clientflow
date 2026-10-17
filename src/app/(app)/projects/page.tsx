@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { FolderKanbanIcon, PlusIcon, SearchXIcon } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { NoticeToast } from "@/components/notice-toast";
+import { RememberListUrl } from "@/components/shell/list-memory";
 import { Pagination } from "@/components/pagination";
 import { ProjectFilters } from "@/components/projects/project-filters";
 import { ProjectList } from "@/components/projects/project-list";
@@ -112,6 +113,7 @@ export default function ProjectsPage({ searchParams }: PageProps<"/projects">) {
       >
         <Projects searchParams={searchParams} />
         <NoticeToast messages={NOTICES} />
+        <RememberListUrl />
       </Suspense>
     </PageContainer>
   );

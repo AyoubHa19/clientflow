@@ -8,6 +8,7 @@ import { LeadFilters } from "@/components/leads/lead-filters";
 import { LeadList } from "@/components/leads/lead-list";
 import { LeadViewTabs } from "@/components/leads/view-tabs";
 import { NoticeToast } from "@/components/notice-toast";
+import { RememberListUrl } from "@/components/shell/list-memory";
 import { Pagination } from "@/components/pagination";
 import { PageContainer, PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
@@ -142,6 +143,7 @@ export default function LeadsPage({ searchParams }: PageProps<"/leads">) {
       <Suspense fallback={<LeadsFallback />}>
         <Leads searchParams={searchParams} />
         <NoticeToast messages={NOTICES} />
+        <RememberListUrl />
       </Suspense>
     </PageContainer>
   );

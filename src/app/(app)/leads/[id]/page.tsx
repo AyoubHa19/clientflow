@@ -2,19 +2,25 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowLeftIcon, ArrowRightIcon, UserCheckIcon } from "lucide-react";
+import { ArrowRightIcon, UserCheckIcon } from "lucide-react";
 import { LeadActions } from "@/components/leads/lead-actions";
 import { LeadStatusBadge } from "@/components/leads/lead-status-badge";
 import { NoticeToast } from "@/components/notice-toast";
 import { PageContainer } from "@/components/shell/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { formatDate } from "@/lib/dates";
 import { db } from "@/server/db";
 import { findMatchingClient, getLead } from "@/server/leads/service";
 import { requireWorkspace } from "@/server/workspace/context";
 
-export const metadata: Metadata = { title: "Lead" };
+// The record's name in the browser tab (it streams in with the page).
+export async function generateMetadata({ params }: PageProps<"/leads/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  const record = await getLead(db, await requireWorkspace(), id);
+  return { title: record ? record.contactName : "Not found" };
+}
 
 const NOTICES = {
   created: "Lead added",
@@ -44,6 +50,10 @@ async function LeadDetails({ params }: { params: PageProps<"/leads/[id]">["param
 
   return (
     <>
+      <Breadcrumbs
+        list={{ label: "Leads", href: "/leads" }}
+        items={[{ label: lead.contactName }]}
+      />
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-3">
@@ -150,13 +160,6 @@ async function LeadDetails({ params }: { params: PageProps<"/leads/[id]">["param
 export default function LeadPage({ params }: PageProps<"/leads/[id]">) {
   return (
     <PageContainer>
-      <Link
-        href="/leads"
-        className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-      >
-        <ArrowLeftIcon aria-hidden className="size-4" />
-        All leads
-      </Link>
       <Suspense
         fallback={
           <div className="grid gap-4" aria-hidden>

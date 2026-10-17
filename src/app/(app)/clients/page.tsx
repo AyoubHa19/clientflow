@@ -6,6 +6,7 @@ import { ClientFilters } from "@/components/clients/client-filters";
 import { ClientList } from "@/components/clients/client-list";
 import { EmptyState } from "@/components/empty-state";
 import { NoticeToast } from "@/components/notice-toast";
+import { RememberListUrl } from "@/components/shell/list-memory";
 import { Pagination } from "@/components/pagination";
 import { PageContainer, PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
@@ -96,6 +97,7 @@ export default function ClientsPage({ searchParams }: PageProps<"/clients">) {
       <Suspense fallback={<ClientsFallback />}>
         <Clients searchParams={searchParams} />
         <NoticeToast messages={NOTICES} />
+        <RememberListUrl />
       </Suspense>
     </PageContainer>
   );
