@@ -17,6 +17,7 @@ import { DashboardPreview } from "@/components/marketing/dashboard-preview";
 import { Sky } from "@/components/marketing/sky";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // Visitors who aren't signed in see this at "/" (proxy.ts rewrites to it).
 export const metadata: Metadata = {
@@ -156,30 +157,32 @@ export default function WelcomePage() {
               </Button>
             </div>
           </div>
-          <div className="mx-auto max-w-5xl px-4 sm:px-6">
-            <DashboardPreview className="rise origin-top" />
-          </div>
         </section>
 
-        {/* The product, tilting in from the side as it scrolls into view. */}
-        <section
-          aria-labelledby="glance-title"
-          className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:py-28"
-        >
-          <div className="fade-up">
-            <h2
-              id="glance-title"
-              className="text-3xl leading-tight font-semibold tracking-tight text-balance sm:text-4xl"
-            >
-              Your whole week, at a glance
-            </h2>
-            <p className="mt-4 text-pretty text-muted-foreground">
-              Open ClientFlow and see what&apos;s overdue, what&apos;s due soon and how your leads
-              are moving. Every number comes from your own work, nothing made up.
-            </p>
-          </div>
-          <div className="[perspective:1400px]">
-            <DashboardPreview className="tilt-in origin-left" />
+        {/*
+          The product: one preview that rises in under the hero, then (on
+          large screens) stays pinned as you scroll and turns into a tilted
+          3D card on the right while the text slides in on the left.
+        */}
+        <section aria-labelledby="glance-title" className="glance">
+          <div className="glance-stage">
+            <div className="relative mx-auto grid max-w-6xl gap-10 px-4 pb-16 sm:px-6">
+              <div className="rise mx-auto w-full max-w-5xl origin-top">
+                <DashboardPreview className="glance-preview" />
+              </div>
+              <div className="glance-copy fade-up">
+                <h2
+                  id="glance-title"
+                  className="text-3xl leading-tight font-semibold tracking-tight text-balance sm:text-4xl"
+                >
+                  Your whole week, at a glance
+                </h2>
+                <p className="mt-4 text-pretty text-muted-foreground">
+                  Open ClientFlow and see what&apos;s overdue, what&apos;s due soon and how your
+                  leads are moving. Every number comes from your own work, nothing made up.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -198,9 +201,18 @@ export default function WelcomePage() {
             >
               Everything a freelancer juggles, in one place
             </h2>
-            <ul className="mt-12 grid grid-cols-[minmax(0,1fr)] gap-4 text-left sm:grid-cols-2 lg:grid-cols-3">
-              {FEATURES.map(({ icon: Icon, title, text }) => (
-                <li key={title} className="fade-up surface p-5">
+            <ul className="mx-auto mt-12 grid max-w-4xl grid-cols-[minmax(0,1fr)] gap-6 text-left">
+              {/* One at a time, each below the last, zig-zagging from its own side. */}
+              {FEATURES.map(({ icon: Icon, title, text }, index) => (
+                <li
+                  key={title}
+                  className={cn(
+                    "w-full surface p-5 sm:max-w-md",
+                    index % 2 === 0
+                      ? "slide-from-left justify-self-start"
+                      : "slide-from-right justify-self-end",
+                  )}
+                >
                   <span className="flex size-10 items-center justify-center rounded-full bg-brand-soft text-brand">
                     <Icon aria-hidden className="size-5" />
                   </span>
@@ -212,63 +224,77 @@ export default function WelcomePage() {
           </div>
         </section>
 
-        <section
-          id="security"
-          aria-labelledby="security-title"
-          className="scroll-mt-6 py-16 lg:py-24"
-        >
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="grid gap-8 surface p-6 sm:p-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)]">
-              <div className="fade-up">
-                <h2
-                  id="security-title"
-                  className="text-3xl font-semibold tracking-tight text-balance"
-                >
-                  Private by design
-                </h2>
-                <p className="mt-3 text-pretty text-muted-foreground">
-                  Client work is confidential. ClientFlow is built to keep it that way.
-                </p>
+        {/*
+          "Private by design" pops in and stays put while the last call
+          ("Clear skies") scrolls up over it, like a card laid on top.
+        */}
+        <div className="cover-stack relative pb-[30vh]">
+          <section
+            id="security"
+            aria-labelledby="security-title"
+            className="sticky top-[12vh] scroll-mt-6 pt-16 lg:pt-24"
+          >
+            <div className="mx-auto max-w-6xl px-4 sm:px-6">
+              <div className="covered">
+                <div className="pop-in grid gap-8 surface p-6 sm:p-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)]">
+                  <div>
+                    <h2
+                      id="security-title"
+                      className="text-3xl font-semibold tracking-tight text-balance"
+                    >
+                      Private by design
+                    </h2>
+                    <p className="mt-3 text-pretty text-muted-foreground">
+                      Client work is confidential. ClientFlow is built to keep it that way.
+                    </p>
+                  </div>
+                  <ul className="grid grid-cols-[minmax(0,1fr)] gap-6 sm:grid-cols-3">
+                    {SECURITY.map(({ icon: Icon, title, text }) => (
+                      <li key={title}>
+                        <Icon aria-hidden className="size-5 text-brand" />
+                        <h3 className="mt-3 text-sm font-semibold">{title}</h3>
+                        <p className="mt-1 text-sm text-pretty text-muted-foreground">{text}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              <ul className="grid grid-cols-[minmax(0,1fr)] gap-6 sm:grid-cols-3">
-                {SECURITY.map(({ icon: Icon, title, text }) => (
-                  <li key={title} className="fade-up">
-                    <Icon aria-hidden className="size-5 text-brand" />
-                    <h3 className="mt-3 text-sm font-semibold">{title}</h3>
-                    <p className="mt-1 text-sm text-pretty text-muted-foreground">{text}</p>
-                  </li>
-                ))}
-              </ul>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* A last call, back under the sky. */}
-        <section aria-labelledby="cta-title" className="px-4 pt-8 pb-16 sm:px-6">
-          <div className="relative isolate mx-auto max-w-6xl overflow-clip rounded-3xl px-6 py-16 text-center text-white sm:py-20">
-            <Sky className="-z-10" fade={false} />
-            <div aria-hidden className="absolute inset-0 -z-10 bg-[oklch(0.25_0.05_255/35%)]" />
-            <h2
-              id="cta-title"
-              className="fade-up text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
-            >
-              Clear skies for your client work
-            </h2>
-            <p className="fade-up mx-auto mt-3 max-w-lg text-white/90">
-              Create a free account and set up your workspace in under a minute.
-            </p>
-            <Button
-              asChild
-              size="lg"
-              className="fade-up mt-8 h-11 bg-white px-5 text-[oklch(0.255_0.045_270)] hover:bg-white/90"
-            >
-              <Link href="/sign-up">
-                Get started free
-                <ArrowRightIcon aria-hidden data-icon="inline-end" />
-              </Link>
-            </Button>
-          </div>
-        </section>
+          {/* A last call under the sky, sliding up over "Private by design". */}
+          <section
+            aria-labelledby="cta-title"
+            className="cta-cover sticky top-[18vh] z-10 mt-[30vh] px-4 sm:px-6"
+          >
+            <div className="relative isolate mx-auto max-w-6xl overflow-clip rounded-3xl px-6 py-16 text-center text-white shadow-[0_-30px_80px_-30px_oklch(0.2_0.05_260/45%)] sm:py-20">
+              <Sky className="-z-10" fade={false} />
+              <div
+                aria-hidden
+                className="absolute inset-0 -z-10 bg-[oklch(0.25_0.05_255/35%)] dark:bg-[oklch(0.05_0_0/45%)]"
+              />
+              <h2
+                id="cta-title"
+                className="fade-up text-3xl font-semibold tracking-tight text-balance sm:text-4xl"
+              >
+                Clear skies for your client work
+              </h2>
+              <p className="fade-up mx-auto mt-3 max-w-lg text-white/90">
+                Create a free account and set up your workspace in under a minute.
+              </p>
+              <Button
+                asChild
+                size="lg"
+                className="fade-up mt-8 h-11 bg-white px-5 text-[oklch(0.255_0.045_270)] hover:bg-white/90"
+              >
+                <Link href="/sign-up">
+                  Get started free
+                  <ArrowRightIcon aria-hidden data-icon="inline-end" />
+                </Link>
+              </Button>
+            </div>
+          </section>
+        </div>
       </main>
 
       <footer className="mx-auto flex max-w-6xl flex-col gap-2 px-4 pb-10 text-xs text-muted-foreground sm:flex-row sm:justify-between sm:px-6">

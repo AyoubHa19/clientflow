@@ -9,10 +9,10 @@ test("visitors see the landing page at the home address", async ({ page }) => {
     page.getByRole("heading", { level: 1, name: /Your clients\. Your work\./ }),
   ).toBeVisible();
 
-  // The product preview says its numbers are made up.
+  // One product preview (it morphs as you scroll), saying its numbers are made up.
   await expect(
     page.getByRole("img", { name: /preview of the ClientFlow dashboard, with made-up numbers/ }),
-  ).toHaveCount(2);
+  ).toHaveCount(1);
   for (const name of [
     "Everything a freelancer juggles, in one place",
     "Private by design",

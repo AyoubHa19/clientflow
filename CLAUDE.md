@@ -265,7 +265,7 @@ end of every stage.
     bright inset top edge); `--sky-veil` is a gradient by day (74% at the
     top for titles, ~40% lower so the clouds show); light
     `--muted-foreground` darkened to L 0.44 so it keeps ≥ 4.7:1 on the
-    sky. Dark is matte: neutral near-black tokens (chroma ~0.005),
+    sky. Dark is matte black (the user found the first try still bluish): chroma-0 tokens, the night photos in `grayscale(1) brightness(0.8)` (`.dark .app-sky`, `.dark .sky::before`), brand toned down to oklch(0.8 0.07 272),
     `--glass-saturate: 1`, a 52% veil over the night photo. The panel is
     just a faint frame; the side bar is a glass card; inputs have a glass
     fill. Measured from screenshots: light ≥ 4.7:1, dark ≥ 5.1:1.
@@ -283,6 +283,18 @@ end of every stage.
   - `.spotlight` cards: a light that follows the mouse
     (`shell/spotlight.tsx`), behind the content via isolate + z-index -1.
   - Leads board columns: glass with a coloured dot per stage.
+- **Landing round 2 (2026-10-17, the user's requests).** One preview,
+  not two: `.glance` (250vh on lg, 210vh below) with a sticky
+  `.glance-stage`; `.glance-preview` morphs on the named view timeline
+  `--glance` (lg: to the right, `perspective()` inside the transform since
+  the stage's perspective doesn't reach grandchildren; phones: tilts in
+  place) and `.glance-copy` slides in. Features: one column, zig-zag,
+  `.slide-from-left/right` over `entry 0% cover 45%` (slow, one by one).
+  "Private by design" is sticky (top 12vh) with `.pop-in`; "Clear skies"
+  is sticky too (top 18vh) and covers it, while `.covered` (driven by the
+  CTA's `--cta` timeline through `timeline-scope` on `.cover-stack`) sinks
+  it back. Checked with a scroll-screenshot script (fresh Playwright
+  browser) at 1440 and 390 px.
 - **Next: Stage 13, portfolio and product readiness** (PRD 14): README,
   screenshots, architecture summary, feature list, setup, demo data
   strategy (the shared demo account could be changed by visitors: decide

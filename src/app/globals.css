@@ -128,48 +128,48 @@
 }
 
 .dark {
-  --background: oklch(0.125 0.004 265);
-  --foreground: oklch(0.965 0.003 265);
-  --card: oklch(0.17 0.005 265);
-  --card-foreground: oklch(0.965 0.003 265);
-  --popover: oklch(0.19 0.006 265);
-  --popover-foreground: oklch(0.965 0.003 265);
-  --primary: oklch(0.945 0.012 275);
-  --primary-foreground: oklch(0.19 0.03 268);
-  --secondary: oklch(0.23 0.006 265);
-  --secondary-foreground: oklch(0.965 0.003 265);
-  --muted: oklch(0.22 0.006 265);
-  --muted-foreground: oklch(0.74 0.01 265);
-  --accent: oklch(0.23 0.006 265);
-  --accent-foreground: oklch(0.965 0.003 265);
-  --brand: oklch(0.76 0.11 272);
-  --brand-soft: oklch(0.27 0.04 272);
-  --brand-foreground: oklch(0.17 0.03 270);
+  --background: oklch(0.1 0 0);
+  --foreground: oklch(0.96 0 0);
+  --card: oklch(0.15 0 0);
+  --card-foreground: oklch(0.96 0 0);
+  --popover: oklch(0.17 0 0);
+  --popover-foreground: oklch(0.96 0 0);
+  --primary: oklch(0.94 0 0);
+  --primary-foreground: oklch(0.16 0 0);
+  --secondary: oklch(0.21 0 0);
+  --secondary-foreground: oklch(0.96 0 0);
+  --muted: oklch(0.2 0 0);
+  --muted-foreground: oklch(0.73 0 0);
+  --accent: oklch(0.21 0 0);
+  --accent-foreground: oklch(0.96 0 0);
+  --brand: oklch(0.8 0.07 272);
+  --brand-soft: oklch(0.24 0.015 272);
+  --brand-foreground: oklch(0.15 0 0);
   --success: oklch(0.74 0.13 155);
   --warning: oklch(0.8 0.12 75);
   --destructive: oklch(0.76 0.15 23);
   --border: oklch(1 0 0 / 8%);
-  --input: oklch(0.5 0.01 265);
-  --ring: oklch(0.76 0.11 272);
-  --chart-1: oklch(0.76 0.11 272);
-  --chart-2: oklch(0.66 0.09 245);
-  --chart-3: oklch(0.86 0.03 270);
-  --chart-4: oklch(0.72 0.08 200);
-  --chart-5: oklch(0.52 0.04 268);
-  --sidebar: oklch(0.125 0.004 265);
-  --sidebar-foreground: oklch(0.965 0.003 265);
-  --sidebar-primary: oklch(0.945 0.012 275);
-  --sidebar-primary-foreground: oklch(0.19 0.03 268);
-  --sidebar-accent: oklch(0.2 0.006 265);
-  --sidebar-accent-foreground: oklch(0.965 0.003 265);
+  --input: oklch(0.5 0 0);
+  --ring: oklch(0.8 0.07 272);
+  --chart-1: oklch(0.8 0.07 272);
+  --chart-2: oklch(0.7 0.05 240);
+  --chart-3: oklch(0.85 0.01 270);
+  --chart-4: oklch(0.72 0.05 200);
+  --chart-5: oklch(0.5 0.01 270);
+  --sidebar: oklch(0.1 0 0);
+  --sidebar-foreground: oklch(0.96 0 0);
+  --sidebar-primary: oklch(0.94 0 0);
+  --sidebar-primary-foreground: oklch(0.16 0 0);
+  --sidebar-accent: oklch(0.18 0 0);
+  --sidebar-accent-foreground: oklch(0.96 0 0);
   --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.76 0.11 272);
+  --sidebar-ring: oklch(0.8 0.07 272);
   --shadow-card: 0 1px 2px oklch(0 0 0 / 30%), 0 12px 32px -16px oklch(0 0 0 / 60%);
   --sky-photo-still: url("/sky/night-1200.webp");
   --sky-photo-large: url("/sky/night.webp");
-  --sky-veil: linear-gradient(oklch(0.08 0.004 265 / 52%), oklch(0.08 0.004 265 / 52%));
+  --sky-veil: linear-gradient(oklch(0.06 0 0 / 55%), oklch(0.06 0 0 / 55%));
   --glass-edge: oklch(1 0 0 / 10%);
-  --surface-fill: oklch(0.17 0.006 265 / 60%);
+  --surface-fill: oklch(0.13 0 0 / 62%);
   --surface-edge: oklch(1 0 0 / 8%);
   --surface-glow: oklch(1 0 0 / 4%);
   /* Matte: frosted without the extra colour boost. */
@@ -199,6 +199,12 @@
   airy enough for dark text. From lg the app is framed by a faint glass
   border.
 */
+/* At night the sky photos lose their blue: a true, matte black night. */
+.dark .app-sky,
+.dark .sky::before {
+  filter: grayscale(1) brightness(0.8);
+}
+
 @utility app-sky {
   position: fixed;
   inset: 0;
@@ -277,7 +283,7 @@
 .dark .sky {
   --sky-photo: url("/sky/night-1200.webp");
   --sky-tint: linear-gradient(transparent, transparent);
-  background-color: oklch(0.14 0.02 260);
+  background-color: oklch(0.1 0 0);
 }
 .dark .sky::before {
   animation-duration: 90s;
@@ -313,7 +319,7 @@
 }
 .dark .sky-fade {
   background:
-    linear-gradient(to bottom, oklch(0.1 0.02 260 / 35%), transparent 40%),
+    linear-gradient(to bottom, oklch(0.05 0 0 / 40%), transparent 40%),
     linear-gradient(to bottom, transparent 55%, var(--background));
 }
 @keyframes sky-drift {
@@ -359,18 +365,6 @@
       animation-timeline: view();
       animation-range: entry 0% cover 35%;
     }
-    /* The 3D tilt needs room: on narrower screens it simply rises. */
-    .tilt-in {
-      animation: rise linear both;
-      animation-timeline: view();
-      animation-range: entry 0% cover 35%;
-    }
-    @media (min-width: 1024px) {
-      .tilt-in {
-        animation-name: tilt-in;
-        animation-range: entry 10% cover 50%;
-      }
-    }
     .fade-up {
       animation: fade-up linear both;
       animation-timeline: view();
@@ -378,6 +372,203 @@
     }
   }
 }
+/*
+  "Your whole week": on large screens the hero's product preview stays
+  pinned while you scroll and turns into a tilted 3D card on the right, as
+  the text slides in on the left (one preview, not two). Without support
+  for scroll-driven animations, with reduced motion, or on smaller screens,
+  the preview and the text simply sit one above the other.
+*/
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (min-width: 1024px) {
+    .glance {
+      height: 250vh;
+      view-timeline-name: --glance;
+    }
+    .glance-stage {
+      position: sticky;
+      top: 0;
+      height: 100dvh;
+      padding-top: 4.5rem;
+    }
+    .glance-preview {
+      transform-origin: right center;
+      animation: glance-morph linear both;
+      animation-timeline: --glance;
+      animation-range: contain 0% contain 100%;
+    }
+    .glance-copy {
+      position: absolute;
+      top: 34%;
+      left: 1.5rem;
+      width: 30%;
+      animation: glance-in linear both;
+      animation-timeline: --glance;
+      animation-range: contain 0% contain 100%;
+    }
+    /* The text is in place already for the frames before it moves in. */
+    .glance-copy.fade-up {
+      animation-name: glance-in;
+    }
+    /* Pinned, the preview is moved by the scroll alone. */
+    .glance-stage .rise {
+      animation: none;
+    }
+  }
+}
+/* Phones and tablets: the same pinned preview, tilting back in 3D in place
+   while the text rises in underneath. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (max-width: 1023px) {
+    .glance {
+      height: 210vh;
+      view-timeline-name: --glance;
+    }
+    .glance-stage {
+      position: sticky;
+      top: 0;
+      height: 100dvh;
+      padding-top: 4.5rem;
+    }
+    .glance-stage .rise {
+      animation: none;
+    }
+    .glance-preview {
+      transform-origin: center top;
+      animation: glance-morph-phone linear both;
+      animation-timeline: --glance;
+      animation-range: contain 0% contain 100%;
+    }
+    .glance-copy,
+    .glance-copy.fade-up {
+      animation: glance-up linear both;
+      animation-timeline: --glance;
+      animation-range: contain 0% contain 100%;
+    }
+  }
+}
+@keyframes glance-morph-phone {
+  0%,
+  15% {
+    transform: perspective(900px) translateY(0) scale(1) rotateX(0) rotateY(0);
+  }
+  70%,
+  100% {
+    transform: perspective(900px) translateY(1vh) scale(0.85) rotateX(18deg) rotateY(-16deg);
+  }
+}
+@keyframes glance-up {
+  0%,
+  50% {
+    opacity: 0;
+    transform: translateY(56px);
+  }
+  85%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes glance-morph {
+  0%,
+  18% {
+    transform: perspective(1400px) translate(0, 0) scale(1) rotateY(0) rotateX(0);
+  }
+  75%,
+  100% {
+    transform: perspective(1400px) translate(2%, 13vh) scale(0.76) rotateY(-24deg) rotateX(6deg);
+  }
+}
+@keyframes glance-in {
+  0%,
+  68% {
+    opacity: 0;
+    transform: translateX(-72px);
+  }
+  92%,
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Feature cards slide in from their own side as they reach the screen. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* A long scroll range makes each card glide in slowly, one by one. */
+    .slide-from-left,
+    .slide-from-right {
+      animation: slide-from-left linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 45%;
+    }
+    .slide-from-right {
+      animation-name: slide-from-right;
+    }
+    /* "Private by design" pops in as it arrives. */
+    .pop-in {
+      animation: pop-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 80%;
+    }
+    /* ...and sinks back, a little smaller and dimmer, as "Clear skies"
+       slides over it (the last call's own scroll drives it). */
+    .cover-stack {
+      timeline-scope: --cta;
+    }
+    .cta-cover {
+      view-timeline-name: --cta;
+    }
+    .covered {
+      animation: covered linear both;
+      animation-timeline: --cta;
+      animation-range: entry 0% cover 60%;
+    }
+  }
+}
+@keyframes slide-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-140px) rotate(-3deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes slide-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(140px) rotate(3deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes covered {
+  to {
+    transform: scale(0.9) translateY(-2vh);
+    opacity: 0.45;
+    filter: blur(1.5px);
+  }
+}
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @keyframes hero-out {
   to {
     opacity: 0;
@@ -390,14 +581,6 @@
   }
   to {
     transform: perspective(1400px) translateY(0) rotateX(0) scale(1);
-  }
-}
-@keyframes tilt-in {
-  from {
-    transform: perspective(1400px) translateX(18%) rotateY(-24deg) scale(0.9);
-  }
-  to {
-    transform: perspective(1400px) translateX(0) rotateY(-8deg) scale(1);
   }
 }
 @keyframes fade-up {

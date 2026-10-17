@@ -140,8 +140,8 @@ colours.
 
 - **A clear sky.** Light mode is a near-white page with a hint of lavender,
   white cards with soft shadows, deep navy text and one periwinkle blue.
-  Dark mode is matte: a neutral, nearly black night with frosted dark
-  glass. Buttons are pills; the font is Manrope. The colours are tokens in
+  Dark mode is a true matte black: neutral (no blue) near-black colours,
+  frosted dark glass, and the night sky photos in greyscale. Buttons are pills; the font is Manrope. The colours are tokens in
   `src/app/globals.css`, and `npm run check:contrast` measures every text
   pair (at least 4.5:1).
 - **Inside the app** every card, list, form and the side bar is frosted
@@ -163,11 +163,16 @@ colours.
   name. Arrow keys to choose, Enter to open, Escape to close.
 - **Visitors** see a landing page at `/` (signed-in people get their
   dashboard there). Its sky is a photo: clouds by day, stars by night,
-  drifting slowly, with a few stars twinkling at night. A product preview
-  (made-up numbers, labelled) rises and tilts in 3D as the page scrolls,
-  and the sections fade in, all with CSS scroll-driven animations (no
-  JavaScript while scrolling). Sign-in and sign-up sit on the same sky,
-  the form on frosted glass.
+  drifting slowly, with a few stars twinkling at night. One product
+  preview (made-up numbers, labelled) rises in, then stays pinned as you
+  scroll and turns into a tilted 3D card (on the right on large screens,
+  in place on phones) while "Your whole week, at a glance" slides in. The
+  features arrive one by one, zig-zagging in from their own side. "Private
+  by design" pops in, and the last call ("Clear skies") slides up over it
+  like a card laid on top, as it sinks back. All of it is CSS scroll-driven
+  animation (no JavaScript while scrolling); with reduced motion, or in
+  browsers without it, everything simply sits in place. Sign-in and
+  sign-up sit on the same sky, the form on frosted glass.
 - White text over the day sky keeps at least 4.5:1: a blue tint is
   multiplied over the top of the photo, and the contrast was measured on
   the photo itself.
