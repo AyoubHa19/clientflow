@@ -315,7 +315,32 @@ end of every stage.
     `grid-cols-[minmax(0,1fr)]`; the number cards are one column under
     400px now), then 3px (an `sr-only` table: tables can't shrink to 1px,
     so `sr-only` goes on a wrapping div).
-- **Next: Stage 13, portfolio and product readiness** (PRD 14): README,
+- **New stages after 12 (2026-10-17, the user's choice).** Claude proposed
+  features to make ClientFlow stand out; the user said to build them in this
+  order, each as its own stage, then Stage 13 last: **14 follow-ups and
+  cold leads → 15 money (lead value, project fee) → 16 client portal (a
+  private status link per project) → 17 client health (time tracking,
+  real hourly rate) → 18 "Today" page and weekly review**, with project
+  templates and installing as an app (PWA) added along the way.
+- **Stage 14, follow-ups and cold leads: done (2026-10-17).** `Lead`
+  has `lastContactedOn` and `nextFollowUpOn` (DATE; migration
+  `lead_follow_ups`, which also adds the `CONTACTED` activity). Rules in
+  `src/lib/followups.ts` (`followUpState`, `COLD_AFTER_DAYS` = 14,
+  `asFollowUpLead` reads the added day in UTC, like the server's filters).
+  `logContact` in the lead service (latest contact wins, New → Contacted,
+  the note goes into the activity summary; `contactLogSchema(today)`
+  refuses a future day). `followUps()` feeds the dashboard's "Follow up"
+  card (`components/dashboard/follow-ups.tsx`); the list has a follow-up
+  filter and sort (the Email column made room for "Follow-up"); board cards
+  show only what needs doing (late, today, cold). `#log-contact` on a
+  lead's page is the card with `LogContactForm`. The light `--warning` went
+  from L 0.55 to 0.52: orange badges measured 4.28:1 on phones over the sky.
+  Dev sample data: Omar planned, Leila due today, Hiba a day late, Thomas
+  Martin cold (its `createdAt` moved back 18 days by a script, as the app
+  can't). After a migration, restart `npm run dev` (it keeps the old
+  Prisma client: "Unknown field").
+- **Next: Stage 15, money** (lead value and project fee; see above). Then
+  **Stage 13, portfolio and product readiness** (PRD 14): README,
   screenshots, architecture summary, feature list, setup, demo data
   strategy (the shared demo account could be changed by visitors: decide
   read-only, a reset, or per-visitor demos; Claude proposed a "Try the

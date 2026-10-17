@@ -128,32 +128,42 @@ async function main() {
       notes: "Needs a booking site before the high season.",
     });
     const converted = must(await convertLead(db, ctx, karim.id), "convert Karim");
-    for (const data of [
+    // Follow-ups: one due today, one late, one planned, and two gone cold
+    // (added a while ago, nothing planned, no recent contact).
+    for (const { addedDaysAgo, ...data } of [
       {
         contactName: "Leila Haddad (sample)",
         company: "Studio Leila",
         source: "Instagram",
         status: "QUALIFIED",
+        lastContactedOn: day(today, -3),
+        nextFollowUpOn: today,
       },
       {
         contactName: "Omar Tazi (sample)",
         email: "omar.tazi@example.com",
         source: "Website",
         status: "CONTACTED",
+        lastContactedOn: day(today, -9),
+        nextFollowUpOn: day(today, -2),
       },
       {
         contactName: "Hiba Alaoui (sample)",
         company: "Alaoui & Co",
         source: "LinkedIn",
         status: "CONTACTED",
+        lastContactedOn: day(today, -2),
+        nextFollowUpOn: day(today, 5),
       },
       {
         contactName: "Nadia Fassi (sample)",
         company: "Fassi Textiles",
         source: "Event",
         status: "CONTACTED",
+        lastContactedOn: day(today, -20),
+        addedDaysAgo: 40,
       },
-      { contactName: "Youssef Ait (sample)", source: "Website", status: "NEW" },
+      { contactName: "Youssef Ait (sample)", source: "Website", status: "NEW", addedDaysAgo: 18 },
       {
         contactName: "Salma Idrissi (sample)",
         company: "Idrissi Bakery",
@@ -167,7 +177,13 @@ async function main() {
         status: "LOST",
       },
     ]) {
-      await lead(data);
+      const created = await lead(data);
+      if (addedDaysAgo) {
+        await db.lead.update({
+          where: { id: created.id },
+          data: { createdAt: new Date(`${day(today, -addedDaysAgo)}T09:00:00Z`) },
+        });
+      }
     }
 
     // Projects: one late, one due soon, one planned, one paused, one done.

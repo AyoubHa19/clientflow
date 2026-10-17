@@ -1,12 +1,23 @@
 import Link from "next/link";
 import { formatDate } from "@/lib/dates";
+import { asFollowUpLead, followUpState } from "@/lib/followups";
 import type { LeadRecord } from "@/server/leads/service";
+import { FollowUpBadge } from "./follow-up-badge";
 import { LeadStatusBadge } from "./lead-status-badge";
 
 const dash = <span className="text-muted-foreground">—</span>;
 
 /** Leads as a table on wide screens and as cards on phones. */
-export function LeadList({ leads, timeZone }: { leads: LeadRecord[]; timeZone: string }) {
+export function LeadList({
+  leads,
+  timeZone,
+  today,
+}: {
+  leads: LeadRecord[];
+  timeZone: string;
+  /** Today in the workspace, for the follow-up badges. */
+  today: string;
+}) {
   return (
     <>
       <div className="hidden overflow-x-auto surface md:block">
@@ -14,7 +25,7 @@ export function LeadList({ leads, timeZone }: { leads: LeadRecord[]; timeZone: s
           <caption className="sr-only">Leads</caption>
           <thead className="bg-muted/50 text-xs text-muted-foreground">
             <tr>
-              {["Contact", "Company", "Email", "Source", "Stage", "Updated"].map((heading) => (
+              {["Contact", "Company", "Source", "Stage", "Follow-up", "Updated"].map((heading) => (
                 <th key={heading} scope="col" className="px-4 py-3 font-medium whitespace-nowrap">
                   {heading}
                 </th>
@@ -33,10 +44,12 @@ export function LeadList({ leads, timeZone }: { leads: LeadRecord[]; timeZone: s
                   </Link>
                 </td>
                 <td className="max-w-48 truncate px-4 py-3">{lead.company ?? dash}</td>
-                <td className="max-w-56 truncate px-4 py-3">{lead.email ?? dash}</td>
                 <td className="max-w-32 truncate px-4 py-3">{lead.source ?? dash}</td>
                 <td className="px-4 py-3">
                   <LeadStatusBadge status={lead.status} />
+                </td>
+                <td className="px-4 py-3">
+                  <FollowUpBadge state={followUpState(asFollowUpLead(lead), today)} />
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
                   {formatDate(lead.updatedAt, timeZone)}
@@ -61,6 +74,7 @@ export function LeadList({ leads, timeZone }: { leads: LeadRecord[]; timeZone: s
               {lead.company && (
                 <p className="mt-1 truncate text-sm text-muted-foreground">{lead.company}</p>
               )}
+              <FollowUpBadge state={followUpState(asFollowUpLead(lead), today)} className="mt-2" />
               <p className="mt-2 text-xs text-muted-foreground">
                 {lead.source ? `${lead.source} · ` : ""}Updated{" "}
                 {formatDate(lead.updatedAt, timeZone)}

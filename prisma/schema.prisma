@@ -132,6 +132,10 @@ model Lead {
   // into two clients.
   convertedClientId String?    @unique @db.Uuid
   convertedAt       DateTime?
+  // Follow-ups (Stage 14): the last day someone got in touch, and the day to
+  // get back to them. With neither recent, an open lead goes cold.
+  lastContactedOn   DateTime?  @db.Date
+  nextFollowUpOn    DateTime?  @db.Date
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
@@ -140,6 +144,7 @@ model Lead {
 
   @@index([workspaceId, status, updatedAt])
   @@index([workspaceId, contactName])
+  @@index([workspaceId, nextFollowUpOn])
   @@map("leads")
 }
 
@@ -232,6 +237,7 @@ enum ActivityAction {
   CONVERTED
   ARCHIVED
   DELETED
+  CONTACTED
 }
 
 // What happened, kept even after the record itself is deleted: entityId has

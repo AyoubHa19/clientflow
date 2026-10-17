@@ -1,11 +1,15 @@
 import type { Prisma } from "@/generated/prisma/client";
+import { todayIn, toDateOnly } from "@/lib/dates";
+import { coldBefore, OPEN_LEAD_STATUSES } from "@/lib/followups";
 import { isUuid } from "@/lib/validation/ids";
 import {
+  contactLogSchema,
   LEAD_STATUSES,
   leadSchema,
   leadStatusSchema,
   LEADS_PER_COLUMN,
   LEADS_PER_PAGE,
+  NOT_IN_FUTURE,
   type LeadListParams,
   type LeadStatus,
 } from "@/lib/validation/lead";
@@ -34,6 +38,8 @@ const leadFields = {
   status: true,
   notes: true,
   convertedAt: true,
+  lastContactedOn: true,
+  nextFollowUpOn: true,
   createdAt: true,
   updatedAt: true,
   convertedClient: { select: { id: true, name: true } },
@@ -55,7 +61,46 @@ const SORTS: Record<LeadListParams["sort"], Prisma.LeadOrderByWithRelationInput[
   updated: [{ updatedAt: "desc" }, { id: "desc" }],
   name: [{ contactName: "asc" }, { id: "asc" }],
   newest: [{ createdAt: "desc" }, { id: "desc" }],
+  followUp: [
+    { nextFollowUpOn: { sort: "asc", nulls: "last" } },
+    { updatedAt: "desc" },
+    { id: "desc" },
+  ],
 };
+
+const day = (value: string) => new Date(`${value}T00:00:00Z`);
+const OPEN = { status: { in: [...OPEN_LEAD_STATUSES] } } satisfies Prisma.LeadWhereInput;
+
+/**
+ * Open leads that have gone cold: nothing planned, and no touch (contact,
+ * or the day they were added, read in UTC) since before the cut-off.
+ * Matches followUpState() in src/lib/followups.ts.
+ */
+function coldWhere(today: string): Prisma.LeadWhereInput {
+  const cutoff = day(coldBefore(today));
+  return {
+    ...OPEN,
+    nextFollowUpOn: null,
+    createdAt: { lt: cutoff },
+    OR: [{ lastContactedOn: null }, { lastContactedOn: { lt: cutoff } }],
+  };
+}
+
+function followUpWhere(
+  filter: LeadListParams["followUp"],
+  today: string,
+): Prisma.LeadWhereInput | undefined {
+  switch (filter) {
+    case "all":
+      return undefined;
+    case "due":
+      return { ...OPEN, nextFollowUpOn: { lte: day(today) } };
+    case "planned":
+      return { ...OPEN, nextFollowUpOn: { gt: day(today) } };
+    case "cold":
+      return coldWhere(today);
+  }
+}
 
 /** The search and source filters, shared by the list and the board. */
 function searchWhere(ctx: WorkspaceContext, q: string, source: string): Prisma.LeadWhereInput {
@@ -71,11 +116,21 @@ function searchWhere(ctx: WorkspaceContext, q: string, source: string): Prisma.L
   };
 }
 
-export async function listLeads(db: Db, ctx: WorkspaceContext, params: LeadListParams) {
+export async function listLeads(
+  db: Db,
+  ctx: WorkspaceContext,
+  params: LeadListParams,
+  today = todayIn(ctx.workspace.timezone),
+) {
   const statuses = STATUS_FILTERS[params.status];
+  const followUp = followUpWhere(params.followUp, today);
+  // AND keeps each part's own conditions (two of them can have an OR).
   const where: Prisma.LeadWhereInput = {
-    ...searchWhere(ctx, params.q, params.source),
-    ...(statuses && { status: { in: statuses } }),
+    AND: [
+      searchWhere(ctx, params.q, params.source),
+      statuses ? { status: { in: statuses } } : {},
+      followUp ?? {},
+    ],
   };
   const total = await db.lead.count({ where });
   const pageCount = Math.max(1, Math.ceil(total / LEADS_PER_PAGE));
@@ -133,7 +188,7 @@ export async function leadSources(db: Db, ctx: WorkspaceContext) {
   return rows.map((row) => row.source).filter((source): source is string => Boolean(source));
 }
 
-type Action = "CREATED" | "UPDATED" | "STATUS_CHANGED" | "CONVERTED" | "DELETED";
+type Action = "CREATED" | "UPDATED" | "STATUS_CHANGED" | "CONVERTED" | "DELETED" | "CONTACTED";
 
 function logActivity(
   tx: Prisma.TransactionClient,
@@ -156,13 +211,20 @@ function logActivity(
 
 const STAYS_WON = "This lead became a client, so it stays Won.";
 
+/** A contact day must have happened: today at the latest, in the workspace's time zone. */
+const inFuture = (date: Date | null, today: string) => date !== null && toDateOnly(date) > today;
+
 export async function createLead(
   db: Db,
   ctx: WorkspaceContext,
   input: unknown,
+  today = todayIn(ctx.workspace.timezone),
 ): Promise<ServiceResult<LeadRecord>> {
   const parsed = leadSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
+  if (inFuture(parsed.data.lastContactedOn, today)) {
+    return invalidFields({ lastContactedOn: NOT_IN_FUTURE });
+  }
   const lead = await db.$transaction(async (tx) => {
     const created = await tx.lead.create({
       data: { ...parsed.data, workspaceId: ctx.workspace.id },
@@ -195,10 +257,14 @@ export async function updateLead(
   ctx: WorkspaceContext,
   id: string,
   input: unknown,
+  today = todayIn(ctx.workspace.timezone),
 ): Promise<ServiceResult<LeadRecord>> {
   if (!isUuid(id)) return notFound("lead");
   const parsed = leadSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
+  if (inFuture(parsed.data.lastContactedOn, today)) {
+    return invalidFields({ lastContactedOn: NOT_IN_FUTURE });
+  }
 
   return db.$transaction(async (tx) => {
     const existing = await lockLead(tx, ctx, id);
@@ -248,6 +314,103 @@ export async function setLeadStatus(
     );
     return ok(updated);
   });
+}
+
+/**
+ * "Log a contact": records the day you got in touch (the latest contact
+ * wins, so logging an older one doesn't turn the clock back), plans the
+ * next follow-up (or clears it), and moves a New lead to Contacted. The
+ * note goes into the activity log. Won and lost leads are closed.
+ */
+export async function logContact(
+  db: Db,
+  ctx: WorkspaceContext,
+  id: string,
+  input: unknown,
+  today = todayIn(ctx.workspace.timezone),
+): Promise<ServiceResult<LeadRecord>> {
+  if (!isUuid(id)) return notFound("lead");
+  const parsed = contactLogSchema(today).safeParse(input);
+  if (!parsed.success) return invalid(parsed.error);
+  const { contactedOn, note, nextFollowUpOn } = parsed.data;
+  // The schema already refused an empty day; this tells TypeScript.
+  if (!contactedOn) return invalidFields({ contactedOn: "Enter the day you got in touch." });
+
+  return db.$transaction(async (tx) => {
+    const existing = await lockLead(tx, ctx, id);
+    if (!existing) return notFound("lead");
+    if (existing.status === "WON" || existing.status === "LOST") {
+      return conflict("This lead is closed (won or lost), so it needs no follow-up.");
+    }
+    const latest =
+      existing.lastContactedOn && existing.lastContactedOn > contactedOn
+        ? existing.lastContactedOn
+        : contactedOn;
+    const updated = await tx.lead.update({
+      where: { id },
+      data: {
+        lastContactedOn: latest,
+        nextFollowUpOn,
+        ...(existing.status === "NEW" && { status: "CONTACTED" }),
+      },
+      select: leadFields,
+    });
+    await logActivity(
+      tx,
+      ctx,
+      { type: "LEAD", id },
+      "CONTACTED",
+      `Contacted ${updated.contactName}${note ? `: ${note}` : ""}`,
+    );
+    return ok(updated);
+  });
+}
+
+const followUpFields = {
+  id: true,
+  contactName: true,
+  company: true,
+  status: true,
+  lastContactedOn: true,
+  nextFollowUpOn: true,
+  createdAt: true,
+} as const;
+
+export type FollowUpLeadRow = Prisma.LeadGetPayload<{ select: typeof followUpFields }>;
+
+/** How many of each the dashboard lists at most. */
+export const FOLLOW_UPS_SHOWN = { due: 6, cold: 4 };
+
+/**
+ * The dashboard's "Follow up": open leads whose follow-up is today or late
+ * (latest first), and the coldest leads with nothing planned, with totals.
+ */
+export async function followUps(db: Db, ctx: WorkspaceContext, today: string) {
+  const workspace = { workspaceId: ctx.workspace.id };
+  const dueWhere: Prisma.LeadWhereInput = { AND: [workspace, followUpWhere("due", today)!] };
+  const coldLeads: Prisma.LeadWhereInput = { AND: [workspace, coldWhere(today)] };
+  const [due, dueTotal, cold, coldTotal] = await Promise.all([
+    db.lead.findMany({
+      where: dueWhere,
+      orderBy: [{ nextFollowUpOn: "asc" }, { id: "asc" }],
+      take: FOLLOW_UPS_SHOWN.due,
+      select: followUpFields,
+    }),
+    db.lead.count({ where: dueWhere }),
+    db.lead.findMany({
+      where: coldLeads,
+      // Never contacted first, then the longest ago.
+      orderBy: [
+        { lastContactedOn: { sort: "asc", nulls: "first" } },
+        { createdAt: "asc" },
+        { id: "asc" },
+      ],
+      take: FOLLOW_UPS_SHOWN.cold,
+      select: followUpFields,
+    }),
+    db.lead.count({ where: coldLeads }),
+  ]);
+  return { due, dueTotal, cold, coldTotal };
 }
 
 export async function deleteLead(

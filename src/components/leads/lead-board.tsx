@@ -32,8 +32,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { isOpenLead, type FollowUpState } from "@/lib/followups";
 import { LEAD_STATUS_LABELS, LEAD_STATUSES, type LeadStatus } from "@/lib/validation/lead";
 import { cn } from "@/lib/utils";
+import { FollowUpBadge } from "./follow-up-badge";
 import { setLeadStatusAction } from "@/server/leads/actions";
 
 export type BoardLead = {
@@ -43,6 +45,8 @@ export type BoardLead = {
   source: string | null;
   updated: string;
   converted: boolean;
+  /** Where its follow-up stands, worked out on the server for today. */
+  followUp: FollowUpState | null;
 };
 
 export type BoardColumnData = {
@@ -296,6 +300,7 @@ function LeadCard({
           )
         }
         menu={<MoveMenu lead={lead} status={status} onMove={onMove} />}
+        open={isOpenLead(status)}
       />
     </li>
   );
@@ -306,11 +311,14 @@ function CardBody({
   handle,
   menu,
   overlay = false,
+  open = true,
 }: {
   lead: BoardLead;
   handle?: React.ReactNode;
   menu?: React.ReactNode;
   overlay?: boolean;
+  /** In an open column: a card moved to Won or Lost drops its follow-up. */
+  open?: boolean;
 }) {
   return (
     <div
@@ -346,6 +354,7 @@ function CardBody({
         {lead.source && <span>{lead.source}</span>}
         <span>Updated {lead.updated}</span>
       </p>
+      {open && <FollowUpBadge state={lead.followUp} showScheduled={false} className="mt-2" />}
     </div>
   );
 }

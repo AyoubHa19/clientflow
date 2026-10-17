@@ -13,7 +13,8 @@ import { Pagination } from "@/components/pagination";
 import { PageContainer, PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatDate } from "@/lib/dates";
+import { formatDate, todayIn } from "@/lib/dates";
+import { asFollowUpLead, followUpState } from "@/lib/followups";
 import { leadsHref, parseLeadListParams } from "@/lib/validation/lead";
 import { db } from "@/server/db";
 import { boardLeads, leadSources, listLeads } from "@/server/leads/service";
@@ -54,10 +55,15 @@ async function Leads({ searchParams }: { searchParams: PageProps<"/leads">["sear
   const params = parseLeadListParams(await searchParams);
   const sources = await leadSources(db, ctx);
   const tz = ctx.workspace.timezone;
+  const today = todayIn(tz);
 
   if (params.view === "list") {
-    const result = await listLeads(db, ctx, params);
-    const filtered = params.q !== "" || params.source !== "" || params.status !== "all";
+    const result = await listLeads(db, ctx, params, today);
+    const filtered =
+      params.q !== "" ||
+      params.source !== "" ||
+      params.status !== "all" ||
+      params.followUp !== "all";
     return (
       <>
         <LeadViewTabs params={params} />
@@ -66,7 +72,7 @@ async function Leads({ searchParams }: { searchParams: PageProps<"/leads">["sear
           <NoLeads filtered={filtered} />
         ) : (
           <>
-            <LeadList leads={result.items} timeZone={tz} />
+            <LeadList leads={result.items} timeZone={tz} today={today} />
             <Pagination
               page={result.page}
               pageCount={result.pageCount}
@@ -99,6 +105,7 @@ async function Leads({ searchParams }: { searchParams: PageProps<"/leads">["sear
       source: lead.source,
       updated: formatDate(lead.updatedAt, tz),
       converted: lead.convertedClient !== null,
+      followUp: followUpState(asFollowUpLead(lead), today),
     })),
   }));
 

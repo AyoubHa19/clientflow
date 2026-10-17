@@ -82,6 +82,18 @@ colours.
   or, when a client already has the same email, links to it instead of
   making a duplicate. The lead becomes Won and stays Won. Two clicks at once
   still make one client (the lead row is locked during the conversion).
+- **Follow-ups.** Each lead can have a "last contacted" day and a "next
+  follow-up" day. **Log a contact** on a lead's page records the day (today
+  by default; never a future day), a short note (kept in the activity log)
+  and the next follow-up, with quick picks ("In 3 days", "In a week"...)
+  counted from the contact day. It moves a New lead to Contacted. Logging an
+  older contact never turns the "last contacted" day back.
+- An open lead with nothing planned and no contact for **14 days** (counting
+  from the later of its last contact and the day it was added) has **gone
+  cold**. Badges say "Follow up today", "Follow-up 2 days late", "Follow up
+  in 5 days" or "No contact for 20 days"; won and lost leads have none.
+- The list filters by follow-up (due today or late, gone cold, planned) and
+  sorts by next follow-up.
 
 ## Projects
 
@@ -113,6 +125,8 @@ colours.
 - The overview shows four numbers, each opening the matching list: active
   clients, open leads, open projects (and how many are on hold), pending
   tasks (and how many are overdue).
+- "Follow up": leads whose follow-up is today or late, and the leads gone
+  cold, each opening the lead's "Log a contact" form.
 - "Coming up": unfinished projects and tasks that are overdue or due in
   the next 14 days. The leads pipeline per stage, with the win rate (won
   out of won and lost) and the leads converted this month. Tasks completed

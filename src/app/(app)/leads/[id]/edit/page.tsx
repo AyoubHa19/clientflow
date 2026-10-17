@@ -6,6 +6,7 @@ import { PageContainer, PageHeader } from "@/components/shell/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/shell/breadcrumbs";
+import { toDateOnly } from "@/lib/dates";
 import { db } from "@/server/db";
 import { updateLeadAction } from "@/server/leads/actions";
 import { getLead } from "@/server/leads/service";
@@ -45,6 +46,8 @@ async function EditLead({ params }: { params: PageProps<"/leads/[id]/edit">["par
               source: lead.source ?? "",
               notes: lead.notes ?? "",
               status: lead.status,
+              lastContactedOn: lead.lastContactedOn ? toDateOnly(lead.lastContactedOn) : "",
+              nextFollowUpOn: lead.nextFollowUpOn ? toDateOnly(lead.nextFollowUpOn) : "",
             }}
             statusLocked={lead.convertedClient !== null}
             submitLabel="Save changes"

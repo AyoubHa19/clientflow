@@ -29,6 +29,8 @@ export type LeadFormValues = {
   source: string;
   notes: string;
   status: LeadStatus;
+  lastContactedOn: string;
+  nextFollowUpOn: string;
 };
 
 const STATUS_OPTIONS = LEAD_STATUSES.map((status) => ({
@@ -153,6 +155,25 @@ export function LeadForm({
           disabled={pending}
         />
       )}
+      <FormField
+        key={`lastContactedOn-${values.lastContactedOn}`}
+        label="Last contacted (optional)"
+        name="lastContactedOn"
+        type="date"
+        defaultValue={values.lastContactedOn}
+        error={errors.lastContactedOn}
+        disabled={pending}
+      />
+      <FormField
+        key={`nextFollowUpOn-${values.nextFollowUpOn}`}
+        label="Next follow-up (optional)"
+        name="nextFollowUpOn"
+        type="date"
+        defaultValue={values.nextFollowUpOn}
+        hint="When to get back to them. It shows on your dashboard that day."
+        error={errors.nextFollowUpOn}
+        disabled={pending}
+      />
       <div className="sm:col-span-2">
         <TextareaField
           key={`notes-${values.notes}`}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { Deadlines } from "@/components/dashboard/deadlines";
+import { FollowUps } from "@/components/dashboard/follow-ups";
 import { GettingStarted } from "@/components/dashboard/getting-started";
 import { KpiCards } from "@/components/dashboard/kpi-cards";
 import { LeadFunnel } from "@/components/dashboard/lead-funnel";
@@ -11,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { todayIn } from "@/lib/dates";
 import { getDashboard, listActivity } from "@/server/dashboard/service";
 import { db } from "@/server/db";
+import { followUps } from "@/server/leads/service";
 import { requireWorkspace } from "@/server/workspace/context";
 
 async function Overview() {
@@ -18,9 +20,10 @@ async function Overview() {
   const ctx = { user, workspace, ...rest };
   const now = new Date();
   const today = todayIn(workspace.timezone, now);
-  const [dashboard, activity] = await Promise.all([
+  const [dashboard, activity, toFollowUp] = await Promise.all([
     getDashboard(db, ctx, today),
     listActivity(db, ctx, { type: "all", page: 1, perPage: 6 }),
+    followUps(db, ctx, today),
   ]);
   const firstName = user.name.trim().split(/\s+/)[0] ?? user.name;
   const allStarted = Object.values(dashboard.started).every(Boolean);
@@ -38,8 +41,9 @@ async function Overview() {
           <Deadlines deadlines={dashboard.deadlines} today={today} />
           <WeeklyChart weekly={dashboard.weekly} />
         </div>
-        {/* The right-hand column: the pipeline and what just happened. */}
+        {/* The right-hand column: who to follow up, the pipeline, what just happened. */}
         <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-4 lg:grid-cols-2 xl:grid-cols-1">
+          <FollowUps data={toFollowUp} today={today} />
           <LeadFunnel funnel={dashboard.funnel} conversion={dashboard.conversion} />
           <section aria-labelledby="activity-title" className="spotlight relative surface p-4">
             <div className="flex items-start justify-between gap-2">

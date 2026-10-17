@@ -199,3 +199,52 @@ for (const colorScheme of ["light", "dark"] as const) {
     });
   });
 }
+
+test("log a contact, then the follow-up shows on the dashboard and in the list", async ({
+  page,
+}) => {
+  await signUpWithWorkspace(page);
+  await addLead(page, "Amina Kettani (sample)");
+
+  // On the lead's page: contacted today, follow up today.
+  const form = page.getByRole("form", { name: "Log a contact" }).filter({ visible: true });
+  const today = await form.getByLabel("When did you get in touch?").inputValue();
+  await form.getByLabel("What happened? (optional)").fill("Called, sending a quote");
+  // A quick pick fills the date; "None" clears it again.
+  await form.getByRole("button", { name: "In a week" }).click();
+  await expect(form.getByRole("button", { name: "In a week" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await form.getByRole("button", { name: "None" }).click();
+  await expect(form.getByLabel("Next follow-up (optional)")).toHaveValue("");
+  await form.getByLabel("Next follow-up (optional)").fill(today);
+  await form.getByRole("button", { name: "Save contact" }).click();
+
+  const card = page.locator("#log-contact").filter({ visible: true });
+  await expect(card.getByText("Follow up today")).toBeVisible();
+  // Logging a contact moves a New lead to Contacted.
+  await expect(
+    page.getByRole("main").getByText("Contacted", { exact: true }).first(),
+  ).toBeVisible();
+
+  // The dashboard lists it under "Due today or late".
+  await page.goto("/");
+  const followUps = page.getByRole("region", { name: "Follow up" });
+  await expect(followUps.getByRole("link", { name: "Amina Kettani (sample)" })).toBeVisible();
+  await expect(followUps.getByText("Follow up today")).toBeVisible();
+
+  // The list's follow-up filter finds it; "Gone cold" doesn't.
+  await page.goto("/leads?view=list&followUp=due");
+  await expect(
+    page.getByRole("link", { name: "Amina Kettani (sample)" }).filter({ visible: true }),
+  ).toBeVisible();
+  await page.goto("/leads?view=list&followUp=cold");
+  await expect(page.getByText("No leads match")).toBeVisible();
+
+  // The note is in the activity log.
+  await page.goto("/activity");
+  await expect(
+    page.getByText("Contacted Amina Kettani (sample): Called, sending a quote").first(),
+  ).toBeVisible();
+});

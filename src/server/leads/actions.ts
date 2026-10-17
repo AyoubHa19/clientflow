@@ -9,7 +9,14 @@ import { redirect } from "next/navigation";
 import type { LeadStatus } from "@/lib/validation/lead";
 import { db } from "@/server/db";
 import { requireWorkspace } from "@/server/workspace/context";
-import { convertLead, createLead, deleteLead, setLeadStatus, updateLead } from "./service";
+import {
+  convertLead,
+  createLead,
+  deleteLead,
+  logContact,
+  setLeadStatus,
+  updateLead,
+} from "./service";
 
 export type LeadFormState = {
   errors?: Record<string, string>;
@@ -17,7 +24,17 @@ export type LeadFormState = {
   values?: Record<string, string>;
 };
 
-const FIELDS = ["contactName", "company", "email", "phone", "source", "notes", "status"] as const;
+const FIELDS = [
+  "contactName",
+  "company",
+  "email",
+  "phone",
+  "source",
+  "notes",
+  "status",
+  "lastContactedOn",
+  "nextFollowUpOn",
+] as const;
 
 function readForm(formData: FormData) {
   return Object.fromEntries(FIELDS.map((field) => [field, String(formData.get(field) ?? "")]));
@@ -59,6 +76,23 @@ export async function setLeadStatusAction(
   if (!result.ok) return { ok: false, message: result.message };
   refresh();
   return { ok: true };
+}
+
+const CONTACT_FIELDS = ["contactedOn", "note", "nextFollowUpOn"] as const;
+
+/** "Log a contact" on a lead's page; back to the page with a notice. */
+export async function logContactAction(
+  id: string,
+  _previous: LeadFormState,
+  formData: FormData,
+): Promise<LeadFormState> {
+  const ctx = await requireWorkspace();
+  const values = Object.fromEntries(
+    CONTACT_FIELDS.map((field) => [field, String(formData.get(field) ?? "")]),
+  );
+  const result = await logContact(db, ctx, id, values);
+  if (!result.ok) return { errors: result.errors, message: result.message, values };
+  redirect(`/leads/${id}?notice=contacted`);
 }
 
 export async function convertLeadAction(id: string, linkClientId: string | null) {

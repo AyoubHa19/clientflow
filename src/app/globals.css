@@ -88,7 +88,9 @@
   --brand-soft: oklch(0.94 0.032 278);
   --brand-foreground: oklch(0.99 0 0);
   --success: oklch(0.47 0.115 155);
-  --warning: oklch(0.55 0.13 65);
+  /* 0.52, not 0.55: on phones the glass shows more sky, and the orange badges
+     (a /10 tint of this) measured 4.28:1 there. */
+  --warning: oklch(0.52 0.13 65);
   --destructive: oklch(0.51 0.2 27);
   --border: oklch(0.915 0.014 280);
   --input: oklch(0.66 0.025 275);

@@ -1,5 +1,7 @@
 import { FilterBar, FilterSelect } from "@/components/filter-bar";
 import {
+  LEAD_FOLLOW_UP_FILTER_LABELS,
+  LEAD_FOLLOW_UP_FILTERS,
   LEAD_SORT_LABELS,
   LEAD_SORTS,
   LEAD_STATUS_FILTER_LABELS,
@@ -7,10 +9,13 @@ import {
   type LeadListParams,
 } from "@/lib/validation/lead";
 
-/** Search and filters. The board only uses search and source; the list adds status and sort. */
+/** Search and filters. The board only uses search and source; the list adds status, follow-up and sort. */
 export function LeadFilters({ params, sources }: { params: LeadListParams; sources: string[] }) {
   const isList = params.view === "list";
-  const activeCount = (params.source ? 1 : 0) + (isList && params.status !== "all" ? 1 : 0);
+  const activeCount =
+    (params.source ? 1 : 0) +
+    (isList && params.status !== "all" ? 1 : 0) +
+    (isList && params.followUp !== "all" ? 1 : 0);
   return (
     <FilterBar
       action="/leads"
@@ -21,7 +26,7 @@ export function LeadFilters({ params, sources }: { params: LeadListParams; sourc
       activeCount={activeCount}
       className={
         isList
-          ? "lg:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))_auto]"
+          ? "lg:grid-cols-[minmax(0,2fr)_repeat(4,minmax(0,1fr))_auto]"
           : "lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto]"
       }
       hidden={isList && <input type="hidden" name="view" value="list" />}
@@ -46,6 +51,16 @@ export function LeadFilters({ params, sources }: { params: LeadListParams; sourc
             options={LEAD_STATUS_FILTERS.map((value) => ({
               value,
               label: LEAD_STATUS_FILTER_LABELS[value],
+            }))}
+          />
+          <FilterSelect
+            id="leads-follow-up"
+            label="Follow-up"
+            name="followUp"
+            value={params.followUp}
+            options={LEAD_FOLLOW_UP_FILTERS.map((value) => ({
+              value,
+              label: LEAD_FOLLOW_UP_FILTER_LABELS[value],
             }))}
           />
           <FilterSelect
