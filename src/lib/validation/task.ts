@@ -6,6 +6,7 @@ import {
   optionalText,
   pageParam,
   requiredName,
+  searchParam,
 } from "./fields";
 import { isUuid } from "./ids";
 
@@ -109,7 +110,7 @@ export function parseTaskListParams(
 ): TaskListParams {
   const project = (firstParam(params.project) ?? "").trim();
   return {
-    q: (firstParam(params.q) ?? "").trim().slice(0, 100),
+    q: searchParam(params.q),
     status: choiceParam(params.status, TASK_STATUS_FILTERS, "open"),
     priority: choiceParam(params.priority, TASK_PRIORITY_FILTERS, "any"),
     project: project === "none" || isUuid(project) ? project : "",

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { hasNoControlCharacters, UNUSUAL_CHARACTERS } from "./fields";
 
 // Shared by the sign-in and sign-up forms and by the server, which checks
 // everything again: the browser can't be trusted to have done it.
@@ -28,7 +29,8 @@ export const signUpSchema = z.object({
     .string()
     .trim()
     .min(1, { error: "Enter your name." })
-    .max(200, { error: "Use 200 characters or fewer." }),
+    .max(200, { error: "Use 200 characters or fewer." })
+    .refine(hasNoControlCharacters, { error: UNUSUAL_CHARACTERS }),
   email,
   password: z
     .string()
@@ -41,15 +43,27 @@ export type SignUpInput = z.infer<typeof signUpSchema>;
 
 export { fieldErrors } from "./errors";
 
+const PLACEHOLDER_ORIGIN = "http://clientflow.invalid";
+
 /**
  * Where to go after signing in: only a path inside this app, so a link
- * can't send someone to another site ("open redirect").
+ * can't send someone to another site ("open redirect"). The path is read
+ * the way a browser reads it, which matters: browsers drop tabs and line
+ * breaks, so "/	/evil.com" would become "//evil.com", another site.
  */
 export function safeNextPath(value: unknown): string {
-  if (typeof value !== "string") return "/";
-  if (!value.startsWith("/") || value.startsWith("//") || value.startsWith("/\\")) return "/";
-  if (value.startsWith("/sign-in") || value.startsWith("/sign-up") || value.startsWith("/api/")) {
+  if (typeof value !== "string" || !value.startsWith("/") || value.length > 2000) return "/";
+  let url: URL;
+  try {
+    url = new URL(value, PLACEHOLDER_ORIGIN);
+  } catch {
     return "/";
   }
-  return value;
+  if (url.origin !== PLACEHOLDER_ORIGIN) return "/";
+  const path = url.pathname;
+  if (path.startsWith("//") || path.startsWith("/sign-in") || path.startsWith("/sign-up")) {
+    return "/";
+  }
+  if (path.startsWith("/api/")) return "/";
+  return `${path}${url.search}${url.hash}`;
 }

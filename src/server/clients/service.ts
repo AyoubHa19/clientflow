@@ -7,7 +7,14 @@ import {
 } from "@/lib/validation/client";
 import { isUuid } from "@/lib/validation/ids";
 import type { Db } from "@/server/db/client";
-import { forbidden, invalid, notFound, ok, type ServiceResult } from "@/server/result";
+import {
+  forbidden,
+  invalid,
+  invalidFields,
+  notFound,
+  ok,
+  type ServiceResult,
+} from "@/server/result";
 import type { WorkspaceContext } from "@/server/workspace/service";
 
 // Client rules. Every query is limited to the caller's workspace
@@ -163,6 +170,10 @@ export async function setClientArchived(
   archived: boolean,
 ): Promise<ServiceResult<ClientRecord>> {
   if (!isUuid(id)) return notFound("client");
+  // An action can be called with anything: only a real true or false will do.
+  if (typeof archived !== "boolean") {
+    return invalidFields({ archived: "Say whether to archive the client." });
+  }
   return db.$transaction(async (tx) => {
     const existing = await tx.client.findFirst({
       where: { id, workspaceId: ctx.workspace.id },

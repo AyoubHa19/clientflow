@@ -6,6 +6,7 @@ import {
   optionalText,
   pageParam,
   requiredName,
+  searchParam,
 } from "./fields";
 import { isUuid } from "./ids";
 
@@ -119,7 +120,7 @@ export function parseProjectListParams(
 ): ProjectListParams {
   const client = (firstParam(params.client) ?? "").trim();
   return {
-    q: (firstParam(params.q) ?? "").trim().slice(0, 100),
+    q: searchParam(params.q),
     status: choiceParam(params.status, PROJECT_STATUS_FILTERS, "open"),
     client: client === "none" || isUuid(client) ? client : "",
     sort: choiceParam(params.sort, PROJECT_SORTS, "due"),

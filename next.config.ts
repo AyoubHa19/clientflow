@@ -1,12 +1,42 @@
 import type { NextConfig } from "next";
 
-// Safe defaults for every response. A Content Security Policy comes in the
-// security stage (11), once the app's scripts and sources are known.
+const isDev = process.env.NODE_ENV === "development";
+// Served over HTTPS (production): then browsers are told to stay on HTTPS.
+// Not on http://localhost, where it would break the local servers.
+const isHttps = (process.env.BETTER_AUTH_URL ?? "").startsWith("https://");
+
+/**
+ * Content Security Policy: what the browser may load and run. Everything
+ * comes from this site; nothing from elsewhere, no plugins, no framing, and
+ * forms only post here. Scripts need 'unsafe-inline' because Next.js puts
+ * its page data in inline scripts, and the per-request "nonce" alternative
+ * doesn't work with prerendered pages (Cache Components). Development also
+ * needs 'unsafe-eval' and a WebSocket for hot reloading.
+ */
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' blob: data:",
+  "font-src 'self'",
+  `connect-src 'self'${isDev ? " ws: wss:" : ""}`,
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+  ...(isHttps ? ["upgrade-insecure-requests"] : []),
+].join("; ");
+
+// Safe defaults for every response.
 const securityHeaders = [
+  { key: "Content-Security-Policy", value: contentSecurityPolicy },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  ...(isHttps
+    ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" }]
+    : []),
 ];
 
 const nextConfig: NextConfig = {

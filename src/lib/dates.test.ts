@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { daysBetween, dueState, formatDateOnly, todayIn, toDateOnly } from "./dates";
+import { daysBetween, dueState, formatDate, formatDateOnly, todayIn, toDateOnly } from "./dates";
+
+describe("formatDate", () => {
+  it("shows a moment on the day it is in the workspace's time zone", () => {
+    const lateEvening = new Date("2026-10-16T23:30:00Z");
+    expect(formatDate(lateEvening, "UTC")).toBe("16 Oct 2026");
+    expect(formatDate(lateEvening, "Asia/Tokyo")).toBe("17 Oct 2026");
+    expect(formatDate(lateEvening, "America/Los_Angeles")).toBe("16 Oct 2026");
+  });
+});
 
 describe("todayIn", () => {
   // 23:30 UTC on 31 December 2026.

@@ -12,6 +12,7 @@ import {
   deleteLead,
   findMatchingClient,
   getLead,
+  leadSources,
   listLeads,
   setLeadStatus,
   updateLead,
@@ -207,6 +208,17 @@ describe("converting a lead into a client", () => {
 });
 
 describe("workspace isolation", () => {
+  it("offers only the workspace's own lead sources, each once", async () => {
+    const [a, b] = [await owner("A"), await owner("B")];
+    await addLead(a, "One (sample)", { source: "Instagram" });
+    await addLead(a, "Two (sample)", { source: "Instagram" });
+    await addLead(a, "Three (sample)", { source: "Event" });
+    await addLead(a, "Four (sample)");
+    await addLead(b, "B's lead (sample)", { source: "B's secret source" });
+    expect(await leadSources(db, a)).toEqual(["Event", "Instagram"]);
+    expect(await leadSources(db, b)).toEqual(["B's secret source"]);
+  });
+
   it("never shows, moves, edits, converts or deletes another workspace's lead", async () => {
     const [a, b] = [await owner("A"), await owner("B")];
     const bLead = await addLead(b, "B's lead (sample)");

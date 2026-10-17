@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { hasNoControlCharacters, UNUSUAL_CHARACTERS } from "./fields";
 
 // Shared by the onboarding and settings forms and the server.
 
@@ -20,7 +21,8 @@ export const workspaceSchema = z.object({
     .string({ error: "Enter a name for your workspace." })
     .trim()
     .min(1, { error: "Enter a name for your workspace." })
-    .max(WORKSPACE_NAME_MAX, { error: `Use ${WORKSPACE_NAME_MAX} characters or fewer.` }),
+    .max(WORKSPACE_NAME_MAX, { error: `Use ${WORKSPACE_NAME_MAX} characters or fewer.` })
+    .refine(hasNoControlCharacters, { error: UNUSUAL_CHARACTERS }),
   timezone: z
     .string({ error: "Choose a time zone." })
     .refine(isValidTimeZone, { error: "Choose a time zone from the list." }),

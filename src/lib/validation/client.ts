@@ -2,12 +2,12 @@ import { z } from "zod";
 import {
   choiceParam,
   CONTACT_LIMITS,
-  firstParam,
   optionalEmail,
   optionalPhone,
   optionalText,
   pageParam,
   requiredName,
+  searchParam,
 } from "./fields";
 
 // Client rules, shared by the forms and the server (which checks again).
@@ -75,7 +75,7 @@ export function parseClientListParams(
   params: Record<string, string | string[] | undefined>,
 ): ClientListParams {
   return {
-    q: (firstParam(params.q) ?? "").trim().slice(0, 100),
+    q: searchParam(params.q),
     status: choiceParam(params.status, CLIENT_STATUS_FILTERS, "open"),
     sort: choiceParam(params.sort, CLIENT_SORTS, "updated"),
     page: pageParam(params.page),

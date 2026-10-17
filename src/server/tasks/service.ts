@@ -272,6 +272,8 @@ export async function setTaskDone(
   done: boolean,
 ): Promise<ServiceResult<TaskRecord>> {
   if (!isUuid(id)) return notFound("task");
+  // An action can be called with anything: only a real true or false will do.
+  if (typeof done !== "boolean") return invalidFields({ done: "Say whether the task is done." });
   return db.$transaction(async (tx) => {
     const existing = await tx.task.findFirst({
       where: { id, workspaceId: ctx.workspace.id },

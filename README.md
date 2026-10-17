@@ -153,6 +153,25 @@ colours.
 - Requests that carry the session cookie must come from this site (an
   Origin check against cross-site request forgery).
 
+## Security
+
+- Every page and Server Action finds the workspace from the session on the
+  server, and every query is limited to it: another workspace's record
+  answers "not found". Only the owner can delete.
+- Everything sent to the server is checked again there (Zod): lengths,
+  choices, ids, real dates (1900–2200), and no invisible control
+  characters. Odd text in the address bar is cleaned rather than crashing.
+- After signing in, the app only goes to a path on this site, read the way
+  a browser reads it.
+- Passwords are hashed (scrypt) by Better Auth; sign-in and sign-up are
+  rate limited and check the request's origin.
+- Responses carry a Content Security Policy (nothing loads from other
+  sites, no framing, forms post only here), `nosniff`, a referrer policy,
+  and, over HTTPS, Strict-Transport-Security.
+- No secrets in the code or its history: settings live in `.env.local`,
+  which Git ignores, and the server names a missing one without printing
+  any value.
+
 ## The database
 
 Neon project "ClientFlow" has one branch per use, so tests never touch
@@ -283,7 +302,10 @@ scripts/            small tools (contrast check)
 - The warning about unsaved changes doesn't cover the browser's back
   button: a web app can't stop it cleanly.
 - `npm audit` reports a "high" advisory in `braces`, used by
-  `eslint-config-next` through `fast-glob`. It only affects the lint tool
-  on your own machine, not the app (`npm audit --omit=dev` finds nothing),
-  and no fixed version exists yet; npm's suggested "fix" would downgrade
-  ESLint's Next config to version 14.
+  `eslint-config-next` through `fast-glob` (5 entries, one cause). It only
+  affects the lint tool on your own machine, not the app (`npm audit
+--omit=dev` finds nothing), and no fixed version exists yet; npm's
+  suggested "fix" would downgrade ESLint's Next config to version 14.
+- The Content Security Policy allows inline scripts: Next.js puts page data
+  in them, and the per-request nonce that would avoid it doesn't work with
+  prerendered pages. Scripts from other sites are still blocked.

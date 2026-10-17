@@ -2,12 +2,12 @@ import { z } from "zod";
 import {
   choiceParam,
   CONTACT_LIMITS,
-  firstParam,
   optionalEmail,
   optionalPhone,
   optionalText,
   pageParam,
   requiredName,
+  searchParam,
 } from "./fields";
 
 // Lead rules, shared by the forms, the board and the server.
@@ -108,9 +108,9 @@ export function parseLeadListParams(
 ): LeadListParams {
   return {
     view: choiceParam(params.view, LEAD_VIEWS, "board"),
-    q: (firstParam(params.q) ?? "").trim().slice(0, 100),
+    q: searchParam(params.q),
     status: choiceParam(params.status, LEAD_STATUS_FILTERS, "all"),
-    source: (firstParam(params.source) ?? "").trim().slice(0, LEAD_LIMITS.source),
+    source: searchParam(params.source, LEAD_LIMITS.source),
     sort: choiceParam(params.sort, LEAD_SORTS, "updated"),
     page: pageParam(params.page),
   };

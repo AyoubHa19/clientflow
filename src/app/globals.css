@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import "./shadcn-tailwind.css";
 
 /* Dark mode follows a "dark" class on <html>, set before the first paint
    by the theme script in the root layout (see src/lib/theme.ts). */

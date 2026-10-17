@@ -205,6 +205,31 @@ describe("workspace isolation", () => {
   });
 });
 
+describe("unusual input", () => {
+  // Server Actions can be called with any values, not just what the forms send.
+  it("explains a null character or an impossible year instead of crashing", async () => {
+    const a = await owner("Unusual");
+    const nullTitle = await createTask(db, a, { title: "Call\u0000 Karim (sample)" });
+    expect(nullTitle).toMatchObject({ ok: false, code: "INVALID" });
+    const yearZero = await createTask(db, a, { title: "Old (sample)", dueDate: "0000-01-01" });
+    expect(yearZero).toMatchObject({
+      ok: false,
+      errors: { dueDate: "Enter a valid due date." },
+    });
+    expect(await db.task.count({ where: { workspaceId: a.workspace.id } })).toBe(0);
+  });
+
+  it("ticks a task only with a real true or false", async () => {
+    const a = await owner("Done flag");
+    const task = await addTask(a, "Send proofs (sample)");
+    for (const value of ["true", 1, null, undefined]) {
+      const result = await setTaskDone(db, a, task.id, value as unknown as boolean);
+      expect(result).toMatchObject({ ok: false, code: "INVALID" });
+    }
+    expect((await getTask(db, a, task.id))?.status).toBe("TODO");
+  });
+});
+
 describe("the list", () => {
   it("filters by due date, priority, project and status, and sorts", async () => {
     const a = await owner("A");

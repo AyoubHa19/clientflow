@@ -183,6 +183,33 @@ describe("workspace isolation", () => {
   });
 });
 
+describe("unusual input", () => {
+  // Server Actions can be called with any values, not just what the forms send.
+  it("explains text with a null character instead of crashing", async () => {
+    const a = await owner("Null character");
+    const result = await createClient(db, a, { name: "Atlas\u0000Café (sample)" });
+    expect(result).toMatchObject({ ok: false, code: "INVALID" });
+    expect(await db.client.count({ where: { workspaceId: a.workspace.id } })).toBe(0);
+  });
+
+  it("searches safely with a null character in the address", async () => {
+    const a = await owner("Null search");
+    await addClient(a, "Atlas Café (sample)");
+    const page = await listClients(db, a, parseClientListParams({ q: "Atlas\u0000" }));
+    expect(page.items.map((client) => client.name)).toEqual(["Atlas Café (sample)"]);
+  });
+
+  it("archives only with a real true or false", async () => {
+    const a = await owner("Archive flag");
+    const client = await addClient(a, "Atlas Café (sample)");
+    for (const value of ["false", 1, null, undefined]) {
+      const result = await setClientArchived(db, a, client.id, value as unknown as boolean);
+      expect(result).toMatchObject({ ok: false, code: "INVALID" });
+    }
+    expect((await getClient(db, a, client.id))?.status).toBe("ACTIVE");
+  });
+});
+
 describe("the list", () => {
   it("searches, filters, sorts and pages", async () => {
     const a = await owner("A");

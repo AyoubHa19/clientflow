@@ -4,12 +4,33 @@ import { z } from "zod";
 
 export const CONTACT_LIMITS = { name: 200, email: 320, phone: 50, company: 200, notes: 5000 };
 
+/**
+ * Invisible control characters (the null character and the like; tabs and
+ * line breaks are fine). PostgreSQL refuses a null character in text, so
+ * letting one through would crash the request instead of explaining.
+ */
+const CONTROL_CHARACTERS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
+export const UNUSUAL_CHARACTERS = "Remove the unusual invisible characters from this text.";
+
+/** Whether text is free of invisible control characters. */
+export const hasNoControlCharacters = (value: string | null | undefined) =>
+  !value || !CONTROL_CHARACTERS.test(value);
+
+/** Search text from the address bar: trimmed, shortened, control characters dropped. */
+export function searchParam(value: string | string[] | undefined, max = 100) {
+  return (firstParam(value) ?? "")
+    .replace(new RegExp(CONTROL_CHARACTERS.source, "g"), "")
+    .trim()
+    .slice(0, max);
+}
+
 /** An optional text field: trimmed, and empty means "none" (null). */
 export function optionalText(max: number, tooLong = `Use ${max} characters or fewer.`) {
   return z
     .string()
     .trim()
     .max(max, { error: tooLong })
+    .refine(hasNoControlCharacters, { error: UNUSUAL_CHARACTERS })
     .optional()
     .nullable()
     .transform((value) => (value ? value : null));
@@ -21,7 +42,8 @@ export function requiredName(missing: string, max = CONTACT_LIMITS.name) {
     .string({ error: missing })
     .trim()
     .min(1, { error: missing })
-    .max(max, { error: `Use ${max} characters or fewer.` });
+    .max(max, { error: `Use ${max} characters or fewer.` })
+    .refine(hasNoControlCharacters, { error: UNUSUAL_CHARACTERS });
 }
 
 /** An optional email, lower-cased. */
@@ -57,9 +79,13 @@ export function choiceParam<T extends string>(
   return (allowed as readonly string[]).includes(raw) ? (raw as T) : fallback;
 }
 
+/** The years a date may fall in: wide, but every one storable. */
+export const YEAR_RANGE = { min: 1900, max: 2200 };
+
 /**
  * An optional calendar day from a date input ("YYYY-MM-DD"), as a Date at
- * midnight UTC (how Prisma stores DATE columns), or null when empty.
+ * midnight UTC (how Prisma stores DATE columns), or null when empty. Years
+ * outside YEAR_RANGE are refused (year 0, say, isn't a date at all).
  */
 export function optionalDay(invalid: string) {
   return z
@@ -75,7 +101,9 @@ export function optionalDay(invalid: string) {
       const valid =
         /^\d{4}-\d{2}-\d{2}$/.test(value) &&
         !Number.isNaN(date.getTime()) &&
-        date.toISOString().slice(0, 10) === value;
+        date.toISOString().slice(0, 10) === value &&
+        date.getUTCFullYear() >= YEAR_RANGE.min &&
+        date.getUTCFullYear() <= YEAR_RANGE.max;
       if (!valid) {
         ctx.addIssue({ code: "custom", message: invalid });
         return z.NEVER;

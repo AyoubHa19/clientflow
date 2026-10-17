@@ -180,9 +180,33 @@ end of every stage.
     motion (the rule in `globals.css`).
   - Task rows put their badges under the title in a narrow list (a
     container query, `@md`).
-- **Next: Stage 11, security and quality review** (PRD 14): access
-  control, workspace isolation, validation, dependencies, error handling,
-  test coverage, production configuration.
+- **Stage 11, security and quality review: done (2026-10-17).** Audited
+  every service and all 19 Server Actions: each reads the session
+  (`requireWorkspace`) and every query is scoped by `workspaceId`; deletes
+  are owner-only. Found and fixed (each with tests):
+  1. A null character (or other control character) in text crashed the
+     request (PostgreSQL refuses it): text rules now refuse them
+     (`hasNoControlCharacters`, also for the workspace and sign-up names),
+     and searches from the address drop them (`searchParam`).
+  2. A date in year 0 crashed a save: dates must be 1900–2200
+     (`YEAR_RANGE` in `fields.ts`).
+  3. Open redirect after sign-in: `?next=/%09/evil.example` (browsers drop
+     the tab, giving `//evil.example`). `safeNextPath` now parses the path
+     like a browser and keeps it only if it stays on this site.
+  4. `setTaskDone` / `setClientArchived` accepted any value: now only real
+     booleans.
+     Also: a Content Security Policy and HTTPS-only HSTS (`next.config.ts`;
+     'unsafe-inline' scripts because nonces don't work with Cache
+     Components), and the shadcn CLI removed (its stylesheet is copied in
+     `src/app/shadcn-tailwind.css`; run `npx shadcn@latest add` when needed).
+     Tests: `e2e/security.spec.ts`, `src/lib/validation/fields.test.ts`, and
+     "unusual input" blocks in the clients and tasks database tests.
+     Revisit after 2026-10-29 (too new to install today): React 19.3.1, and
+     `@vitest/coverage-v8` for a coverage report (for now, a script listed
+     untested exports; the gaps were filled).
+- **Next: Stage 12, deployment** (PRD 14): production environment
+  variables, the Neon production branch, migrations, deploying, a smoke
+  test, and documenting it.
 
 ## Running it
 
@@ -277,6 +301,12 @@ playwright test e2e/x.spec.ts`; the full suite once at the end.
 - Neon URLs use `sslmode=verify-full` (pg warns about `require`).
 - The generated Prisma client is in `src/generated/prisma` (ignored by
   Git, Prettier and ESLint); import from `@/generated/prisma/client`.
+- Backslashes in Bash heredocs and `node -e` / `python -` scripts can be
+  eaten on the way (`\u0000` became a raw null character in a source file
+  once). Write anything with backslashes using the Write or Edit tools, or
+  in a script file, and scan for raw control characters afterwards.
+- Don't install a package version published less than two weeks ago
+  (supply-chain safety); check with `npm view <pkg>@<version> time`.
 - Python on this PC defaults to cp1252: open files with
   `encoding="utf-8"`, or a failed write leaves the file empty (it emptied
   CLAUDE.md once; restored from Git).

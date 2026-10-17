@@ -61,6 +61,15 @@ describe("safeNextPath", () => {
     expect(safeNextPath("javascript:alert(1)")).toBe("/");
   });
 
+  it("reads the path as a browser would, which drops tabs and line breaks", () => {
+    // "/\t/evil.example" turns into "//evil.example" in a browser: another site.
+    expect(safeNextPath("/\t/evil.example")).toBe("/");
+    expect(safeNextPath("/\n/evil.example")).toBe("/");
+    expect(safeNextPath("/\r\n/evil.example")).toBe("/");
+    expect(safeNextPath("/%2F/evil.example")).toBe("/%2F/evil.example"); // stays here
+    expect(safeNextPath("/tasks?due=overdue#top")).toBe("/tasks?due=overdue#top");
+  });
+
   it("doesn't loop back to the sign-in pages", () => {
     expect(safeNextPath("/sign-in")).toBe("/");
     expect(safeNextPath("/sign-up")).toBe("/");
