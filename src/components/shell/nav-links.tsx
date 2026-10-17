@@ -20,9 +20,10 @@ function NavList({ pathname, onNavigate }: NavProps & { pathname: string | null 
               onNavigate={onNavigate}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex h-9 items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors outline-none",
+                "flex h-10 items-center gap-3 rounded-full px-3.5 text-sm font-medium text-muted-foreground transition-colors outline-none",
                 "hover:bg-sidebar-accent hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
-                active && "bg-sidebar-accent text-foreground shadow-xs ring-1 ring-border",
+                active &&
+                  "bg-sidebar-accent text-foreground shadow-(--shadow-card) ring-1 ring-border",
               )}
             >
               <Icon aria-hidden className={cn("size-4", active && "text-brand")} />

@@ -16,7 +16,7 @@ export function GettingStarted({ started }: { started: Dashboard["started"] }) {
   return (
     <section
       aria-labelledby="getting-started-title"
-      className="rounded-xl border border-brand/30 bg-brand-soft/50 p-4"
+      className="surface border-brand/30 bg-brand-soft/50 p-4"
     >
       <h2 id="getting-started-title" className="font-medium">
         Getting started

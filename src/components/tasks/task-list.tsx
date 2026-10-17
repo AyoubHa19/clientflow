@@ -51,7 +51,7 @@ export function TaskList({
   }
 
   return (
-    <ul className="@container grid grid-cols-[minmax(0,1fr)] divide-y overflow-clip rounded-xl border">
+    <ul className="@container grid grid-cols-[minmax(0,1fr)] divide-y overflow-clip surface">
       {items.map((task) => {
         const done = task.status === "DONE";
         const checkboxId = `task-done-${task.id}`;

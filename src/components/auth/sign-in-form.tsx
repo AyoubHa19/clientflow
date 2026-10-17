@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { authClient, authErrorMessage } from "@/lib/auth-client";
 import { fieldErrors, safeNextPath, signInSchema } from "@/lib/validation/auth";
 import { focusFirstError, FormField, FormMessage } from "@/components/forms/form-field";
+import { useHydrated } from "@/lib/use-hydrated";
 
 export function SignInForm() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export function SignInForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string>();
   const [pending, setPending] = useState(false);
+  const hydrated = useHydrated();
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,7 +45,9 @@ export function SignInForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} noValidate className="grid gap-5">
+    // method="post": even if the form were ever sent without JavaScript, the
+    // password would go in the request body, never in the address.
+    <form method="post" onSubmit={onSubmit} noValidate className="grid gap-5">
       <FormMessage>{message}</FormMessage>
       <FormField
         label="Email"
@@ -62,7 +66,7 @@ export function SignInForm() {
         error={errors.password}
         disabled={pending}
       />
-      <Button type="submit" size="lg" disabled={pending} className="mt-1 w-full">
+      <Button type="submit" size="lg" disabled={!hydrated || pending} className="mt-1 w-full">
         {pending && <Loader2Icon aria-hidden className="animate-spin" />}
         {pending ? "Signing in…" : "Sign in"}
       </Button>

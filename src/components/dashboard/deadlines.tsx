@@ -13,7 +13,7 @@ export function Deadlines({
   today: string;
 }) {
   return (
-    <section aria-labelledby="deadlines-title" className="rounded-xl border bg-card p-4">
+    <section aria-labelledby="deadlines-title" className="surface p-4">
       <h2 id="deadlines-title" className="font-medium">
         Coming up
       </h2>

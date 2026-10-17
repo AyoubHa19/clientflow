@@ -25,6 +25,11 @@ export default defineConfig({
   use: {
     baseURL: existingServer ?? `http://localhost:${PORT}`,
     trace: "on-first-retry",
+    // Still pages: the drifting sky and scroll animations would keep three
+    // headless browsers repainting, starving the test server's CPU (password
+    // hashing then ran past the database transaction's time limit). The
+    // motion test turns motion back on for itself.
+    reducedMotion: "reduce",
   },
   projects: [
     { name: "desktop", use: { ...devices["Desktop Chrome"] } },

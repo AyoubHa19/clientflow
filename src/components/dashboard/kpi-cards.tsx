@@ -22,7 +22,7 @@ function KpiCard({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="relative min-w-0 rounded-xl border bg-card p-3 transition-colors hover:bg-muted/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 sm:p-4">
+    <div className="relative min-w-0 surface p-3 transition-colors hover:bg-muted/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 sm:p-4">
       <div className="flex items-start justify-between gap-2">
         <h2 className="text-sm font-medium text-muted-foreground">
           {/* The whole card is the link (the ::after covers it). */}

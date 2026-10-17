@@ -15,7 +15,7 @@ export function LeadFunnel({
   const total = funnel.reduce((sum, stage) => sum + stage.count, 0);
 
   return (
-    <section aria-labelledby="funnel-title" className="rounded-xl border bg-card p-4">
+    <section aria-labelledby="funnel-title" className="surface p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 id="funnel-title" className="font-medium">

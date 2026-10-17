@@ -37,7 +37,7 @@ async function Overview() {
         <Deadlines deadlines={dashboard.deadlines} today={today} />
         <LeadFunnel funnel={dashboard.funnel} conversion={dashboard.conversion} />
         <WeeklyChart weekly={dashboard.weekly} />
-        <section aria-labelledby="activity-title" className="rounded-xl border bg-card p-4">
+        <section aria-labelledby="activity-title" className="surface p-4">
           <div className="flex items-start justify-between gap-2">
             <h2 id="activity-title" className="font-medium">
               Recent activity

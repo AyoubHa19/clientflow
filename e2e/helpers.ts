@@ -36,7 +36,18 @@ export async function expectNoAxeViolations(page: Page) {
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze();
-  expect(results.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+  // Each problem names the elements and, for contrast, the measured ratio.
+  expect(
+    results.violations.map(
+      (v) =>
+        `${v.id}: ${v.help} → ${v.nodes
+          .slice(0, 4)
+          .map(
+            (node) => `${node.target.join(" ")} (${node.any[0]?.message ?? node.failureSummary})`,
+          )
+          .join(" | ")}`,
+    ),
+  ).toEqual([]);
 }
 
 /** Signs a new account up and names its workspace, as onboarding does. */

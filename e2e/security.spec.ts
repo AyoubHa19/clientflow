@@ -60,6 +60,17 @@ test("signing in never sends people to another site", async ({ page, context }) 
   expect(new URL(page.url()).hostname).toBe("localhost");
 });
 
+test("passwords could never end up in an address", async ({ page }) => {
+  for (const path of ["/sign-in", "/sign-up"]) {
+    await page.goto(path);
+    const form = page.locator("form").filter({ has: page.getByLabel("Password", { exact: true }) });
+    // Posted, never a GET form (which would put the fields in the URL)...
+    await expect(form).toHaveAttribute("method", "post");
+    // ...and its button only works once the page's JavaScript is running.
+    await expect(form.getByRole("button", { name: /Sign in|Create account/ })).toBeEnabled();
+  }
+});
+
 test("sign-up refuses a name with a null character, with a clear answer", async ({ page }) => {
   await page.goto("/sign-in");
   const user = newTestUser();

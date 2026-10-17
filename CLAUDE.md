@@ -221,10 +221,47 @@ end of every stage.
   to sign in (in the browser pane) for Claude to look.
   Production commands: the auto-mode classifier blocks them unless the
   user has just said yes in chat; ask first, every time.
+- **Design round (2026-10-17, between stages 12 and 13; the user asked for
+  it before the screenshots).** From a video the user sent (the "Credix"
+  Webflow template): a sky hero with a product preview that rises and
+  tilts in 3D on scroll, a lavender-white page with white cards. Done:
+  - Tokens in `globals.css` ("a clear sky"; night: very deep blue-black,
+    the user wanted dark mode really dark), `--shadow-card`, `surface` and
+    `glass` utilities, Manrope font, pill buttons, rounded fields, pill
+    nav links; the main panel is gone (cards sit on the tinted page).
+  - Landing page `src/app/welcome/page.tsx`; `proxy.ts` rewrites "/" to it
+    for visitors without a session cookie (the address stays "/").
+    `DashboardPreview` (made-up numbers, labelled) and `Sky`
+    (`src/components/marketing/`).
+  - Sky photos (user's choice, Unsplash License, credited in README and the
+    footer): day "Sea of clouds" (Harper van Mourik), night "A starry night
+    sky" (Vlad ION), in `public/sky/` (full and -1200 for phones). They
+    drift slowly (60 s / 90 s), stars twinkle at night; `.sky-tint`
+    multiplies blue over the day photo so white text keeps ≥ 4.5:1
+    (measured from screenshots with ffmpeg on text-free strips: ≥ 5.4:1).
+  - Scroll motion: `.hero-copy`, `.rise`, `.tilt-in` (3D only from lg),
+    `.fade-up`, all inside `@supports (animation-timeline: view())` and
+    `prefers-reduced-motion: no-preference`.
+  - Sign-in / sign-up on the sky with the form on glass.
+  - To see signed-out pages, use a fresh Playwright browser (the browser
+    pane is signed in): a screenshot script did 375/1440, light/dark.
+  - Performance: no backdrop-filter over the moving sky (re-blurred every
+    frame); the day tint is a `background-blend-mode` layer of the drifting
+    element itself. Browser tests run with `reducedMotion: "reduce"`
+    (`playwright.config.ts`): with motion on, three headless browsers
+    starved the test server and sign-up's transaction (scrypt inside) ran
+    past 10 s (P2028, "Failed to create user").
+  - Found on the way and fixed: the sign-in and sign-up forms had no
+    `method`, so a submit before hydration would have sent a GET form
+    (password in the URL). They're `method="post"` now, and their buttons
+    wait for hydration (`useHydrated`, `src/lib/use-hydrated.ts`); tested
+    in `e2e/security.spec.ts`.
 - **Next: Stage 13, portfolio and product readiness** (PRD 14): README,
   screenshots, architecture summary, feature list, setup, demo data
   strategy (the shared demo account could be changed by visitors: decide
-  read-only, a reset, or per-visitor demos), known limits, roadmap.
+  read-only, a reset, or per-visitor demos; Claude proposed a "Try the
+  demo" button that makes a private demo workspace per visitor), known
+  limits, roadmap.
 
 ## Running it
 

@@ -56,102 +56,108 @@
 }
 
 /*
-  ClientFlow colour tokens. Calm and restrained: cool greys, a deep ink for
-  primary actions, and one teal-blue brand colour ("flow") for focus rings,
-  the current page and charts. Change a colour here and the whole app follows.
+  ClientFlow colour tokens: "a clear sky". Light mode is a near-white page
+  with a hint of lavender, white cards and deep navy ink; one periwinkle
+  blue brand colour for focus rings, the current page, links and charts.
+  Dark mode is a night sky: very deep, nearly black blue, with dark glass
+  cards. Change a colour here and the whole app follows.
 
-  Page = --background (a cool off-white), cards and the main panel = --card
-  (white). Contrast (WCAG 2.x; `node scripts/contrast.mjs` checks them all,
-  so run it after changing a colour):
-    light: muted-foreground on background 5.5:1, brand on background 5.1:1,
-           brand on brand-soft 4.8:1, warning on card 5.0:1, input border on
-           card 3.1:1 (form fields need 3:1)
-    dark:  muted-foreground on muted 6.4:1, destructive on card 7.7:1, input
-           border on card 3.3:1
-  Every text pair is at least 4.5:1 in both themes. Destructive is darker
-  (light) / lighter (dark) than it needs to be on a card because the Delete
-  button puts it on its own red tint in a dialog's grey footer; axe checks
-  that case in e2e/shell.spec.ts.
+  Page = --background, cards and the main panel = --card. Contrast (WCAG
+  2.x) is measured by `node scripts/contrast.mjs` (part of `npm run check`):
+  every text pair is at least 4.5:1 in both themes, and the input border at
+  least 3:1. Destructive is darker (light) / lighter (dark) than a card
+  alone needs, because the Delete button puts it on its own red tint in a
+  dialog's grey footer.
 */
 :root {
-  --background: oklch(0.972 0.004 247);
-  --foreground: oklch(0.21 0.025 262);
+  --background: oklch(0.972 0.008 280);
+  --foreground: oklch(0.255 0.045 270);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.025 262);
+  --card-foreground: oklch(0.255 0.045 270);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.025 262);
-  --primary: oklch(0.26 0.035 262);
-  --primary-foreground: oklch(0.985 0.002 247);
-  --secondary: oklch(0.955 0.006 247);
-  --secondary-foreground: oklch(0.26 0.035 262);
-  --muted: oklch(0.955 0.006 247);
-  --muted-foreground: oklch(0.5 0.025 260);
-  --accent: oklch(0.955 0.006 247);
-  --accent-foreground: oklch(0.26 0.035 262);
-  --brand: oklch(0.51 0.115 232);
-  --brand-soft: oklch(0.95 0.025 228);
+  --popover-foreground: oklch(0.255 0.045 270);
+  --primary: oklch(0.285 0.06 270);
+  --primary-foreground: oklch(0.985 0.004 280);
+  --secondary: oklch(0.948 0.014 280);
+  --secondary-foreground: oklch(0.285 0.06 270);
+  --muted: oklch(0.952 0.012 280);
+  --muted-foreground: oklch(0.49 0.035 272);
+  --accent: oklch(0.948 0.014 280);
+  --accent-foreground: oklch(0.285 0.06 270);
+  --brand: oklch(0.5 0.15 270);
+  --brand-soft: oklch(0.94 0.032 278);
   --brand-foreground: oklch(0.99 0 0);
-  --success: oklch(0.52 0.12 155);
+  --success: oklch(0.47 0.115 155);
   --warning: oklch(0.55 0.13 65);
   --destructive: oklch(0.51 0.2 27);
-  --border: oklch(0.915 0.008 255);
-  --input: oklch(0.66 0.015 255);
-  --ring: oklch(0.51 0.115 232);
-  --chart-1: oklch(0.51 0.115 232);
-  --chart-2: oklch(0.7 0.1 200);
-  --chart-3: oklch(0.42 0.06 262);
-  --chart-4: oklch(0.78 0.08 170);
-  --chart-5: oklch(0.65 0.04 255);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.972 0.004 247);
-  --sidebar-foreground: oklch(0.21 0.025 262);
-  --sidebar-primary: oklch(0.26 0.035 262);
-  --sidebar-primary-foreground: oklch(0.985 0.002 247);
+  --border: oklch(0.915 0.014 280);
+  --input: oklch(0.66 0.025 275);
+  --ring: oklch(0.5 0.15 270);
+  --chart-1: oklch(0.5 0.15 270);
+  --chart-2: oklch(0.7 0.09 250);
+  --chart-3: oklch(0.42 0.07 270);
+  --chart-4: oklch(0.78 0.07 200);
+  --chart-5: oklch(0.65 0.04 275);
+  --radius: 0.875rem;
+  --sidebar: oklch(0.972 0.008 280);
+  --sidebar-foreground: oklch(0.255 0.045 270);
+  --sidebar-primary: oklch(0.285 0.06 270);
+  --sidebar-primary-foreground: oklch(0.985 0.004 280);
   --sidebar-accent: oklch(1 0 0);
-  --sidebar-accent-foreground: oklch(0.21 0.025 262);
-  --sidebar-border: oklch(0.915 0.008 255);
-  --sidebar-ring: oklch(0.51 0.115 232);
+  --sidebar-accent-foreground: oklch(0.255 0.045 270);
+  --sidebar-border: oklch(0.915 0.014 280);
+  --sidebar-ring: oklch(0.5 0.15 270);
+  --shadow-card: 0 1px 2px oklch(0.3 0.05 270 / 4%), 0 8px 24px -12px oklch(0.3 0.06 270 / 14%);
   color-scheme: light;
 }
 
 .dark {
-  --background: oklch(0.165 0.014 262);
-  --foreground: oklch(0.965 0.004 247);
-  --card: oklch(0.205 0.017 262);
-  --card-foreground: oklch(0.965 0.004 247);
-  --popover: oklch(0.225 0.018 262);
-  --popover-foreground: oklch(0.965 0.004 247);
-  --primary: oklch(0.94 0.008 247);
-  --primary-foreground: oklch(0.2 0.02 262);
-  --secondary: oklch(0.265 0.018 262);
-  --secondary-foreground: oklch(0.965 0.004 247);
-  --muted: oklch(0.265 0.018 262);
-  --muted-foreground: oklch(0.73 0.02 255);
-  --accent: oklch(0.265 0.018 262);
-  --accent-foreground: oklch(0.965 0.004 247);
-  --brand: oklch(0.76 0.11 220);
-  --brand-soft: oklch(0.3 0.045 232);
-  --brand-foreground: oklch(0.18 0.03 240);
+  --background: oklch(0.125 0.018 265);
+  --foreground: oklch(0.965 0.006 270);
+  --card: oklch(0.172 0.022 266);
+  --card-foreground: oklch(0.965 0.006 270);
+  --popover: oklch(0.195 0.024 266);
+  --popover-foreground: oklch(0.965 0.006 270);
+  --primary: oklch(0.945 0.012 275);
+  --primary-foreground: oklch(0.19 0.03 268);
+  --secondary: oklch(0.235 0.024 266);
+  --secondary-foreground: oklch(0.965 0.006 270);
+  --muted: oklch(0.225 0.022 266);
+  --muted-foreground: oklch(0.74 0.025 270);
+  --accent: oklch(0.235 0.024 266);
+  --accent-foreground: oklch(0.965 0.006 270);
+  --brand: oklch(0.76 0.11 272);
+  --brand-soft: oklch(0.28 0.06 272);
+  --brand-foreground: oklch(0.17 0.03 270);
   --success: oklch(0.74 0.13 155);
   --warning: oklch(0.8 0.12 75);
   --destructive: oklch(0.76 0.15 23);
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(0.52 0.018 258);
-  --ring: oklch(0.76 0.11 220);
-  --chart-1: oklch(0.76 0.11 220);
-  --chart-2: oklch(0.68 0.09 195);
-  --chart-3: oklch(0.85 0.03 250);
-  --chart-4: oklch(0.72 0.09 165);
-  --chart-5: oklch(0.55 0.04 255);
-  --sidebar: oklch(0.165 0.014 262);
-  --sidebar-foreground: oklch(0.965 0.004 247);
-  --sidebar-primary: oklch(0.94 0.008 247);
-  --sidebar-primary-foreground: oklch(0.2 0.02 262);
-  --sidebar-accent: oklch(0.235 0.018 262);
-  --sidebar-accent-foreground: oklch(0.965 0.004 247);
-  --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.76 0.11 220);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(0.5 0.025 268);
+  --ring: oklch(0.76 0.11 272);
+  --chart-1: oklch(0.76 0.11 272);
+  --chart-2: oklch(0.66 0.09 245);
+  --chart-3: oklch(0.86 0.03 270);
+  --chart-4: oklch(0.72 0.08 200);
+  --chart-5: oklch(0.52 0.04 268);
+  --sidebar: oklch(0.125 0.018 265);
+  --sidebar-foreground: oklch(0.965 0.006 270);
+  --sidebar-primary: oklch(0.945 0.012 275);
+  --sidebar-primary-foreground: oklch(0.19 0.03 268);
+  --sidebar-accent: oklch(0.2 0.024 266);
+  --sidebar-accent-foreground: oklch(0.965 0.006 270);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.76 0.11 272);
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 30%), 0 12px 32px -16px oklch(0 0 0 / 60%);
   color-scheme: dark;
+}
+
+/* A card-like surface: the page's cards, lists and panels. */
+@utility surface {
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-card);
+  box-shadow: var(--shadow-card);
 }
 
 @layer base {
@@ -167,6 +173,180 @@
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
+  }
+}
+
+/*
+  The sky behind the landing and sign-in pages: clouds by day, stars by
+  night (photos from Unsplash, credited in the README). The photo drifts
+  very slowly, by transform only, so phones stay smooth; a smaller file is
+  used below lg. The fade at the bottom melts it into the page colour.
+
+  By day a blue tint is multiplied into the photo (in the same layer, so
+  it's painted once, not on every frame of the drift). It deepens the sky
+  behind the headline so white text keeps at least 4.5:1 on the bright
+  clouds (measured on the photo itself); the clouds' detail stays.
+*/
+.sky {
+  --sky-photo: url("/sky/day-1200.webp");
+  --sky-tint: linear-gradient(
+    to bottom,
+    oklch(0.64 0.09 245) 0%,
+    oklch(0.66 0.09 245) 48%,
+    oklch(0.82 0.05 245) 64%,
+    transparent 78%
+  );
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  background-color: oklch(0.5 0.07 240);
+}
+.sky::before {
+  content: "";
+  position: absolute;
+  inset: -6%;
+  background-image: var(--sky-tint), var(--sky-photo);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-blend-mode: multiply;
+  animation: sky-drift 60s ease-in-out infinite alternate;
+  will-change: transform;
+}
+.dark .sky {
+  --sky-photo: url("/sky/night-1200.webp");
+  --sky-tint: linear-gradient(transparent, transparent);
+  background-color: oklch(0.14 0.02 260);
+}
+.dark .sky::before {
+  animation-duration: 90s;
+}
+@media (min-width: 1024px) {
+  .sky {
+    --sky-photo: url("/sky/day.webp");
+  }
+  .dark .sky {
+    --sky-photo: url("/sky/night.webp");
+  }
+}
+/* A few extra stars that twinkle, at night only. */
+.dark .sky::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 22%, white, transparent),
+    radial-gradient(1px 1px at 28% 68%, white, transparent),
+    radial-gradient(1.5px 1.5px at 46% 14%, white, transparent),
+    radial-gradient(1px 1px at 63% 42%, white, transparent),
+    radial-gradient(2px 2px at 78% 26%, white, transparent),
+    radial-gradient(1px 1px at 88% 61%, white, transparent),
+    radial-gradient(1.5px 1.5px at 35% 38%, white, transparent),
+    radial-gradient(1px 1px at 71% 79%, white, transparent);
+  animation: twinkle 5s ease-in-out infinite alternate;
+}
+.sky-fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 62%, var(--background));
+}
+.dark .sky-fade {
+  background:
+    linear-gradient(to bottom, oklch(0.1 0.02 260 / 35%), transparent 40%),
+    linear-gradient(to bottom, transparent 55%, var(--background));
+}
+@keyframes sky-drift {
+  from {
+    transform: translate3d(-2%, 0, 0) scale(1.04);
+  }
+  to {
+    transform: translate3d(2%, -1.5%, 0) scale(1.1);
+  }
+}
+@keyframes twinkle {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Glass: panels over the sky (the sign-in form). Nearly opaque rather than
+   blurred: blurring a moving photo means re-blurring it on every frame,
+   which is heavy for phones. */
+@utility glass {
+  background-color: color-mix(in oklch, var(--color-card) 90%, transparent);
+  border: 1px solid color-mix(in oklch, var(--color-card) 60%, transparent);
+  box-shadow: 0 24px 60px -24px oklch(0.2 0.05 260 / 35%);
+}
+
+/*
+  Scroll motion on the landing page (CSS scroll-driven animations, so no
+  JavaScript runs while scrolling). Browsers without them, and people who
+  ask for reduced motion, see everything in place.
+*/
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-copy {
+      animation: hero-out linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 60vh;
+    }
+    .rise {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 35%;
+    }
+    /* The 3D tilt needs room: on narrower screens it simply rises. */
+    .tilt-in {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 35%;
+    }
+    @media (min-width: 1024px) {
+      .tilt-in {
+        animation-name: tilt-in;
+        animation-range: entry 10% cover 50%;
+      }
+    }
+    .fade-up {
+      animation: fade-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 90%;
+    }
+  }
+}
+@keyframes hero-out {
+  to {
+    opacity: 0;
+    transform: translateY(-48px) scale(0.97);
+  }
+}
+@keyframes rise {
+  from {
+    transform: perspective(1400px) translateY(96px) rotateX(14deg) scale(0.92);
+  }
+  to {
+    transform: perspective(1400px) translateY(0) rotateX(0) scale(1);
+  }
+}
+@keyframes tilt-in {
+  from {
+    transform: perspective(1400px) translateX(18%) rotateY(-24deg) scale(0.9);
+  }
+  to {
+    transform: perspective(1400px) translateX(0) rotateY(-8deg) scale(1);
+  }
+}
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

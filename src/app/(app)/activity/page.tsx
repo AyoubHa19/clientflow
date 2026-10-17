@@ -70,7 +70,7 @@ async function Activity({
         />
       ) : (
         <>
-          <div className="rounded-xl border px-4">
+          <div className="surface px-4">
             <ActivityFeed items={result.items} timeZone={ctx.workspace.timezone} now={now} />
           </div>
           <Pagination

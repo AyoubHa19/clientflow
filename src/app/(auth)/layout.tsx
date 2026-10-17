@@ -1,6 +1,8 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { CheckCircle2Icon } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
+import { Sky } from "@/components/marketing/sky";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { redirectIfSignedIn } from "@/server/auth/session";
 
@@ -16,40 +18,49 @@ async function SignedInRedirect() {
   return null;
 }
 
+/**
+ * Sign-in and sign-up: the same sky as the landing page, with the form on
+ * frosted glass. The headline sits in the sky's deeper top half, where
+ * white text keeps its contrast.
+ */
 export default function AuthLayout({ children }: LayoutProps<"/">) {
   return (
-    <div className="grid min-h-dvh lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+    <div className="relative isolate flex min-h-dvh flex-col">
       <Suspense fallback={null}>
         <SignedInRedirect />
       </Suspense>
+      <Sky className="-z-10" fade={false} />
 
-      <aside className="relative hidden flex-col justify-between overflow-clip bg-primary p-10 text-primary-foreground lg:flex dark:border-r dark:bg-card dark:text-foreground">
-        <Logo />
-        <div className="max-w-md">
-          <p className="text-3xl leading-tight font-semibold tracking-tight text-balance">
+      <header className="flex items-center justify-between px-4 py-4 text-white sm:px-8">
+        <Link
+          href="/"
+          aria-label="ClientFlow home"
+          className="rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-white/60"
+        >
+          <Logo />
+        </Link>
+        <ThemeToggle />
+      </header>
+
+      <div className="mx-auto grid w-full max-w-6xl flex-1 items-start gap-10 px-4 pt-6 pb-12 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:pt-16">
+        <aside className="hidden text-white lg:block">
+          <p className="max-w-md text-4xl leading-tight font-semibold tracking-tight text-balance">
             Your client work, organised in one calm place.
           </p>
-          <ul className="mt-8 grid gap-4">
+          <ul className="mt-8 grid max-w-md gap-4">
             {POINTS.map((point) => (
-              <li key={point} className="flex items-start gap-3 text-sm opacity-85">
+              <li key={point} className="flex items-start gap-3 text-white/90">
                 <CheckCircle2Icon aria-hidden className="mt-0.5 size-4 shrink-0" />
                 {point}
               </li>
             ))}
           </ul>
-        </div>
-        <p className="text-xs opacity-75">Built for freelancers, consultants and small agencies.</p>
-      </aside>
+        </aside>
 
-      <main className="flex flex-col px-4 py-6 sm:px-8">
-        <div className="flex items-center justify-between lg:justify-end">
-          <Logo className="lg:hidden" />
-          <ThemeToggle />
-        </div>
-        <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">
+        <main className="mx-auto w-full max-w-sm rounded-3xl glass p-6 sm:p-8 lg:max-w-none">
           {children}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

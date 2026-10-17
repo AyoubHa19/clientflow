@@ -136,6 +136,31 @@ colours.
   offers "Try again", without losing the navigation.
 - Pages slide in gently; with "reduce motion" turned on, nothing moves.
 
+## Design
+
+- **A clear sky.** Light mode is a near-white page with a hint of lavender,
+  white cards with soft shadows, deep navy text and one periwinkle blue.
+  Dark mode is a night sky: very deep, nearly black blue, with dark glass
+  cards. Buttons are pills; the font is Manrope. The colours are tokens in
+  `src/app/globals.css`, and `npm run check:contrast` measures every text
+  pair (at least 4.5:1).
+- **Visitors** see a landing page at `/` (signed-in people get their
+  dashboard there). Its sky is a photo: clouds by day, stars by night,
+  drifting slowly, with a few stars twinkling at night. A product preview
+  (made-up numbers, labelled) rises and tilts in 3D as the page scrolls,
+  and the sections fade in, all with CSS scroll-driven animations (no
+  JavaScript while scrolling). Sign-in and sign-up sit on the same sky,
+  the form on frosted glass.
+- White text over the day sky keeps at least 4.5:1: a blue tint is
+  multiplied over the top of the photo, and the contrast was measured on
+  the photo itself.
+- With "reduce motion" turned on, nothing moves. Phones get smaller photos
+  (about 17 KB each; 48–56 KB on large screens).
+- Photos from Unsplash (Unsplash License): "Sea of clouds" by
+  [Harper van Mourik](https://unsplash.com/photos/sea-of-clouds-during-daytime-IyOOKwXXMUM)
+  and "A starry night sky" by
+  [Vlad ION](https://unsplash.com/photos/a-starry-night-sky-zzdEX4Nixb0).
+
 ## Signing in
 
 - `/sign-up` and `/sign-in` (Better Auth, email and password). Passwords
@@ -165,7 +190,9 @@ colours.
 - After signing in, the app only goes to a path on this site, read the way
   a browser reads it.
 - Passwords are hashed (scrypt) by Better Auth; sign-in and sign-up are
-  rate limited and check the request's origin.
+  rate limited and check the request's origin. Their forms are posted
+  (never a GET that would put a password in the address), and their
+  buttons wait until the page's JavaScript is running.
 - Responses carry a Content Security Policy (nothing loads from other
   sites, no framing, forms post only here), `nosniff`, a referrer policy,
   and, over HTTPS, Strict-Transport-Security.

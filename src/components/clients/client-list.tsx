@@ -9,7 +9,7 @@ const dash = <span className="text-muted-foreground">—</span>;
 export function ClientList({ clients, timeZone }: { clients: ClientRecord[]; timeZone: string }) {
   return (
     <>
-      <div className="hidden overflow-x-auto rounded-xl border md:block">
+      <div className="hidden overflow-x-auto surface md:block">
         <table className="w-full text-left text-sm">
           <caption className="sr-only">Clients</caption>
           <thead className="bg-muted/50 text-xs text-muted-foreground">
@@ -65,7 +65,7 @@ export function ClientList({ clients, timeZone }: { clients: ClientRecord[]; tim
           <li key={client.id}>
             <Link
               href={`/clients/${client.id}`}
-              className="block rounded-xl border p-4 outline-none hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="block surface p-4 outline-none hover:bg-muted/40 focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <div className="flex items-start justify-between gap-3">
                 <span className="min-w-0 truncate font-medium">{client.name}</span>

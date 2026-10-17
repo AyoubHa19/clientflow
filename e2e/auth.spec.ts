@@ -51,18 +51,26 @@ test("visitors are sent to sign in, then back where they were going", async ({ p
 
 test("sign up, sign out and sign in again", async ({ page }) => {
   const user = newTestUser();
+  // Visitors see the landing page at "/", which leads to sign-up.
   await page.goto("/");
-  await expect(page).toHaveURL(/\/sign-in$/);
-
-  await page.getByRole("link", { name: "Create an account" }).click();
+  await expect(page).toHaveURL("/");
+  await page.getByRole("link", { name: "Get started free" }).first().click();
+  await expect(page).toHaveURL(/\/sign-up$/);
   await fillSignUp(page, user);
   // A new account names its workspace first.
   await createWorkspace(page);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome, Sara");
 
   await signOut(page);
-  // Signed out means signed out: the app sends you back.
+  // Signed out means signed out: the app's pages send you to sign in, and
+  // "/" shows the landing page again.
+  await page.goto("/clients");
+  await expect(page).toHaveURL(/\/sign-in\?next=%2Fclients$/);
   await page.goto("/");
+  await expect(
+    page.getByRole("heading", { level: 1, name: /Your clients\. Your work\./ }),
+  ).toBeVisible();
+  await page.getByRole("banner").getByRole("link", { name: "Sign in" }).click();
   await expect(page).toHaveURL(/\/sign-in$/);
 
   await fillSignIn(page, user.email, user.password);

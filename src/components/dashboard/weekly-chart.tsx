@@ -13,7 +13,7 @@ export function WeeklyChart({ weekly }: { weekly: Dashboard["weekly"] }) {
   const total = weekly.reduce((sum, week) => sum + week.count, 0);
 
   return (
-    <section aria-labelledby="weekly-title" className="rounded-xl border bg-card p-4">
+    <section aria-labelledby="weekly-title" className="surface p-4">
       <h2 id="weekly-title" className="font-medium">
         Tasks completed
       </h2>

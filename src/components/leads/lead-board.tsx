@@ -215,7 +215,7 @@ function BoardColumn({
       aria-labelledby={headingId}
       data-status={column.status}
       className={cn(
-        "flex min-h-48 flex-col gap-2 rounded-xl border bg-muted/40 p-2 transition-colors",
+        "flex min-h-48 flex-col gap-2 surface bg-muted/40 p-2 transition-colors",
         isOver && "border-ring bg-brand-soft/60",
       )}
     >

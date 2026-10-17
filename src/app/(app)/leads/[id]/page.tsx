@@ -75,7 +75,7 @@ async function LeadDetails({ params }: { params: PageProps<"/leads/[id]">["param
       </div>
 
       {lead.convertedClient && (
-        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm">
+        <div className="flex flex-wrap items-center gap-3 surface border-success/30 bg-success/10 px-4 py-3 text-sm">
           <UserCheckIcon aria-hidden className="size-5 text-success" />
           <p className="flex-1">
             Converted into a client

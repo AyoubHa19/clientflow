@@ -8,7 +8,8 @@ import { NavLinks } from "./nav-links";
 
 /**
  * The frame around every signed-in page: a side bar from lg up, a top bar
- * with a menu below lg, and the page itself on a white panel.
+ * with a menu below lg. The page sits straight on the tinted background, so
+ * its cards (white by day, dark glass by night) stand out.
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -40,7 +41,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex min-h-dvh min-w-0 flex-col lg:py-2 lg:pr-2">
+      <div className="flex min-h-dvh min-w-0 flex-col">
         <header className="sticky top-0 z-40 grid h-14 grid-cols-[1fr_auto_1fr] items-center border-b bg-background/85 px-2 backdrop-blur lg:hidden">
           <div>
             <MobileNav workspace={<CurrentWorkspace />} />
@@ -54,11 +55,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main
-          id="main"
-          tabIndex={-1}
-          className="flex-1 bg-card outline-none lg:rounded-2xl lg:border lg:shadow-xs"
-        >
+        <main id="main" tabIndex={-1} className="flex-1 outline-none">
           {children}
         </main>
       </div>

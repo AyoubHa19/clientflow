@@ -89,7 +89,7 @@ export function TaskQuickAdd({
       noValidate
       aria-label="Add a task"
       className={cn(
-        "grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 rounded-xl border bg-muted/30 p-3",
+        "grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3 surface bg-muted/30 p-3",
         wide.grid,
       )}
     >
