@@ -295,6 +295,26 @@ end of every stage.
   CTA's `--cta` timeline through `timeline-scope` on `.cover-stack`) sinks
   it back. Checked with a scroll-screenshot script (fresh Playwright
   browser) at 1440 and 390 px.
+- **Logo round (2026-10-17).** The mark is the user's own drawing (two
+  figures reaching for each other), traced once into `brand/mark-path.ts`
+  (edit the drawing, not the numbers), in a sky gradient (`--logo-*`
+  tokens, `BrandDefs` in the root layout holds the gradient), with an
+  orbit that turns on hover and a star that twinkles where the hands
+  meet; `tone="white"` on the sky photos. The wordmark: a ribbon weaves
+  through "Flow", behind the F and o, in front of the l and w, with a
+  light running along it. The user wanted it **through the middle of the
+  "o"**: its height and the front cut-outs were measured in the page
+  (`globals.css` `.wordmark-ribbon*`); remeasure if the font or size
+  changes. `icon.svg` is the mark on the gradient.
+  - The landing's `DashboardPreview` was redrawn to match the app as it is
+    now (glass cards, the real `Sparkline` and `WinRing`, the stage bar,
+    "Coming up" table, side bar with Quick add); the pipeline card is left
+    out below sm so the picture fits a phone. Update it when the
+    dashboard's look changes.
+  - Fixed: at 320px the dashboard was 42px too wide (its columns had no
+    `grid-cols-[minmax(0,1fr)]`; the number cards are one column under
+    400px now), then 3px (an `sr-only` table: tables can't shrink to 1px,
+    so `sr-only` goes on a wrapping div).
 - **Next: Stage 13, portfolio and product readiness** (PRD 14): README,
   screenshots, architecture summary, feature list, setup, demo data
   strategy (the shared demo account could be changed by visitors: decide

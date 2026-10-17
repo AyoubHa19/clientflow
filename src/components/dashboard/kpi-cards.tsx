@@ -71,7 +71,7 @@ export function KpiCards({
   return (
     <section
       aria-label="Key numbers"
-      className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3 xl:grid-cols-4"
+      className="grid grid-cols-[minmax(0,1fr)] gap-3 min-[25rem]:grid-cols-2 xl:grid-cols-4"
     >
       <KpiCard
         href="/clients?status=active"

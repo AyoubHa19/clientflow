@@ -1,10 +1,11 @@
+import { useId } from "react";
 import Link from "next/link";
 import { LEAD_STATUS_LABELS, type LeadStatus } from "@/lib/validation/lead";
 import { cn } from "@/lib/utils";
 import type { Dashboard } from "@/server/dashboard/service";
 
 /** One colour per stage, shared by the bar, the legend and the board. */
-const STAGE_COLOUR: Record<LeadStatus, string> = {
+export const STAGE_COLOUR: Record<LeadStatus, string> = {
   NEW: "bg-chart-5",
   CONTACTED: "bg-chart-2",
   QUALIFIED: "bg-brand",
@@ -12,41 +13,67 @@ const STAGE_COLOUR: Record<LeadStatus, string> = {
   LOST: "bg-destructive/60",
 };
 
-/** The win rate as a glowing ring (decorative; the number is written in it). */
-function WinRing({ rate }: { rate: number | null }) {
-  const radius = 34;
+/**
+ * The win rate as a glowing ring (decorative; the number is written in it).
+ * `size="sm"` is the landing page's miniature: a thinner ring with room for
+ * its text, and no glow (it blurs at that size).
+ */
+export function WinRing({ rate, size = "md" }: { rate: number | null; size?: "md" | "sm" }) {
+  const gradient = useId();
+  const small = size === "sm";
+  const stroke = small ? 7 : 9;
+  const radius = small ? 33 : 34;
   const circumference = 2 * Math.PI * radius;
   const filled = ((rate ?? 0) / 100) * circumference;
   return (
-    <div className="relative size-24 shrink-0">
+    <div className={cn("relative shrink-0", small ? "size-16" : "size-24")}>
       <svg aria-hidden viewBox="0 0 84 84" className="size-full -rotate-90">
         <defs>
-          <linearGradient id="win-ring" x1="0" x2="1" y1="0" y2="1">
+          <linearGradient id={gradient} x1="0" x2="1" y1="0" y2="1">
             <stop offset="0%" stopColor="var(--chart-2)" />
             <stop offset="100%" stopColor="var(--brand)" />
           </linearGradient>
         </defs>
-        <circle cx="42" cy="42" r={radius} fill="none" strokeWidth="9" className="stroke-muted" />
+        <circle
+          cx="42"
+          cy="42"
+          r={radius}
+          fill="none"
+          strokeWidth={stroke}
+          className="stroke-muted"
+        />
         {rate !== null && rate > 0 && (
           <circle
             cx="42"
             cy="42"
             r={radius}
             fill="none"
-            stroke="url(#win-ring)"
-            strokeWidth="9"
+            stroke={`url(#${gradient})`}
+            strokeWidth={stroke}
             strokeLinecap="round"
             strokeDasharray={`${filled} ${circumference}`}
-            className="ring-draw drop-shadow-[0_0_6px_var(--brand)]"
+            className={cn("ring-draw", !small && "drop-shadow-[0_0_6px_var(--brand)]")}
             style={{ ["--ring" as string]: `${circumference}` }}
           />
         )}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-xl leading-none font-semibold tabular-nums">
+        <span
+          className={cn(
+            "leading-none font-semibold tabular-nums",
+            small ? "text-[0.72rem]" : "text-xl",
+          )}
+        >
           {rate === null ? "–" : `${rate}%`}
         </span>
-        <span className="mt-1 text-[0.6rem] text-muted-foreground">won</span>
+        <span
+          className={cn(
+            "text-muted-foreground",
+            small ? "mt-0.5 text-[0.5rem] leading-none" : "mt-1 text-[0.6rem]",
+          )}
+        >
+          won
+        </span>
       </div>
     </div>
   );

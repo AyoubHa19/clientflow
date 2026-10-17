@@ -33,13 +33,13 @@ async function Overview() {
       />
       {!allStarted && <GettingStarted started={dashboard.started} />}
       <div className="grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-[minmax(0,1fr)_19rem]">
-        <div className="grid min-w-0 content-start gap-4">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-4">
           <KpiCards counts={dashboard.counts} trends={dashboard.trends} />
           <Deadlines deadlines={dashboard.deadlines} today={today} />
           <WeeklyChart weekly={dashboard.weekly} />
         </div>
         {/* The right-hand column: the pipeline and what just happened. */}
-        <div className="grid min-w-0 content-start gap-4 lg:grid-cols-2 xl:grid-cols-1">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-4 lg:grid-cols-2 xl:grid-cols-1">
           <LeadFunnel funnel={dashboard.funnel} conversion={dashboard.conversion} />
           <section aria-labelledby="activity-title" className="spotlight relative surface p-4">
             <div className="flex items-start justify-between gap-2">

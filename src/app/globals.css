@@ -124,6 +124,10 @@
   --surface-edge: oklch(1 0 0 / 72%);
   --surface-glow: oklch(1 0 0 / 80%);
   --glass-saturate: 1.6;
+  /* The logo's sky gradient and its star. */
+  --logo-from: #5257d6;
+  --logo-to: #2f8fd8;
+  --logo-star: #5257d6;
   color-scheme: light;
 }
 
@@ -174,6 +178,9 @@
   --surface-glow: oklch(1 0 0 / 4%);
   /* Matte: frosted without the extra colour boost. */
   --glass-saturate: 1;
+  --logo-from: #c3c6ff;
+  --logo-to: #9ad3ff;
+  --logo-star: #ffffff;
   color-scheme: dark;
 }
 
@@ -591,6 +598,123 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* The logo: its star twinkles; hovering a link with the logo turns the orbit. */
+@media (prefers-reduced-motion: no-preference) {
+  .logo-star {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: logo-twinkle 2.8s ease-in-out infinite;
+  }
+  .logo-orbit {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  a:hover .logo-orbit,
+  .group\/logo:hover .logo-orbit {
+    transform: rotate(-18deg) rotate(160deg);
+  }
+}
+/* The wordmark: a ribbon of light weaves through "Flow", behind F and o
+   and in front of l and w, with a glow running along it. */
+.wordmark {
+  --wm-from: var(--logo-from);
+  --wm-to: var(--logo-to);
+  white-space: nowrap;
+}
+.logo-white .wordmark {
+  --wm-from: #ffffff;
+  --wm-to: #d6ebff;
+}
+.wordmark-flow {
+  position: relative;
+  display: inline-block;
+  isolation: isolate;
+  padding: 0 0.04em;
+  font-weight: 800;
+}
+.wordmark-text {
+  background: linear-gradient(90deg, var(--wm-from), var(--wm-to));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.wordmark-ribbon {
+  position: absolute;
+  /* From the middle of the line, so the wave runs through the lowercase letters. */
+  top: calc(50% - 0.22em);
+  left: 0;
+  width: calc(100% + 0.12em);
+  height: 0.6em;
+  overflow: visible;
+  pointer-events: none;
+}
+.wordmark-ribbon-back {
+  z-index: -1;
+}
+.wordmark-ribbon-front {
+  z-index: 1;
+  /* Over the l (23–35% of the ribbon) and the w (60–94%), measured. */
+  clip-path: polygon(
+    23% 0,
+    35% 0,
+    35% 100%,
+    23% 100%,
+    23% 0,
+    60% 0,
+    94% 0,
+    94% 100%,
+    60% 100%,
+    60% 0
+  );
+}
+.wordmark-ribbon path {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.wordmark-band {
+  stroke: var(--wm-to);
+  opacity: 0.85;
+}
+.wordmark-ribbon-back .wordmark-band {
+  stroke: var(--wm-from);
+  opacity: 0.5;
+}
+.wordmark-pulse {
+  stroke: #ffffff;
+  stroke-dasharray: 14 86;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wordmark-pulse {
+    opacity: 1;
+    filter: drop-shadow(0 0 2px var(--wm-to));
+    animation: wordmark-pulse 3.2s linear infinite;
+  }
+}
+@keyframes wordmark-pulse {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes logo-twinkle {
+  0%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
   }
 }
 

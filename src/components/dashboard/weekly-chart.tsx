@@ -90,23 +90,26 @@ export function WeeklyChart({ weekly }: { weekly: Dashboard["weekly"] }) {
         </div>
       </div>
 
-      <table className="sr-only">
-        <caption>Tasks completed per week, last 8 weeks</caption>
-        <thead>
-          <tr>
-            <th scope="col">Week starting</th>
-            <th scope="col">Tasks completed</th>
-          </tr>
-        </thead>
-        <tbody>
-          {weekly.map((week) => (
-            <tr key={week.weekStart}>
-              <td>{formatDateOnly(week.weekStart)}</td>
-              <td>{week.count}</td>
+      {/* sr-only on a wrapper: a table can't shrink to 1px, and widened the page on phones. */}
+      <div className="sr-only">
+        <table>
+          <caption>Tasks completed per week, last 8 weeks</caption>
+          <thead>
+            <tr>
+              <th scope="col">Week starting</th>
+              <th scope="col">Tasks completed</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {weekly.map((week) => (
+              <tr key={week.weekStart}>
+                <td>{formatDateOnly(week.weekStart)}</td>
+                <td>{week.count}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
+import { BrandDefs } from "@/components/brand/logo";
 import { InlineScript } from "@/components/theme/inline-script";
 import { ThemeSync } from "@/components/theme/theme-sync";
 import { Toaster } from "@/components/ui/sonner";
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <InlineScript html={THEME_SCRIPT} />
       </head>
       <body>
+        <BrandDefs />
         <TooltipProvider>{children}</TooltipProvider>
         <Toaster />
         <ThemeSync />

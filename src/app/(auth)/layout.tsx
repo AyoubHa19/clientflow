@@ -37,7 +37,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
           aria-label="ClientFlow home"
           className="rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-white/60"
         >
-          <Logo />
+          <Logo tone="white" />
         </Link>
         <ThemeToggle />
       </header>

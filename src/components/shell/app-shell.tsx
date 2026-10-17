@@ -35,11 +35,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="min-h-dvh glass-panel lg:grid lg:min-h-[calc(100dvh-2rem)] lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:rounded-[2rem]">
         <aside className="sticky top-7 m-3 hidden h-[calc(100dvh-3.5rem)] flex-col gap-6 surface px-3 py-5 lg:flex">
-          <div className="grid gap-1 px-2">
+          <div className="grid min-w-0 gap-1 px-2">
             <Link href="/" aria-label="ClientFlow home" className="w-fit rounded-lg py-1">
               <Logo />
             </Link>
-            <div className="pl-10.5">
+            <div className="min-w-0 pl-10.5">
               <CurrentWorkspace />
             </div>
           </div>
