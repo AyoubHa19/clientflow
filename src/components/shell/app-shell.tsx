@@ -16,10 +16,10 @@ const QUICK_ADD = [
 ];
 
 /**
- * The frame around every signed-in page: one glass panel floating over a
- * still sky (clouds by day, stars by night). From lg the panel holds the
- * side bar and a top bar with the search; below lg it fills the screen,
- * with a top bar and a menu.
+ * The frame around every signed-in page, over a still sky (clouds by day,
+ * stars by night) that shows behind every glass card. From lg: a glass
+ * side bar and a top bar with the search; below lg, a glass top bar and a
+ * menu.
  */
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -34,7 +34,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </a>
 
       <div className="min-h-dvh glass-panel lg:grid lg:min-h-[calc(100dvh-2rem)] lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:rounded-[2rem]">
-        <aside className="sticky top-4 hidden h-[calc(100dvh-2rem)] flex-col gap-6 border-r border-(--glass-edge) px-3 py-5 lg:flex">
+        <aside className="sticky top-7 m-3 hidden h-[calc(100dvh-3.5rem)] flex-col gap-6 surface px-3 py-5 lg:flex">
           <div className="grid gap-1 px-2">
             <Link href="/" aria-label="ClientFlow home" className="w-fit rounded-lg py-1">
               <Logo />
@@ -74,7 +74,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         <div className="flex min-h-dvh min-w-0 flex-col lg:min-h-0">
-          <header className="sticky top-0 z-40 grid h-14 grid-cols-[1fr_auto_1fr] items-center border-b border-(--glass-edge) bg-background/80 px-2 backdrop-blur lg:hidden">
+          <header className="sticky top-0 z-40 grid h-14 grid-cols-[1fr_auto_1fr] items-center border-b border-(--surface-edge) bg-(--surface-fill) px-2 backdrop-blur-xl backdrop-saturate-150 lg:hidden">
             <div>
               <MobileNav workspace={<CurrentWorkspace />} />
             </div>

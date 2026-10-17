@@ -140,18 +140,21 @@ colours.
 
 - **A clear sky.** Light mode is a near-white page with a hint of lavender,
   white cards with soft shadows, deep navy text and one periwinkle blue.
-  Dark mode is a night sky: very deep, nearly black blue, with dark glass
-  cards. Buttons are pills; the font is Manrope. The colours are tokens in
+  Dark mode is matte: a neutral, nearly black night with frosted dark
+  glass. Buttons are pills; the font is Manrope. The colours are tokens in
   `src/app/globals.css`, and `npm run check:contrast` measures every text
   pair (at least 4.5:1).
-- **Inside the app** everything floats on one glass panel over a still
-  sky (clouds by day, stars by night). The frosted look is the sky photo
-  blurred in advance (3 KB) and fixed behind the panel, so scrolling costs
-  nothing; cards are a lighter (day) or darker (night) glass on top. Text
-  on the glass was measured on screenshots: at least 4.8:1. On phones the
-  panel fills the screen.
-- **The dashboard**: four cards with a small chart of what was added each
-  week (8 weeks) and numbers that count up as the page opens; "Coming up"
+- **Inside the app** every card, list, form and the side bar is frosted
+  glass over a still sky that shows clearly behind them (clouds by day,
+  stars by night), on phones too. The sky never moves inside the app, so
+  the blur is only redrawn while scrolling. By day a veil, brighter at the
+  top, keeps page titles readable on the sky; text on the sky and on the
+  glass was measured on screenshots (at least 4.7:1).
+- **The dashboard**: four cards with a glowing trend line of what was
+  added each week (8 weeks) that draws itself in, and numbers that count
+  up; the pipeline as a win-rate ring and one bar split by stage; tasks
+  completed as gradient pill bars that grow in, this week lit, with the
+  weekly average; "Coming up"
   as a table with status badges; the pipeline and the latest changes in a
   column on the right. Cards lift a little on hover, with a soft light
   that follows the mouse (behind the text, so contrast never drops).

@@ -32,7 +32,17 @@ export async function expectNoAxeViolations(page: Page) {
   // A record's tab title streams in after its page: wait until the page has
   // finished loading (no requests for a moment) and has its title.
   await page.waitForLoadState("networkidle");
-  await expect(page).toHaveTitle(/\S/);
+  // ...and the title has settled (present for three checks in a row): the
+  // old page's title can linger a moment before the new one replaces it.
+  await expect
+    .poll(async () => {
+      for (let i = 0; i < 3; i++) {
+        if (!(await page.title()).trim()) return false;
+        await page.waitForTimeout(150);
+      }
+      return true;
+    })
+    .toBe(true);
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze();

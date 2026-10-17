@@ -315,7 +315,7 @@ function CardBody({
   return (
     <div
       className={cn(
-        "rounded-xl border border-(--surface-edge) bg-card p-3 text-sm shadow-(--shadow-card) transition duration-200 hover:-translate-y-0.5",
+        "rounded-xl border border-(--surface-edge) bg-(--surface-fill) p-3 text-sm shadow-(--shadow-card) transition duration-200 hover:-translate-y-0.5",
         overlay && "w-60 rotate-1 shadow-lg ring-2 ring-ring/40",
       )}
     >

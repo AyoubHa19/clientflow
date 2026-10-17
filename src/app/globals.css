@@ -81,7 +81,7 @@
   --secondary: oklch(0.948 0.014 280);
   --secondary-foreground: oklch(0.285 0.06 270);
   --muted: oklch(0.952 0.012 280);
-  --muted-foreground: oklch(0.49 0.035 272);
+  --muted-foreground: oklch(0.44 0.035 272);
   --accent: oklch(0.948 0.014 280);
   --accent-foreground: oklch(0.285 0.06 270);
   --brand: oklch(0.5 0.15 270);
@@ -110,128 +110,114 @@
   --shadow-card: 0 1px 2px oklch(0.3 0.05 270 / 4%), 0 8px 24px -12px oklch(0.3 0.06 270 / 14%);
   /* Glass: the app's panel (a veil over the blurred sky) and its cards. */
   --sky-photo-still: url("/sky/day-1200.webp");
-  --sky-photo-blur: url("/sky/day-blur.webp");
-  --glass-veil: oklch(0.985 0.006 280 / 80%);
-  --glass-edge: oklch(1 0 0 / 70%);
-  --surface-fill: oklch(1 0 0 / 78%);
-  --surface-edge: oklch(1 0 0 / 85%);
+  --sky-photo-large: url("/sky/day.webp");
+  /* A light veil keeps the day sky airy, and brighter at the top, where
+     page titles sit straight on it (dark text stays readable). */
+  --sky-veil: linear-gradient(
+    to bottom,
+    oklch(0.985 0.01 250 / 74%),
+    oklch(0.985 0.01 250 / 46%) 55%,
+    oklch(0.985 0.01 250 / 40%)
+  );
+  --glass-edge: oklch(1 0 0 / 60%);
+  --surface-fill: oklch(1 0 0 / 64%);
+  --surface-edge: oklch(1 0 0 / 72%);
+  --surface-glow: oklch(1 0 0 / 80%);
+  --glass-saturate: 1.6;
   color-scheme: light;
 }
 
 .dark {
-  --background: oklch(0.125 0.018 265);
-  --foreground: oklch(0.965 0.006 270);
-  --card: oklch(0.172 0.022 266);
-  --card-foreground: oklch(0.965 0.006 270);
-  --popover: oklch(0.195 0.024 266);
-  --popover-foreground: oklch(0.965 0.006 270);
+  --background: oklch(0.125 0.004 265);
+  --foreground: oklch(0.965 0.003 265);
+  --card: oklch(0.17 0.005 265);
+  --card-foreground: oklch(0.965 0.003 265);
+  --popover: oklch(0.19 0.006 265);
+  --popover-foreground: oklch(0.965 0.003 265);
   --primary: oklch(0.945 0.012 275);
   --primary-foreground: oklch(0.19 0.03 268);
-  --secondary: oklch(0.235 0.024 266);
-  --secondary-foreground: oklch(0.965 0.006 270);
-  --muted: oklch(0.225 0.022 266);
-  --muted-foreground: oklch(0.74 0.025 270);
-  --accent: oklch(0.235 0.024 266);
-  --accent-foreground: oklch(0.965 0.006 270);
+  --secondary: oklch(0.23 0.006 265);
+  --secondary-foreground: oklch(0.965 0.003 265);
+  --muted: oklch(0.22 0.006 265);
+  --muted-foreground: oklch(0.74 0.01 265);
+  --accent: oklch(0.23 0.006 265);
+  --accent-foreground: oklch(0.965 0.003 265);
   --brand: oklch(0.76 0.11 272);
-  --brand-soft: oklch(0.28 0.06 272);
+  --brand-soft: oklch(0.27 0.04 272);
   --brand-foreground: oklch(0.17 0.03 270);
   --success: oklch(0.74 0.13 155);
   --warning: oklch(0.8 0.12 75);
   --destructive: oklch(0.76 0.15 23);
   --border: oklch(1 0 0 / 8%);
-  --input: oklch(0.5 0.025 268);
+  --input: oklch(0.5 0.01 265);
   --ring: oklch(0.76 0.11 272);
   --chart-1: oklch(0.76 0.11 272);
   --chart-2: oklch(0.66 0.09 245);
   --chart-3: oklch(0.86 0.03 270);
   --chart-4: oklch(0.72 0.08 200);
   --chart-5: oklch(0.52 0.04 268);
-  --sidebar: oklch(0.125 0.018 265);
-  --sidebar-foreground: oklch(0.965 0.006 270);
+  --sidebar: oklch(0.125 0.004 265);
+  --sidebar-foreground: oklch(0.965 0.003 265);
   --sidebar-primary: oklch(0.945 0.012 275);
   --sidebar-primary-foreground: oklch(0.19 0.03 268);
-  --sidebar-accent: oklch(0.2 0.024 266);
-  --sidebar-accent-foreground: oklch(0.965 0.006 270);
+  --sidebar-accent: oklch(0.2 0.006 265);
+  --sidebar-accent-foreground: oklch(0.965 0.003 265);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.76 0.11 272);
   --shadow-card: 0 1px 2px oklch(0 0 0 / 30%), 0 12px 32px -16px oklch(0 0 0 / 60%);
   --sky-photo-still: url("/sky/night-1200.webp");
-  --sky-photo-blur: url("/sky/night-blur.webp");
-  --glass-veil: oklch(0.13 0.02 266 / 66%);
-  --glass-edge: oklch(1 0 0 / 9%);
-  --surface-fill: oklch(0.19 0.024 266 / 72%);
+  --sky-photo-large: url("/sky/night.webp");
+  --sky-veil: linear-gradient(oklch(0.08 0.004 265 / 52%), oklch(0.08 0.004 265 / 52%));
+  --glass-edge: oklch(1 0 0 / 10%);
+  --surface-fill: oklch(0.17 0.006 265 / 60%);
   --surface-edge: oklch(1 0 0 / 8%);
+  --surface-glow: oklch(1 0 0 / 4%);
+  /* Matte: frosted without the extra colour boost. */
+  --glass-saturate: 1;
   color-scheme: dark;
 }
 
 /* A card-like surface: the page's cards, lists and panels. */
+/*
+  Glass cards: translucent, blurring the still sky behind them, with a
+  bright top edge like light catching glass. The sky never moves inside
+  the app, so the blur is only redrawn while scrolling.
+*/
 @utility surface {
   border-radius: var(--radius-xl);
   border: 1px solid var(--surface-edge);
   background-color: var(--surface-fill);
-  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(18px) saturate(var(--glass-saturate));
+  box-shadow:
+    var(--shadow-card),
+    inset 0 1px 0 var(--surface-glow);
 }
 
 /*
-  The signed-in app floats as one glass panel over a still sky. The panel's
-  "frosted" look is the sky photo blurred in advance (a 3 KB file) fixed to
-  the viewport exactly like the sky behind it, under a veil: it looks like
-  backdrop blur but costs nothing while scrolling. Phones (no room for a
-  frame, and fixed backgrounds don't work well there) get the veil over a
-  plain tint instead.
+  The signed-in app sits on a still sky (clouds by day, stars by night),
+  clearly visible behind every glass card. A light veil keeps the day sky
+  airy enough for dark text. From lg the app is framed by a faint glass
+  border.
 */
-/*
-  A soft light that follows the mouse across a card (src/components/shell/
-  spotlight.tsx sets --spot-x/--spot-y). It sits behind the card's content
-  (isolate + z-index -1), so it never lowers text contrast.
-*/
-.spotlight {
-  isolation: isolate;
-}
-.spotlight::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(
-    260px circle at var(--spot-x, 50%) var(--spot-y, -30%),
-    oklch(0.85 0.08 272 / 45%),
-    transparent 65%
-  );
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.dark .spotlight::before {
-  background: radial-gradient(
-    260px circle at var(--spot-x, 50%) var(--spot-y, -30%),
-    oklch(0.7 0.12 272 / 16%),
-    transparent 65%
-  );
-}
-.spotlight:hover::before {
-  opacity: 1;
-}
-
 @utility app-sky {
   position: fixed;
   inset: 0;
   z-index: -10;
-  background: var(--sky-photo-still) center / cover no-repeat;
-  background-color: var(--background);
-}
-@utility glass-panel {
   background:
-    linear-gradient(var(--glass-veil), var(--glass-veil)),
-    linear-gradient(var(--background), var(--background));
+    var(--sky-veil),
+    var(--sky-photo-still) center / cover no-repeat;
+  background-color: var(--background);
   @media (min-width: 1024px) {
     background:
-      linear-gradient(var(--glass-veil), var(--glass-veil)),
-      var(--sky-photo-blur) center / cover no-repeat fixed;
+      var(--sky-veil),
+      var(--sky-photo-large) center / cover no-repeat;
+  }
+}
+@utility glass-panel {
+  @media (min-width: 1024px) {
+    background-color: oklch(1 0 0 / 6%);
     border: 1px solid var(--glass-edge);
-    box-shadow: 0 30px 80px -30px oklch(0.25 0.06 260 / 40%);
+    box-shadow: 0 30px 80px -30px oklch(0.25 0.06 260 / 30%);
   }
 }
 
@@ -422,6 +408,67 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Charts: lines draw in, bars and rings grow, the latest point breathes. */
+@media (prefers-reduced-motion: no-preference) {
+  .spark-draw {
+    stroke-dasharray: 1;
+    animation: spark-draw 1.2s ease-out both;
+  }
+  .spark-fade {
+    animation: fade-in 1.2s ease-out both;
+  }
+  .spark-pulse {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: spark-pulse 2.4s ease-in-out 1.2s infinite;
+  }
+  .bar-grow {
+    transform-origin: bottom;
+    animation: bar-grow 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .bar-grow-x {
+    transform-origin: left;
+    animation: bar-grow-x 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .ring-draw {
+    animation: ring-draw 1.1s ease-out both;
+  }
+}
+@keyframes spark-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes spark-pulse {
+  50% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes bar-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes ring-draw {
+  from {
+    stroke-dasharray: 0 var(--ring);
   }
 }
 

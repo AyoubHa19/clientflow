@@ -259,15 +259,22 @@ end of every stage.
 - **Glass app round (2026-10-17), from a picture the user sent (a glassy
   dashboard over a colourful backdrop).** The landing page stays as it is
   for now; the user wants to add things to it later.
-  - `AppShell`: a still sky (`app-sky`, fixed) and one `glass-panel` (from
-    lg: rounded, the pre-blurred `/sky/*-blur.webp` fixed under
-    `--glass-veil`; no backdrop-filter, for speed). Top bar with the search
-    and the theme; the side bar has a "Quick add" card. `--surface-fill` /
-    `--surface-edge` make cards translucent glass. Text on the panel
-    measured from screenshots: light ≥ 4.8:1 (veil 80%), dark ≥ 7:1.
+  - Second pass (the user: "the cards themselves glassy, the sky clearly
+    behind them, every section, phones too; dark mode matte"): `surface`
+    is real glass (backdrop-filter blur 18px over the still `app-sky`,
+    bright inset top edge); `--sky-veil` is a gradient by day (74% at the
+    top for titles, ~40% lower so the clouds show); light
+    `--muted-foreground` darkened to L 0.44 so it keeps ≥ 4.7:1 on the
+    sky. Dark is matte: neutral near-black tokens (chroma ~0.005),
+    `--glass-saturate: 1`, a 52% veil over the night photo. The panel is
+    just a faint frame; the side bar is a glass card; inputs have a glass
+    fill. Measured from screenshots: light ≥ 4.7:1, dark ≥ 5.1:1.
   - Dashboard: `trends` (added per week, 8 weeks) in `getDashboard`;
-    `Sparkline`, `CountUp`; "Coming up" is a table; a right-hand column
-    (pipeline, recent activity) from xl.
+    `Sparkline` (gradient + glow, draws in, pulsing last point), `CountUp`;
+    "Coming up" is a table; `LeadFunnel` is a win-rate ring + one bar split
+    by stage + legend; `WeeklyChart` gradient pill bars that grow in, this
+    week lit, a dashed average. Animations (`.spark-draw`, `.bar-grow`,
+    `.ring-draw`...) only with no-preference for motion.
   - Ctrl+K search: `src/server/search/{service,actions}.ts` (workspace only,
     text cleaned by `searchParam`, 5 per kind) and
     `src/components/search/command-menu.tsx` (combobox + listbox; the

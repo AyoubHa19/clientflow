@@ -169,6 +169,8 @@ for (const colorScheme of ["light", "dark"] as const) {
       await expectNoAxeViolations(page);
       await taskTitles(page).first().click();
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      // The task's own name in the tab streams in after the page.
+      await expect(page).toHaveTitle(/\(sample\) · ClientFlow/);
       await expectNoAxeViolations(page);
     });
   });
