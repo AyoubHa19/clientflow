@@ -55,6 +55,16 @@ export type BoardColumnData = {
 type Move = { id: string; to: LeadStatus };
 
 /** The board after moving one lead: out of its column, to the top of `to`. */
+
+/** A coloured dot per stage, so the columns read at a glance. */
+const STATUS_DOT: Record<LeadStatus, string> = {
+  NEW: "bg-chart-5",
+  CONTACTED: "bg-chart-2",
+  QUALIFIED: "bg-brand",
+  WON: "bg-success",
+  LOST: "bg-destructive/60",
+};
+
 function applyMove(columns: BoardColumnData[], { id, to }: Move): BoardColumnData[] {
   const from = columns.find((column) => column.items.some((lead) => lead.id === id));
   const lead = from?.items.find((item) => item.id === id);
@@ -215,12 +225,13 @@ function BoardColumn({
       aria-labelledby={headingId}
       data-status={column.status}
       className={cn(
-        "flex min-h-48 flex-col gap-2 surface bg-muted/40 p-2 transition-colors",
-        isOver && "border-ring bg-brand-soft/60",
+        "flex min-h-48 flex-col gap-2 surface p-2 transition-colors",
+        isOver && "border-ring! bg-brand-soft/70!",
       )}
     >
       <header className="flex items-center justify-between px-1.5 pt-1">
-        <h2 id={headingId} className="text-sm font-semibold">
+        <h2 id={headingId} className="flex items-center gap-2 text-sm font-semibold">
+          <span aria-hidden className={cn("size-2 rounded-full", STATUS_DOT[column.status])} />
           {label}
         </h2>
         <span className="rounded-full bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground ring-1 ring-border">
@@ -304,7 +315,7 @@ function CardBody({
   return (
     <div
       className={cn(
-        "rounded-lg border bg-card p-3 text-sm shadow-xs",
+        "rounded-xl border border-(--surface-edge) bg-card p-3 text-sm shadow-(--shadow-card) transition duration-200 hover:-translate-y-0.5",
         overlay && "w-60 rotate-1 shadow-lg ring-2 ring-ring/40",
       )}
     >

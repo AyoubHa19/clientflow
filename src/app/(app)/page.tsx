@@ -20,7 +20,7 @@ async function Overview() {
   const today = todayIn(workspace.timezone, now);
   const [dashboard, activity] = await Promise.all([
     getDashboard(db, ctx, today),
-    listActivity(db, ctx, { type: "all", page: 1, perPage: 8 }),
+    listActivity(db, ctx, { type: "all", page: 1, perPage: 6 }),
   ]);
   const firstName = user.name.trim().split(/\s+/)[0] ?? user.name;
   const allStarted = Object.values(dashboard.started).every(Boolean);
@@ -32,31 +32,38 @@ async function Overview() {
         description={`Here's what's happening in ${workspace.name}.`}
       />
       {!allStarted && <GettingStarted started={dashboard.started} />}
-      <KpiCards counts={dashboard.counts} />
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
-        <Deadlines deadlines={dashboard.deadlines} today={today} />
-        <LeadFunnel funnel={dashboard.funnel} conversion={dashboard.conversion} />
-        <WeeklyChart weekly={dashboard.weekly} />
-        <section aria-labelledby="activity-title" className="surface p-4">
-          <div className="flex items-start justify-between gap-2">
-            <h2 id="activity-title" className="font-medium">
-              Recent activity
-            </h2>
-            {activity.total > 0 && (
-              <Link
-                href="/activity"
-                className="text-sm font-medium text-brand underline-offset-4 hover:underline"
-              >
-                See all
-              </Link>
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-[minmax(0,1fr)_19rem]">
+        <div className="grid min-w-0 content-start gap-4">
+          <KpiCards counts={dashboard.counts} trends={dashboard.trends} />
+          <Deadlines deadlines={dashboard.deadlines} today={today} />
+          <WeeklyChart weekly={dashboard.weekly} />
+        </div>
+        {/* The right-hand column: the pipeline and what just happened. */}
+        <div className="grid min-w-0 content-start gap-4 lg:grid-cols-2 xl:grid-cols-1">
+          <LeadFunnel funnel={dashboard.funnel} conversion={dashboard.conversion} />
+          <section aria-labelledby="activity-title" className="spotlight relative surface p-4">
+            <div className="flex items-start justify-between gap-2">
+              <h2 id="activity-title" className="font-semibold">
+                Recent activity
+              </h2>
+              {activity.total > 0 && (
+                <Link
+                  href="/activity"
+                  className="text-sm font-medium text-brand underline-offset-4 hover:underline"
+                >
+                  See all
+                </Link>
+              )}
+            </div>
+            {activity.items.length === 0 ? (
+              <p className="mt-6 text-sm text-muted-foreground">
+                Nothing yet: changes show up here.
+              </p>
+            ) : (
+              <ActivityFeed items={activity.items} timeZone={workspace.timezone} now={now} />
             )}
-          </div>
-          {activity.items.length === 0 ? (
-            <p className="mt-6 text-sm text-muted-foreground">Nothing yet: changes show up here.</p>
-          ) : (
-            <ActivityFeed items={activity.items} timeZone={workspace.timezone} now={now} />
-          )}
-        </section>
+          </section>
+        </div>
       </div>
     </>
   );

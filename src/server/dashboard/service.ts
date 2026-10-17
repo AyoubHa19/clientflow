@@ -115,6 +115,21 @@ export async function getDashboard(db: Db, ctx: WorkspaceContext, today: string)
     .filter((task) => task.completedAt)
     .map((task) => todayIn(tz, task.completedAt!));
 
+  // What was added each week, for the small charts on the cards.
+  const since = { workspaceId, createdAt: { gte: firstWeek } };
+  const created = { select: { createdAt: true } } as const;
+  const [newClients, newLeads, newProjects, newTasks] = await Promise.all([
+    db.client.findMany({ where: since, ...created }),
+    db.lead.findMany({ where: since, ...created }),
+    db.project.findMany({ where: since, ...created }),
+    db.task.findMany({ where: since, ...created }),
+  ]);
+  const perWeek = (rows: { createdAt: Date }[]) =>
+    countByWeek(
+      rows.map((row) => todayIn(tz, row.createdAt)),
+      weeks,
+    ).map((week) => week.count);
+
   return {
     counts: {
       activeClients,
@@ -128,6 +143,13 @@ export async function getDashboard(db: Db, ctx: WorkspaceContext, today: string)
     conversion: { won, lost, rate: conversionRate(won, lost), convertedThisMonth },
     deadlines,
     weekly: countByWeek(completedDays, weeks),
+    /** Added per week over the same 8 weeks, oldest first. */
+    trends: {
+      clients: perWeek(newClients),
+      leads: perWeek(newLeads),
+      projects: perWeek(newProjects),
+      tasks: perWeek(newTasks),
+    },
     started: {
       client: anyClient > 0,
       lead: anyLead > 0,

@@ -144,6 +144,20 @@ colours.
   cards. Buttons are pills; the font is Manrope. The colours are tokens in
   `src/app/globals.css`, and `npm run check:contrast` measures every text
   pair (at least 4.5:1).
+- **Inside the app** everything floats on one glass panel over a still
+  sky (clouds by day, stars by night). The frosted look is the sky photo
+  blurred in advance (3 KB) and fixed behind the panel, so scrolling costs
+  nothing; cards are a lighter (day) or darker (night) glass on top. Text
+  on the glass was measured on screenshots: at least 4.8:1. On phones the
+  panel fills the screen.
+- **The dashboard**: four cards with a small chart of what was added each
+  week (8 weeks) and numbers that count up as the page opens; "Coming up"
+  as a table with status badges; the pipeline and the latest changes in a
+  column on the right. Cards lift a little on hover, with a soft light
+  that follows the mouse (behind the text, so contrast never drops).
+- **Search everything** with the bar at the top or **Ctrl+K** / **⌘K**:
+  clients, leads, projects and tasks of your workspace (only yours), by
+  name. Arrow keys to choose, Enter to open, Escape to close.
 - **Visitors** see a landing page at `/` (signed-in people get their
   dashboard there). Its sky is a photo: clouds by day, stars by night,
   drifting slowly, with a few stars twinkling at night. A product preview

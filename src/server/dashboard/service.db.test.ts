@@ -7,6 +7,7 @@ import { createProject } from "@/server/projects/service";
 import { createTask, setTaskDone } from "@/server/tasks/service";
 import { getTestDatabaseUrl } from "@/test/test-database";
 import { createWorkspace, type WorkspaceContext } from "@/server/workspace/service";
+import { todayIn } from "@/lib/dates";
 import { getDashboard, listActivity } from "./service";
 
 let db: Db;
@@ -179,6 +180,24 @@ describe("the dashboard", () => {
     const dashboard = await getDashboard(db, a, TODAY);
     expect(dashboard.weekly.at(-1)).toEqual({ weekStart: "2026-10-12", count: 1 });
     expect(dashboard.weekly.at(-2)).toEqual({ weekStart: "2026-10-05", count: 0 });
+  });
+});
+
+describe("trends", () => {
+  it("counts what was added each week, this week last, and only the workspace's own", async () => {
+    const [a, b] = [await owner("Trends A"), await owner("Trends B")];
+    const today = todayIn("UTC");
+    for (const name of ["One (sample)", "Two (sample)"]) {
+      if (!(await createClient(db, a, { name })).ok) throw new Error("client");
+    }
+    if (!(await createLead(db, a, { contactName: "Lead (sample)" })).ok) throw new Error("lead");
+    if (!(await createClient(db, b, { name: "B's client (sample)" })).ok) throw new Error("b");
+
+    const { trends } = await getDashboard(db, a, today);
+    expect(trends.clients).toEqual([0, 0, 0, 0, 0, 0, 0, 2]);
+    expect(trends.leads).toEqual([0, 0, 0, 0, 0, 0, 0, 1]);
+    expect(trends.projects).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+    expect(trends.tasks).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
   });
 });
 

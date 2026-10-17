@@ -108,6 +108,13 @@
   --sidebar-border: oklch(0.915 0.014 280);
   --sidebar-ring: oklch(0.5 0.15 270);
   --shadow-card: 0 1px 2px oklch(0.3 0.05 270 / 4%), 0 8px 24px -12px oklch(0.3 0.06 270 / 14%);
+  /* Glass: the app's panel (a veil over the blurred sky) and its cards. */
+  --sky-photo-still: url("/sky/day-1200.webp");
+  --sky-photo-blur: url("/sky/day-blur.webp");
+  --glass-veil: oklch(0.985 0.006 280 / 80%);
+  --glass-edge: oklch(1 0 0 / 70%);
+  --surface-fill: oklch(1 0 0 / 78%);
+  --surface-edge: oklch(1 0 0 / 85%);
   color-scheme: light;
 }
 
@@ -149,15 +156,83 @@
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.76 0.11 272);
   --shadow-card: 0 1px 2px oklch(0 0 0 / 30%), 0 12px 32px -16px oklch(0 0 0 / 60%);
+  --sky-photo-still: url("/sky/night-1200.webp");
+  --sky-photo-blur: url("/sky/night-blur.webp");
+  --glass-veil: oklch(0.13 0.02 266 / 66%);
+  --glass-edge: oklch(1 0 0 / 9%);
+  --surface-fill: oklch(0.19 0.024 266 / 72%);
+  --surface-edge: oklch(1 0 0 / 8%);
   color-scheme: dark;
 }
 
 /* A card-like surface: the page's cards, lists and panels. */
 @utility surface {
   border-radius: var(--radius-xl);
-  border: 1px solid var(--color-border);
-  background-color: var(--color-card);
+  border: 1px solid var(--surface-edge);
+  background-color: var(--surface-fill);
   box-shadow: var(--shadow-card);
+}
+
+/*
+  The signed-in app floats as one glass panel over a still sky. The panel's
+  "frosted" look is the sky photo blurred in advance (a 3 KB file) fixed to
+  the viewport exactly like the sky behind it, under a veil: it looks like
+  backdrop blur but costs nothing while scrolling. Phones (no room for a
+  frame, and fixed backgrounds don't work well there) get the veil over a
+  plain tint instead.
+*/
+/*
+  A soft light that follows the mouse across a card (src/components/shell/
+  spotlight.tsx sets --spot-x/--spot-y). It sits behind the card's content
+  (isolate + z-index -1), so it never lowers text contrast.
+*/
+.spotlight {
+  isolation: isolate;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    260px circle at var(--spot-x, 50%) var(--spot-y, -30%),
+    oklch(0.85 0.08 272 / 45%),
+    transparent 65%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.dark .spotlight::before {
+  background: radial-gradient(
+    260px circle at var(--spot-x, 50%) var(--spot-y, -30%),
+    oklch(0.7 0.12 272 / 16%),
+    transparent 65%
+  );
+}
+.spotlight:hover::before {
+  opacity: 1;
+}
+
+@utility app-sky {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  background: var(--sky-photo-still) center / cover no-repeat;
+  background-color: var(--background);
+}
+@utility glass-panel {
+  background:
+    linear-gradient(var(--glass-veil), var(--glass-veil)),
+    linear-gradient(var(--background), var(--background));
+  @media (min-width: 1024px) {
+    background:
+      linear-gradient(var(--glass-veil), var(--glass-veil)),
+      var(--sky-photo-blur) center / cover no-repeat fixed;
+    border: 1px solid var(--glass-edge);
+    box-shadow: 0 30px 80px -30px oklch(0.25 0.06 260 / 40%);
+  }
 }
 
 @layer base {

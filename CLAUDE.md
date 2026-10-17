@@ -256,6 +256,26 @@ end of every stage.
     (password in the URL). They're `method="post"` now, and their buttons
     wait for hydration (`useHydrated`, `src/lib/use-hydrated.ts`); tested
     in `e2e/security.spec.ts`.
+- **Glass app round (2026-10-17), from a picture the user sent (a glassy
+  dashboard over a colourful backdrop).** The landing page stays as it is
+  for now; the user wants to add things to it later.
+  - `AppShell`: a still sky (`app-sky`, fixed) and one `glass-panel` (from
+    lg: rounded, the pre-blurred `/sky/*-blur.webp` fixed under
+    `--glass-veil`; no backdrop-filter, for speed). Top bar with the search
+    and the theme; the side bar has a "Quick add" card. `--surface-fill` /
+    `--surface-edge` make cards translucent glass. Text on the panel
+    measured from screenshots: light ≥ 4.8:1 (veil 80%), dark ≥ 7:1.
+  - Dashboard: `trends` (added per week, 8 weeks) in `getDashboard`;
+    `Sparkline`, `CountUp`; "Coming up" is a table; a right-hand column
+    (pipeline, recent activity) from xl.
+  - Ctrl+K search: `src/server/search/{service,actions}.ts` (workspace only,
+    text cleaned by `searchParam`, 5 per kind) and
+    `src/components/search/command-menu.tsx` (combobox + listbox; the
+    status line sits outside the listbox, or axe complains). Tests:
+    `src/server/search/service.db.test.ts`, `e2e/search.spec.ts`.
+  - `.spotlight` cards: a light that follows the mouse
+    (`shell/spotlight.tsx`), behind the content via isolate + z-index -1.
+  - Leads board columns: glass with a coloured dot per stage.
 - **Next: Stage 13, portfolio and product readiness** (PRD 14): README,
   screenshots, architecture summary, feature list, setup, demo data
   strategy (the shared demo account could be changed by visitors: decide
