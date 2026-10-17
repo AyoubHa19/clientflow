@@ -146,9 +146,24 @@ end of every stage.
 - For Stage 10 (UX polish): on phones, /tasks shows quick add and all
   filters before any task; collapse the filters (and maybe the quick add
   options) on small screens.
-- **Next: Stage 9, dashboard and activity** (real numbers: active clients,
-  open leads, active projects, pending and overdue tasks; recent activity
-  from the `activities` table; upcoming deadlines; the leads funnel).
+- **Stage 9, dashboard and activity: done (2026-10-17).** The overview
+  (`src/app/(app)/page.tsx`) reads `getDashboard(db, ctx, today)` and
+  `listActivity` (`src/server/dashboard/service.ts`; date helpers in
+  `src/lib/dashboard.ts`). Four cards, each a link to the matching list:
+  active clients, open leads, open projects (same as the projects list's
+  default filter, with "N on hold"), pending tasks (with "N overdue",
+  linking to `/tasks?due=overdue`). "Coming up": unfinished projects and
+  tasks due in the next 14 days, overdue first. The leads funnel with the
+  win rate (won / (won + lost)) and conversions this month. "Tasks
+  completed": 8 weeks (Monday starts, by `completedAt` in the workspace's
+  time zone), bars from plain divs plus a hidden table. A "Getting
+  started" checklist until there's a client, lead, project and task.
+  `/activity` (in the nav): every change, type filter (links), 25 per
+  page; an entry links to its record only while it still exists. Nothing
+  new in the database.
+- **Next: Stage 10, UX and responsive polish** (PRD 14): responsive
+  behaviour, accessibility, loading and error states, forms, navigation,
+  motion. Include the /tasks phone note above.
 
 ## Running it
 
@@ -237,3 +252,6 @@ playwright test e2e/x.spec.ts`; the full suite once at the end.
 - Neon URLs use `sslmode=verify-full` (pg warns about `require`).
 - The generated Prisma client is in `src/generated/prisma` (ignored by
   Git, Prettier and ESLint); import from `@/generated/prisma/client`.
+- Python on this PC defaults to cp1252: open files with
+  `encoding="utf-8"`, or a failed write leaves the file empty (it emptied
+  CLAUDE.md once; restored from Git).

@@ -107,6 +107,21 @@ colours.
 - Project pages list their tasks (with their own quick add) and show
   progress, "3 of 5 tasks done"; the projects list shows it too.
 
+## Dashboard
+
+- The overview shows four numbers, each opening the matching list: active
+  clients, open leads, open projects (and how many are on hold), pending
+  tasks (and how many are overdue).
+- "Coming up": unfinished projects and tasks that are overdue or due in
+  the next 14 days. The leads pipeline per stage, with the win rate (won
+  out of won and lost) and the leads converted this month. Tasks completed
+  per week over the last 8 weeks (weeks start on Monday, in the
+  workspace's time zone). The latest changes.
+- A new workspace sees a "Getting started" checklist until it has a
+  client, a lead, a project and a task.
+- `/activity`: every change in the workspace, newest first, filtered by
+  type, 25 per page. An entry links to its record while it still exists.
+
 ## Signing in
 
 - `/sign-up` and `/sign-in` (Better Auth, email and password). Passwords

@@ -1,5 +1,6 @@
 import {
   FolderKanbanIcon,
+  HistoryIcon,
   LayoutDashboardIcon,
   ListChecksIcon,
   SettingsIcon,
@@ -18,6 +19,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/leads", label: "Leads", icon: TargetIcon },
   { href: "/projects", label: "Projects", icon: FolderKanbanIcon },
   { href: "/tasks", label: "Tasks", icon: ListChecksIcon },
+  { href: "/activity", label: "Activity", icon: HistoryIcon },
   { href: "/settings", label: "Settings", icon: SettingsIcon },
 ];
 
