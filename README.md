@@ -3,11 +3,12 @@
 A calm workspace for freelancers and small agencies: clients, leads,
 projects and tasks in one place.
 
-> **Status:** in development, built one stage at a time (see `PRD.md`,
-> section 14). Done so far: **Stage 1**, project foundation; **Stage 2**,
-> database; **Stage 3**, sign-up, sign-in and sign-out; **Stage 4**,
-> workspaces and data isolation; **Stage 5**, clients; **Stage 6**, leads;
-> **Stage 7**, projects; **Stage 8**, tasks. The dashboard comes next.
+> **Live:** https://clientflow-ayoubha19.vercel.app
+>
+> Built one stage at a time (see `PRD.md`, section 14): foundation,
+> database, sign-in, workspaces, clients, leads, projects, tasks, the
+> dashboard, UX polish, a security review and deployment (stages 1–12).
+> Next: portfolio readiness (stage 13).
 
 ## Stack
 
@@ -187,10 +188,42 @@ real data:
 | --------------------- | ----------------------------------------------------------------------------- |
 | `npm run db:migrate`  | After editing `prisma/schema.prisma`: writes and applies a migration on `dev` |
 | `npm run db:studio`   | Opens Prisma Studio to look at the `dev` data                                 |
-| `npm run db:deploy`   | Applies migrations without creating any (production, Stage 12)                |
+| `npm run db:deploy`   | Applies migrations without creating any (used for production, see below)      |
 | `npm run db:generate` | Regenerates the Prisma client (also runs after `npm install`)                 |
 
 The schema is in `prisma/schema.prisma`, with a comment on each rule.
+
+## Deployment
+
+- **Where:** Vercel (free plan), project `clientflow`, linked to the GitHub
+  repository. Every push to `main` builds and goes live at
+  https://clientflow-ayoubha19.vercel.app. The functions run in Frankfurt
+  (`vercel.json`), next to the database.
+- **Database:** Neon's `production` branch (Frankfurt), separate from `dev`
+  and `test`.
+- **Settings** (Vercel, Production environment, marked sensitive):
+  `DATABASE_URL` (Neon's pooled address for `production`, with
+  `sslmode=verify-full`), `BETTER_AUTH_SECRET` (its own random value, not
+  the development one) and `BETTER_AUTH_URL` (the address above). Never
+  set `AUTH_RATE_LIMIT` there: it exists only for the browser tests.
+- **Migrations** are applied by hand, before pushing code that needs
+  them: run `npm run db:deploy` with `DIRECT_DATABASE_URL` set to the
+  `production` branch's direct (non-pooled) address. It only applies
+  migrations that aren't there yet.
+- **Demo account:** `npm run seed:sample` with `DATABASE_URL`,
+  `SAMPLE_USER_EMAIL` and `SAMPLE_USER_PASSWORD` set creates "Sara Bennani
+  (sample)" and a workspace full of example data; it does nothing if the
+  account exists. On the live site its email and password are kept
+  privately, not in the repository.
+- **Going back:** if a release breaks something, promote the previous
+  deployment in Vercel (Deployments → ⋯ → Promote, or `vercel rollback`),
+  then fix and push. A migration isn't undone that way: write a new one.
+- **Checked after deploying:** the security headers (including HSTS),
+  http → https, sign-up's validation, the sign-in rate limit (the sixth
+  try in a minute gets 429), and the pages on phone and desktop.
+- Vercel's automatic addresses for each deployment are protected by Vercel
+  (only the account owner can open them); the public address is the one
+  above. Branch previews have no settings, so only `main` is deployed.
 
 ## Checks
 

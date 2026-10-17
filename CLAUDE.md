@@ -53,7 +53,7 @@ end of every stage.
 - Added features (each in its stage): leads Kanban (6), activity log (9),
   dark mode (done in 1), Ctrl+K search (10), "Try the demo" account (13).
 - Password reset waits until there's a domain for sending email.
-- Deploys happen in Stage 12 only (unlike Pocketwise).
+- Deployed since Stage 12: every push to `main` goes live (see "Where things stand").
 
 ## Where things stand
 
@@ -204,9 +204,27 @@ end of every stage.
      Revisit after 2026-10-29 (too new to install today): React 19.3.1, and
      `@vitest/coverage-v8` for a coverage report (for now, a script listed
      untested exports; the gaps were filled).
-- **Next: Stage 12, deployment** (PRD 14): production environment
-  variables, the Neon production branch, migrations, deploying, a smoke
-  test, and documenting it.
+- **Stage 12, deployment: done (2026-10-17).** Live at
+  https://clientflow-ayoubha19.vercel.app (Vercel project `clientflow`,
+  team scope `bnaybir`, linked to GitHub; every push to `main` deploys).
+  Functions in `fra1` (`vercel.json`). Neon `production` branch migrated.
+  Vercel Production settings (sensitive): `DATABASE_URL`,
+  `BETTER_AUTH_SECRET` (its own), `BETTER_AUTH_URL`. Vercel CLI: use
+  `npx -y vercel@62.2.0 ... --scope bnaybir` (signed in as `ayoubha19`);
+  its update check prints EPIPE noise, ignore it. Demo account on
+  production made by `scripts/seed-sample.ts`; its email and password are
+  `PRODUCTION_SAMPLE_USER_EMAIL` / `PRODUCTION_SAMPLE_USER_PASSWORD` in
+  `.env.local` (never print them). Smoke-tested without signing in
+  (Claude may not type passwords on non-local sites): headers + HSTS,
+  http → https, sign-up validation (400), rate limit (429 on the 6th
+  try), phone layout. The signed-in pages on the live site need the user
+  to sign in (in the browser pane) for Claude to look.
+  Production commands: the auto-mode classifier blocks them unless the
+  user has just said yes in chat; ask first, every time.
+- **Next: Stage 13, portfolio and product readiness** (PRD 14): README,
+  screenshots, architecture summary, feature list, setup, demo data
+  strategy (the shared demo account could be changed by visitors: decide
+  read-only, a reset, or per-visitor demos), known limits, roadmap.
 
 ## Running it
 
