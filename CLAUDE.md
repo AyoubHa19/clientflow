@@ -390,8 +390,21 @@ end of every stage.
   shared `TaskList`, the task and project links were under 24px at 320px
   (axe target-size): now `py-0.5` and `leading-6`. After adding an export,
   restart `npm run dev` ("x is not a function").
-- **Next: project templates and installing as an app (PWA)** (small), then
-  **Stage 13, portfolio and product readiness** (PRD 14): README,
+- **Stage 19, project templates and PWA: done (2026-10-18).** Templates:
+  `src/lib/templates.ts` (built-ins in code, `templateTasksSchema`,
+  `tasksToTemplate`), table `project_templates` (tasks as JSONB, name unique
+  per workspace), `src/server/templates/service.ts`; `createProject(...,
+{ template })` makes the tasks in its transaction. UI: "Start from" on
+  the new project form, `SaveTemplate` dialog on the project page,
+  `TemplateList` in Settings. PWA: `src/app/manifest.ts`, icons rendered by
+  a Playwright script from icon.svg (`public/icons/*`, `src/app/apple-icon.png`),
+  `public/sw.js` + `public/offline.html` (registered in production only by
+  `components/pwa/service-worker.tsx`; caches only the offline page),
+  `experimental.useOffline` + `OfflineNotice` in the shell. `e2e/pwa.spec.ts`
+  checks Chrome's installability (CDP `Page.getInstallabilityErrors`) and
+  the offline page. Dev sample: project "Atlas Café website (sample)" from
+  the Website template, and the template "Café website (sample)".
+- **Next: Stage 13, portfolio and product readiness** (the last one) (PRD 14): README,
   screenshots, architecture summary, feature list, setup, demo data
   strategy (the shared demo account could be changed by visitors: decide
   read-only, a reset, or per-visitor demos; Claude proposed a "Try the

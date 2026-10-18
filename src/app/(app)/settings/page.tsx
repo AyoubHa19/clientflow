@@ -6,13 +6,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { SettingsForm } from "@/components/workspace/settings-form";
 import { timeZoneOptions } from "@/lib/validation/workspace";
 import { requireWorkspace } from "@/server/workspace/context";
+import { TemplateList } from "@/components/projects/template-list";
+import { BUILT_IN_TEMPLATES } from "@/lib/templates";
+import { db } from "@/server/db";
+import { listTemplates } from "@/server/templates/service";
 
 export const metadata: Metadata = { title: "Settings" };
 
 const ROLE_LABELS = { OWNER: "Owner", MEMBER: "Member" } as const;
 
 async function Settings() {
-  const { user, workspace, role } = await requireWorkspace();
+  const ctx = await requireWorkspace();
+  const { user, workspace, role } = ctx;
+  const templates = await listTemplates(db, ctx);
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
@@ -32,6 +38,28 @@ async function Settings() {
             timezone={workspace.timezone}
             currency={workspace.currency}
             canEdit={role === "OWNER"}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <h2>Project templates</h2>
+          </CardTitle>
+          <CardDescription>
+            Start a project with its tasks ready. Ready-made:{" "}
+            {BUILT_IN_TEMPLATES.map((t) => t.name).join(", ")}. Yours:
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TemplateList
+            templates={templates.map((template) => ({
+              id: template.id,
+              name: template.name,
+              tasks: template.tasks.length,
+            }))}
+            canDelete={role === "OWNER"}
           />
         </CardContent>
       </Card>

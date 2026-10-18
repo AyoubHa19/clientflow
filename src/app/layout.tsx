@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope } from "next/font/google";
 import { BrandDefs } from "@/components/brand/logo";
+import { ServiceWorker } from "@/components/pwa/service-worker";
 import { InlineScript } from "@/components/theme/inline-script";
 import { ThemeSync } from "@/components/theme/theme-sync";
 import { Toaster } from "@/components/ui/sonner";
@@ -14,6 +15,8 @@ export const metadata: Metadata = {
   title: { default: "ClientFlow", template: "%s · ClientFlow" },
   description:
     "Clients, leads, projects and tasks in one calm workspace, for freelancers and small agencies.",
+  // Installed on an iPhone's home screen, it opens without Safari's bars.
+  appleWebApp: { capable: true, title: "ClientFlow", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {
@@ -36,6 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <TooltipProvider>{children}</TooltipProvider>
         <Toaster />
         <ThemeSync />
+        <ServiceWorker />
       </body>
     </html>
   );

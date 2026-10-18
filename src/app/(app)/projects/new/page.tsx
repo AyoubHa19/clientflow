@@ -9,6 +9,7 @@ import { firstParam } from "@/lib/validation/fields";
 import { db } from "@/server/db";
 import { createProjectAction } from "@/server/projects/actions";
 import { clientOptions } from "@/server/projects/service";
+import { templateChoices } from "@/server/templates/service";
 import { requireWorkspace } from "@/server/workspace/context";
 
 export const metadata: Metadata = { title: "New project" };
@@ -19,7 +20,10 @@ async function NewProject({
   searchParams: PageProps<"/projects/new">["searchParams"];
 }) {
   const ctx = await requireWorkspace();
-  const clients = await clientOptions(db, ctx);
+  const [clients, templates] = await Promise.all([
+    clientOptions(db, ctx),
+    templateChoices(db, ctx),
+  ]);
   // ?clientId= from a client's page picks that client, if it's one of ours.
   const wanted = firstParam((await searchParams).clientId) ?? "";
   const clientId = clients.some((client) => client.id === wanted) ? wanted : "";
@@ -31,6 +35,7 @@ async function NewProject({
       initial={{ clientId }}
       submitLabel="Add project"
       currency={ctx.workspace.currency}
+      templates={templates}
       cancelHref={clientId ? `/clients/${clientId}` : "/projects"}
     />
   );

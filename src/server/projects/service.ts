@@ -16,6 +16,7 @@ import {
   ok,
   type ServiceResult,
 } from "@/server/result";
+import { createTemplateTasks, findTemplate, NO_SUCH_TEMPLATE } from "@/server/templates/service";
 import type { WorkspaceContext } from "@/server/workspace/service";
 
 // Project rules. Every query is limited to the caller's workspace, and a
@@ -173,10 +174,17 @@ function logActivity(
   });
 }
 
+/**
+ * Adds a project. With `template` ("builtin:website" or one of the
+ * workspace's template ids), it starts with that template's tasks (due
+ * dates counted from its start, or today) and, if it has none, the
+ * template's description.
+ */
 export async function createProject(
   db: Db,
   ctx: WorkspaceContext,
   input: unknown,
+  options: { template?: string | null } = {},
 ): Promise<ServiceResult<ProjectRecord>> {
   const parsed = projectSchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
@@ -186,11 +194,26 @@ export async function createProject(
     if (clientId && !(await clientInWorkspace(tx, ctx, clientId))) {
       return invalidFields(NO_SUCH_CLIENT);
     }
+    const template = options.template ? await findTemplate(tx, ctx, options.template) : null;
+    if (options.template && !template) return invalidFields(NO_SUCH_TEMPLATE);
     const project = await tx.project.create({
-      data: { ...parsed.data, workspaceId: ctx.workspace.id },
+      data: {
+        ...parsed.data,
+        description: parsed.data.description ?? template?.description ?? null,
+        workspaceId: ctx.workspace.id,
+      },
       select: projectFields,
     });
-    await logActivity(tx, ctx, project.id, "CREATED", `Added project ${project.name}`);
+    if (template) await createTemplateTasks(tx, ctx, project, template.tasks);
+    await logActivity(
+      tx,
+      ctx,
+      project.id,
+      "CREATED",
+      template
+        ? `Added project ${project.name} from the ${template.name} template`
+        : `Added project ${project.name}`,
+    );
     return ok(project);
   });
 }

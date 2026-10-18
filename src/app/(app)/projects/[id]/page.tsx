@@ -10,7 +10,9 @@ import { PageContainer } from "@/components/shell/page-header";
 import { TaskList } from "@/components/tasks/task-list";
 import { TaskQuickAdd } from "@/components/tasks/task-quick-add";
 import { toTaskItems } from "@/components/tasks/to-task-items";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SaveTemplate } from "@/components/projects/save-template";
+import { saveAsTemplateAction } from "@/server/projects/actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { formatDate, formatDateOnly, todayIn, toDateOnly } from "@/lib/dates";
@@ -156,6 +158,13 @@ async function ProjectDetails({ params }: { params: PageProps<"/projects/[id]">[
             <CardTitle>
               <h2>Tasks</h2>
             </CardTitle>
+            <CardAction>
+              <SaveTemplate
+                action={saveAsTemplateAction.bind(null, project.id)}
+                projectName={project.name}
+                taskCount={tasks.length}
+              />
+            </CardAction>
           </CardHeader>
           <CardContent className="grid gap-4">
             <ProgressBar done={progress.done} total={progress.total} />

@@ -126,6 +126,28 @@ colours.
   time zone**, and disappear once a project is completed or cancelled.
 - A client's page lists their projects and starts a new one for them.
 
+## Project templates
+
+- **Start from** on the new project form: a blank project, a ready-made
+  template (Website, Logo & brand, Social media month) or one of yours. Its
+  tasks are created with the project, their due dates counted from its
+  start date (or today); its description is used if you didn't write one.
+- **Save as template** on a project's page keeps its tasks (due dates as
+  days after the project's start). Names are unique per workspace;
+  Settings lists them, and the owner can delete them.
+
+## Install it like an app
+
+- ClientFlow has a web app manifest (`src/app/manifest.ts`) and icons
+  (`public/icons`, rendered from `src/app/icon.svg`), so phones and
+  computers offer to install it; it opens on Today.
+- A small service worker (`public/sw.js`, production only) shows a friendly
+  offline page when a page can't load. It **never stores pages or data**:
+  they're private and change all the time.
+- With the connection gone, the app says so at the top; page changes and
+  saves wait and go through when it's back (Next's experimental
+  `useOffline`).
+
 ## Today and the week in review
 
 - **`/today`** (in the menu): unfinished tasks due today or late (tick them

@@ -65,6 +65,7 @@ describe("migrations", () => {
       "activities",
       "clients",
       "leads",
+      "project_templates",
       "projects",
       "rate_limits",
       "sessions",

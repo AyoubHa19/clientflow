@@ -59,6 +59,7 @@ model Workspace {
   tasks       Task[]
   activities  Activity[]
   timeEntries TimeEntry[]
+  templates   ProjectTemplate[]
 
   @@map("workspaces")
 }
@@ -237,6 +238,28 @@ model Task {
   @@index([workspaceId, updatedAt])
   @@index([projectId])
   @@map("tasks")
+}
+
+// ---------------------------------------------------------------------------
+// Project templates (Stage 19)
+// ---------------------------------------------------------------------------
+
+// A workspace's own project templates (the built-in ones live in the code).
+// `tasks` is a JSON list of { title, priority, dueInDays }, checked by
+// templateTasksSchema in src/lib/templates.ts on the way in and out.
+model ProjectTemplate {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  workspaceId String   @db.Uuid
+  name        String   @db.VarChar(100)
+  description String?  @db.VarChar(500)
+  tasks       Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, name])
+  @@map("project_templates")
 }
 
 // ---------------------------------------------------------------------------

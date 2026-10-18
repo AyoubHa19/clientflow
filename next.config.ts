@@ -47,9 +47,22 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Next's dev-only badge would sit over the side bar's theme switch.
   devIndicators: { position: "bottom-right" },
+  experimental: {
+    // When the connection drops, page changes and saves wait and are retried
+    // once it's back, and useOffline() can say so (OfflineNotice).
+    useOffline: true,
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
+      // The service worker: always the latest version, never from a cache.
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+          { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+        ],
+      },
       // Clients' status pages: the link is the key, so it must not leak to
       // other sites through the Referer header, or end up in search results.
       {

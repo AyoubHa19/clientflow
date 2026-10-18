@@ -12,6 +12,7 @@ import { db } from "@/server/db";
 import { requireWorkspace } from "@/server/workspace/context";
 import { createProject, deleteProject, setProjectStatus, updateProject } from "./service";
 import { setShareTasks, shareProject, stopSharing } from "./sharing";
+import { deleteTemplate, saveAsTemplate } from "@/server/templates/service";
 
 export type ProjectFormState = {
   errors?: Record<string, string>;
@@ -39,9 +40,38 @@ export async function createProjectAction(
 ): Promise<ProjectFormState> {
   const ctx = await requireWorkspace();
   const values = readForm(formData);
-  const result = await createProject(db, ctx, values);
-  if (!result.ok) return { errors: result.errors, message: result.message, values };
+  const template = String(formData.get("template") ?? "");
+  const result = await createProject(db, ctx, values, { template: template || null });
+  if (!result.ok) {
+    return { errors: result.errors, message: result.message, values: { ...values, template } };
+  }
   redirect(`/projects/${result.value.id}?notice=created`);
+}
+
+/** "Save as template" on a project's page: its tasks become a template. */
+export async function saveAsTemplateAction(
+  projectId: string,
+  _previous: ProjectFormState,
+  formData: FormData,
+): Promise<ProjectFormState & { savedAt?: number }> {
+  const ctx = await requireWorkspace();
+  const name = String(formData.get("name") ?? "");
+  const result = await saveAsTemplate(db, ctx, projectId, { name });
+  if (!result.ok) return { errors: result.errors, message: result.message, values: { name } };
+  refresh();
+  const { tasks } = result.value;
+  return {
+    savedAt: Date.now(),
+    message: `Saved "${result.value.name}" with ${tasks} ${tasks === 1 ? "task" : "tasks"}`,
+  };
+}
+
+export async function deleteTemplateAction(id: string) {
+  const ctx = await requireWorkspace();
+  const result = await deleteTemplate(db, ctx, id);
+  if (!result.ok) return { ok: false as const, message: result.message };
+  refresh();
+  return { ok: true as const };
 }
 
 export async function updateProjectAction(

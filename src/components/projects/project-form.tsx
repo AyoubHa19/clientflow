@@ -28,6 +28,7 @@ export type ProjectFormValues = {
   startDate: string;
   dueDate: string;
   fee: string;
+  template: string;
 };
 
 const STATUS_OPTIONS = PROJECT_STATUSES.map((status) => ({
@@ -43,6 +44,7 @@ export function ProjectForm({
   submitLabel,
   cancelHref,
   currency,
+  templates,
 }: {
   action: (state: ProjectFormState, formData: FormData) => Promise<ProjectFormState>;
   clients: { id: string; name: string }[];
@@ -51,6 +53,8 @@ export function ProjectForm({
   cancelHref: string;
   /** The workspace's currency, for the fee field. */
   currency: string;
+  /** Templates to start from (new projects only). */
+  templates?: { value: string; label: string; ownTemplate: boolean }[];
 }) {
   const form = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(action, {});
@@ -79,6 +83,26 @@ export function ProjectForm({
       <div className="sm:col-span-2">
         <FormMessage>{state.errors ? undefined : state.message}</FormMessage>
       </div>
+      {templates && (
+        <div className="sm:col-span-2">
+          <SelectField
+            key={`template-${values.template}`}
+            label="Start from"
+            name="template"
+            defaultValue={values.template ?? ""}
+            options={[
+              { value: "", label: "A blank project" },
+              ...templates.map((template) => ({
+                value: template.value,
+                label: template.ownTemplate ? `Your template: ${template.label}` : template.label,
+              })),
+            ]}
+            hint="A template adds its tasks, due dates counted from the start date (or today)."
+            error={errors.template}
+            disabled={pending}
+          />
+        </div>
+      )}
       <div className="sm:col-span-2">
         <FormField
           key={`name-${values.name}`}
