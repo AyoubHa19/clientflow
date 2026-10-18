@@ -48,7 +48,18 @@ const nextConfig: NextConfig = {
   // Next's dev-only badge would sit over the side bar's theme switch.
   devIndicators: { position: "bottom-right" },
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      // Clients' status pages: the link is the key, so it must not leak to
+      // other sites through the Referer header, or end up in search results.
+      {
+        source: "/status/:token",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+        ],
+      },
+    ];
   },
   turbopack: {
     rules: {

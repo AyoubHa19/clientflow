@@ -180,6 +180,13 @@ model Project {
   // What the client pays for it, in minor units (cents) of the workspace's
   // currency (Stage 15).
   fee         Int?
+  // The client's status page (Stage 16): /status/<shareToken>, open to
+  // whoever has the link. A long random secret; null when sharing is off.
+  // A new link replaces it, so the old one stops working.
+  shareToken  String?       @unique @db.VarChar(64)
+  sharedAt    DateTime?
+  // Whether the status page lists the tasks (or only the progress).
+  shareTasks  Boolean       @default(true)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 

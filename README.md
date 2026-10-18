@@ -126,6 +126,23 @@ colours.
   time zone**, and disappear once a project is completed or cancelled.
 - A client's page lists their projects and starts a new one for them.
 
+## Sharing with a client
+
+- On a project's page, **Share with client** makes a link to a status page
+  (`/status/<secret>`): the project's name, client, status, progress, dates
+  and, if the owner allows, its tasks (titles, due dates, done or not). The
+  client needs no account. The fee, the description and notes never show:
+  the page reads only those fields (`getSharedProject`).
+- The secret is 32 random bytes (43 characters), unique in the database.
+  **New link** replaces it (the old link stops working); **Stop sharing**
+  turns it off. Only the owner can do either; both are in the activity log.
+- The page sends `Referrer-Policy: no-referrer` (the link doesn't leak to
+  sites it links to) and `noindex`. A wrong, old or switched-off link gets
+  the same friendly "This link doesn't work" page.
+- The secret is stored as is, not hashed, so the owner can copy the link
+  again later (like a shared document link). Anyone who sees the database
+  could open the status pages, which hold nothing private.
+
 ## Tasks
 
 - `/tasks`: add a task in one line (title, and if wanted a project, due
@@ -244,6 +261,8 @@ colours.
   characters. Odd text in the address bar is cleaned rather than crashing.
 - After signing in, the app only goes to a path on this site, read the way
   a browser reads it.
+- The only pages open without signing in are the landing page, sign-in,
+  sign-up and the clients' status pages (see "Sharing with a client").
 - Passwords are hashed (scrypt) by Better Auth; sign-in and sign-up are
   rate limited and check the request's origin. Their forms are posted
   (never a GET that would put a password in the address), and their

@@ -15,6 +15,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { formatDate, formatDateOnly, todayIn, toDateOnly } from "@/lib/dates";
 import { formatMoney } from "@/lib/money";
+import { ShareCard } from "@/components/projects/share-card";
+import { getShareState, shareUrl } from "@/server/projects/sharing";
 import { db } from "@/server/db";
 import { getProject } from "@/server/projects/service";
 import { projectProgress, tasksForProject } from "@/server/tasks/service";
@@ -47,9 +49,10 @@ async function ProjectDetails({ params }: { params: PageProps<"/projects/[id]">[
   if (!project) notFound();
   const tz = ctx.workspace.timezone;
   const today = todayIn(tz);
-  const [tasks, progressById] = await Promise.all([
+  const [tasks, progressById, share] = await Promise.all([
     tasksForProject(db, ctx, project.id),
     projectProgress(db, ctx, [project.id]),
+    getShareState(db, ctx, project.id),
   ]);
   const progress = progressById[project.id] ?? { done: 0, total: 0 };
 
@@ -123,6 +126,22 @@ async function ProjectDetails({ params }: { params: PageProps<"/projects/[id]">[
               <Detail label="Added">{formatDate(project.createdAt, tz)}</Detail>
               <Detail label="Updated">{formatDate(project.updatedAt, tz)}</Detail>
             </dl>
+          </CardContent>
+        </Card>
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>
+              <h2>Share with client</h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ShareCard
+              projectId={project.id}
+              url={share?.token ? shareUrl(share.token) : null}
+              sharedOn={share?.sharedAt ? formatDate(share.sharedAt, tz) : null}
+              showTasks={share?.showTasks ?? true}
+              canEdit={ctx.role === "OWNER"}
+            />
           </CardContent>
         </Card>
         <Card className="lg:col-span-2">

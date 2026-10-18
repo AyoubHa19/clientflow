@@ -21,8 +21,8 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Everything except the public pages (sign-in, sign-up, the landing page),
-  // Better Auth's endpoints, Next's own files and static files (anything
-  // with a dot, like icon.svg or the sky photos).
-  matcher: ["/((?!sign-in|sign-up|welcome|api/auth|_next/|.*\\..*).*)"],
+  // Everything except the public pages (sign-in, sign-up, the landing page,
+  // clients' status pages), Better Auth's endpoints, Next's own files and
+  // static files (anything with a dot, like icon.svg or the sky photos).
+  matcher: ["/((?!sign-in|sign-up|welcome|status/|api/auth|_next/|.*\\..*).*)"],
 };

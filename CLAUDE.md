@@ -352,8 +352,22 @@ end of every stage.
   Source column became Value, the projects table's Start became Fee (both
   still on the cards and pages). Dev sample: Omar 3,200, Leila 6,500, Hiba
   12,000, Thomas 4,000.50, Karim 18,000 (won); fees on three open projects.
-- **Next: Stage 16, client portal** (a private status link per project; see
-  above). Then **Stage 13, portfolio and product readiness** (PRD 14): README,
+- **Stage 16, client portal: done (2026-10-18).** `Project.shareToken`
+  (unique, 43-char base64url from 32 random bytes; stored as is so the link
+  can be copied again), `sharedAt`, `shareTasks`. Migration
+  `project_sharing` was written by hand: `prisma migrate dev` refuses to run
+  here when it wants to confirm a warning (non-interactive), so use
+  `--create-only` or write the SQL, apply with `prisma migrate deploy`, and
+  check drift with `prisma migrate diff --from-config-datasource
+--to-schema prisma/schema.prisma --exit-code`. Rules in
+  `src/server/projects/sharing.ts` (owner-only share / new link / stop /
+  show tasks; `getSharedProject` selects only safe fields). The public page
+  is `src/app/status/[token]/page.tsx` (sky + glass, like sign-in), open in
+  `proxy.ts`, with no-referrer and noindex headers in `next.config.ts`.
+  `ShareCard` on the project page. Dev sample: "Atlas Café menu design
+  (sample)" is shared.
+- **Next: Stage 17, client health** (time tracking, real hourly rate; see
+  above). Then Stage 18, then **Stage 13, portfolio and product readiness** (PRD 14): README,
   screenshots, architecture summary, feature list, setup, demo data
   strategy (the shared demo account could be changed by visitors: decide
   read-only, a reset, or per-visitor demos; Claude proposed a "Try the

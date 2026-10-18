@@ -11,6 +11,7 @@ import type { ProjectStatus } from "@/lib/validation/project";
 import { db } from "@/server/db";
 import { requireWorkspace } from "@/server/workspace/context";
 import { createProject, deleteProject, setProjectStatus, updateProject } from "./service";
+import { setShareTasks, shareProject, stopSharing } from "./sharing";
 
 export type ProjectFormState = {
   errors?: Record<string, string>;
@@ -71,4 +72,33 @@ export async function deleteProjectAction(id: string) {
   const result = await deleteProject(db, ctx, id);
   if (!result.ok) return { message: result.message };
   redirect("/projects?notice=deleted");
+}
+
+// Sharing a project's status page with its client (Stage 16). Owners only:
+// the service checks the role and that the project is in the workspace.
+
+type ShareResult = { ok: true } | { ok: false; message: string };
+
+export async function shareProjectAction(id: string): Promise<ShareResult> {
+  const ctx = await requireWorkspace();
+  const result = await shareProject(db, ctx, id);
+  if (!result.ok) return { ok: false, message: result.message };
+  refresh();
+  return { ok: true };
+}
+
+export async function stopSharingAction(id: string): Promise<ShareResult> {
+  const ctx = await requireWorkspace();
+  const result = await stopSharing(db, ctx, id);
+  if (!result.ok) return { ok: false, message: result.message };
+  refresh();
+  return { ok: true };
+}
+
+export async function setShareTasksAction(id: string, show: boolean): Promise<ShareResult> {
+  const ctx = await requireWorkspace();
+  const result = await setShareTasks(db, ctx, id, show);
+  if (!result.ok) return { ok: false, message: result.message };
+  refresh();
+  return { ok: true };
 }
