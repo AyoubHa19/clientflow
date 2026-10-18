@@ -37,8 +37,11 @@ test("visitors see the landing page at the home address", async ({ page }) => {
   await page.getByRole("banner").getByRole("link", { name: "Get started" }).click();
   await expect(page).toHaveURL(/\/sign-up$/);
   await page.goto("/");
-  await page.getByRole("main").getByRole("link", { name: "Sign in" }).click();
+  await page.getByRole("banner").getByRole("link", { name: "Sign in" }).click();
   await expect(page).toHaveURL(/\/sign-in$/);
+  // The hero offers the demo (e2e/demo.spec.ts tries it).
+  await page.goto("/");
+  await expect(page.getByRole("main").getByRole("button", { name: "Try the demo" })).toHaveCount(2);
 });
 
 test("signed-in people still get their dashboard at the home address", async ({ page }) => {

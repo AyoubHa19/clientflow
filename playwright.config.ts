@@ -19,8 +19,11 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "github" : "list",
   // A dev server compiles pages on first visit and serves many tests at
-  // once, so give each step more time than the 5-second default.
-  timeout: 60_000,
+  // once, so give each step more time than the 5-second default. The
+  // longest flows (a client from start to delete, axe on every lead page)
+  // take 40-50 s on a normal day; 90 s keeps them from failing when
+  // Neon's free plan is slow.
+  timeout: 90_000,
   expect: { timeout: 15_000 },
   use: {
     baseURL: existingServer ?? `http://localhost:${PORT}`,

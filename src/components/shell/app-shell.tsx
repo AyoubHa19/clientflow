@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FolderKanbanIcon, PlusIcon, TargetIcon, UsersIcon } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { CommandMenu } from "@/components/search/command-menu";
-import { CurrentTimer } from "@/components/time/current-timer";
+import { ShellStatus } from "./shell-status";
 import { OfflineNotice } from "@/components/pwa/offline-notice";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { CurrentUserMenu } from "./current-user-menu";
@@ -91,7 +91,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-3 px-4 pt-4 sm:px-6 lg:px-8 lg:pt-6">
             <CommandMenu className="lg:max-w-md" />
-            <CurrentTimer />
+            <ShellStatus />
             <OfflineNotice />
             <div className="ml-auto hidden lg:block">
               <ThemeToggle />

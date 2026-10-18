@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SignInForm } from "@/components/auth/sign-in-form";
+import { TryDemoButton } from "@/components/demo/try-demo-button";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -13,6 +14,10 @@ export default function SignInPage() {
       <Suspense>
         <SignInForm />
       </Suspense>
+      <div className="mt-6 grid gap-3 border-t pt-6 text-center">
+        <p className="text-sm text-muted-foreground">Just looking around?</p>
+        <TryDemoButton className="w-full" />
+      </div>
     </>
   );
 }

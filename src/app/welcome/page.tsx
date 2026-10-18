@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { DashboardPreview } from "@/components/marketing/dashboard-preview";
+import { TryDemoButton } from "@/components/demo/try-demo-button";
 import { Sky } from "@/components/marketing/sky";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -147,14 +148,12 @@ export default function WelcomePage() {
                   <ArrowRightIcon aria-hidden data-icon="inline-end" />
                 </Link>
               </Button>
-              <Button
-                asChild
+              {/* A private demo with sample data, no sign-up (sign in is in the top bar). */}
+              <TryDemoButton
                 size="lg"
-                variant="outline"
                 className="h-11 border-white/50 bg-white/10 px-5 text-white hover:bg-white/20 hover:text-white dark:border-white/30 dark:bg-white/5 dark:hover:bg-white/15"
-              >
-                <Link href="/sign-in">Sign in</Link>
-              </Button>
+                messageClassName="text-white"
+              />
             </div>
           </div>
         </section>
@@ -282,16 +281,23 @@ export default function WelcomePage() {
               <p className="fade-up mx-auto mt-3 max-w-lg text-white/90">
                 Create a free account and set up your workspace in under a minute.
               </p>
-              <Button
-                asChild
-                size="lg"
-                className="fade-up mt-8 h-11 bg-white px-5 text-[oklch(0.255_0.045_270)] hover:bg-white/90"
-              >
-                <Link href="/sign-up">
-                  Get started free
-                  <ArrowRightIcon aria-hidden data-icon="inline-end" />
-                </Link>
-              </Button>
+              <div className="fade-up mt-8 flex flex-wrap items-start justify-center gap-3">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-11 bg-white px-5 text-[oklch(0.255_0.045_270)] hover:bg-white/90"
+                >
+                  <Link href="/sign-up">
+                    Get started free
+                    <ArrowRightIcon aria-hidden data-icon="inline-end" />
+                  </Link>
+                </Button>
+                <TryDemoButton
+                  size="lg"
+                  className="h-11 border-white/50 bg-white/10 px-5 text-white hover:bg-white/20 hover:text-white dark:border-white/30 dark:bg-white/5 dark:hover:bg-white/15"
+                  messageClassName="text-white"
+                />
+              </div>
             </div>
           </section>
         </div>

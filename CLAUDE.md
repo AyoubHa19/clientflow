@@ -404,7 +404,27 @@ end of every stage.
   checks Chrome's installability (CDP `Page.getInstallabilityErrors`) and
   the offline page. Dev sample: project "Atlas Café website (sample)" from
   the Website template, and the template "Café website (sample)".
-- **Next: Stage 13, portfolio and product readiness** (the last one) (PRD 14): README,
+- **Stage 13, portfolio and product readiness: done (2026-10-18). The PRD's
+  roadmap is complete.** "Try the demo" (`src/server/demo`): a Server
+  Action makes a throwaway account (`visitor-<uuid>@demo.clientflow.invalid`,
+  random password, signed in by nextCookies), a workspace in the visitor's
+  time zone, and fills it with `seedSampleWorkspace` (`src/server/sample/
+seed.ts`, shared with `scripts/seed-sample.ts`). Each new demo first
+  deletes demos older than 24 h (`cleanUpDemos`); at most 30 an hour
+  (`canStartDemo`). `DemoNotice` (banner with "Create your own account":
+  signs out, opens sign-up) is drawn by `ShellStatus` together with the
+  running timer. A separate Suspense boundary for it in the shell made
+  pages hang under parallel load (the list never streamed in): keep ONE
+  session-loading boundary in the shell's top row. Browser test timeout is
+  90 s (the longest flows take 40–50 s). Buttons on the landing hero (instead
+  of Sign in), its last call to action, and under the sign-in form. README
+  rewritten for the portfolio: pitch, highlights, screenshot gallery
+  (`docs/screenshots/*.webp`, taken by a Playwright script from the sample
+  account with Next's dev button hidden), demo, a mermaid architecture
+  diagram, then the detailed sections, known limits and a roadmap.
+- **What next is the user's call**: ideas are in the README's Roadmap
+  (email once there's a domain, team invitations, invoices, client
+  approvals on the status page...). (PRD 14): README,
   screenshots, architecture summary, feature list, setup, demo data
   strategy (the shared demo account could be changed by visitors: decide
   read-only, a reset, or per-visitor demos; Claude proposed a "Try the

@@ -1,14 +1,120 @@
 # ClientFlow
 
-A calm workspace for freelancers and small agencies: clients, leads,
-projects and tasks in one place.
+**A calm workspace for freelancers and small agencies**: clients, leads,
+projects, tasks, time and money in one place, with the follow-ups and
+deadlines that matter today up front.
 
-> **Live:** https://clientflow-ayoubha19.vercel.app
->
-> Built one stage at a time (see `PRD.md`, section 14): foundation,
-> database, sign-in, workspaces, clients, leads, projects, tasks, the
-> dashboard, UX polish, a security review and deployment (stages 1–12).
-> Next: portfolio readiness (stage 13).
+**Live:** https://clientflow-ayoubha19.vercel.app · press **Try the demo**
+for a private workspace full of sample data, no sign-up.
+
+![The ClientFlow dashboard: key numbers with trends, the money card, who to follow up, what's coming up and the leads pipeline](docs/screenshots/dashboard-light.webp)
+
+A full-stack portfolio project built in stages from a product brief
+(`PRD.md`): Next.js 16, TypeScript, PostgreSQL and Prisma, with every rule
+checked on the server, every query scoped to the signed-in workspace, and
+**~130 unit, ~120 database and ~180 browser tests** (with axe accessibility
+checks in light and dark, from 320 px phones to desktops).
+
+## Contents
+
+- [What makes it different](#what-makes-it-different)
+- [Screenshots](#screenshots)
+- [Try the demo](#try-the-demo)
+- [Stack](#stack) · [Architecture](#architecture) · [Running it](#running-it) · [Checks](#checks)
+- Features: [Workspaces](#workspaces) · [Clients](#clients) · [Leads](#leads) ·
+  [Money](#money) · [Projects](#projects) · [Templates](#project-templates) ·
+  [Tasks](#tasks) · [Time and client health](#time-and-client-health) ·
+  [Sharing with a client](#sharing-with-a-client) · [Dashboard](#dashboard) ·
+  [Today and the week in review](#today-and-the-week-in-review) ·
+  [Install it like an app](#install-it-like-an-app)
+- [Security](#security) · [The database](#the-database) · [Deployment](#deployment) ·
+  [Decisions](#decisions) · [Known limits](#known-limits) · [Roadmap](#roadmap)
+
+## What makes it different
+
+Most CRMs are built for sales teams. ClientFlow is built around the
+questions a freelancer actually asks:
+
+- **Who should I get back to today?** Every lead has a next follow-up;
+  the dashboard and the Today page list the late ones and the leads that
+  have **gone cold** (no contact for 14 days).
+- **Is this client worth it?** A timer on every project gives its **real
+  hourly rate** (fee ÷ hours), and each client gets a **health** badge
+  (Good, Watch, At risk) that always says why: "pays 46% more per hour
+  than your average", "3 overdue tasks".
+- **Where are we on my project?** One click makes a **private status
+  page** for the client: progress, dates and tasks, no account needed,
+  never the fee or your notes.
+- **What did I get done this week?** A **week in review**: done, slipped,
+  time per project, leads won, compared with the week before.
+- Plus: money in your own currency (pipeline, won this month, open work),
+  project **templates**, Ctrl+K search, a leads board you can drive with the
+  keyboard, installable as an app with an offline page, light and dark.
+
+## Screenshots
+
+|                                                                                                  |                                                                                                                 |
+| ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| ![Today: tasks due or late, coming up, time logged and follow-ups](docs/screenshots/today.webp)  | ![Week in review: done, slipped, projects completed and where the time went](docs/screenshots/week-review.webp) |
+| **Today**: what's due, who to call back, time logged.                                            | **Week in review**, compared with last week.                                                                    |
+| ![The leads board with values and follow-up badges](docs/screenshots/leads-board.webp)           | ![A client's page with its health card](docs/screenshots/client-health.webp)                                    |
+| **Leads board**: drag, keyboard or menu; values per stage.                                       | **Client health**, with its reasons.                                                                            |
+| ![A project's time card with the timer and real hourly rate](docs/screenshots/project-time.webp) | ![The status page a client sees through a shared link](docs/screenshots/status-page.webp)                       |
+| **Time**: timer, hours and the real hourly rate.                                                 | **The client's status page** (shared link).                                                                     |
+| ![The dashboard in dark mode](docs/screenshots/dashboard-dark.webp)                              | ![The landing page with its sky](docs/screenshots/landing.webp)                                                 |
+| **Dark mode**: matte black glass.                                                                | **Landing page**, with "Try the demo".                                                                          |
+
+<p align="center">
+  <img src="docs/screenshots/phone-dashboard.webp" alt="The dashboard on a phone" width="260">
+  &nbsp;
+  <img src="docs/screenshots/phone-today-dark.webp" alt="Today on a phone, in dark mode" width="260">
+</p>
+
+## Try the demo
+
+**Try the demo** (on the landing page and the sign-in page) gives each
+visitor their **own private workspace**, filled with the same sample data
+as the seed script (clients, leads to follow up, projects with fees and
+logged time, tasks late and coming up), dated around their own today and
+time zone. Nobody sees anyone else's changes, so the demo can't be broken
+for the next person.
+
+- A demo is an ordinary account in the reserved `.invalid` domain (no mail
+  can ever go there), signed in by a Server Action (`src/server/demo`).
+- It's **deleted 24 hours** after it starts: each new demo first clears
+  the old ones, so no scheduled job is needed.
+- At most **30 demos an hour** can start across the site, which keeps the
+  free database small; past that, the button says to try again soon.
+- Inside, a banner says it's a demo, with "Create your own account".
+
+## Architecture
+
+```mermaid
+flowchart LR
+  B[Browser] -->|page or Server Action| P[proxy.ts<br/>cookie check]
+  P --> RSC[Server Components<br/>and Server Actions]
+  RSC --> RW["requireWorkspace()<br/>session + membership"]
+  RW --> S[Services<br/>src/server/*/service.ts]
+  S --> Z[Zod rules<br/>src/lib]
+  S --> PR[Prisma 7]
+  PR --> DB[(PostgreSQL<br/>Neon, Frankfurt)]
+  B -. "/status/&lt;secret&gt;<br/>(no account)" .-> SP[Status page] --> PR
+```
+
+- **Pages are Server Components**; changes go through **Server Actions**.
+  Neither trusts the browser: the action reads only the form's fields, and
+  `requireWorkspace()` finds the user and their workspace from the session.
+- **Services** (`src/server/<area>/service.ts`) hold every rule as plain
+  functions taking `(db, ctx, input)`: validate with Zod, check the role,
+  scope every query by `ctx.workspace.id`, and write the activity log in
+  the same transaction. They know nothing about Next, so the database
+  tests call them directly.
+- **Shared rules** live in `src/lib` (amounts, dates, follow-ups, health,
+  durations...), used by the forms and checked again on the server, each
+  with its own unit tests.
+- **The database** adds its own guards where it can: unique keys, foreign
+  keys with explicit delete rules, CHECK constraints on amounts and
+  durations, and a partial unique index for one running timer per person.
 
 ## Stack
 
@@ -45,6 +151,30 @@ and open http://localhost:3001 (the port is fixed so it never clashes with
 another project on 3000). Create an account, or use the sample one from
 `.env.local`. In development, `/design` shows the shared components and
 colours.
+
+To try the demo locally, press **Try the demo** on the landing page while
+signed out: it makes a private demo workspace in the dev database.
+
+## Checks
+
+| Command                  | What it does                                                    |
+| ------------------------ | --------------------------------------------------------------- |
+| `npm run check`          | All of the below except the end-to-end tests                    |
+| `npm run format:check`   | Prettier formatting                                             |
+| `npm run lint`           | ESLint                                                          |
+| `npm run typecheck`      | Prisma client and route types, then TypeScript                  |
+| `npm test`               | Unit tests (Vitest)                                             |
+| `npm run test:db`        | Database tests on Neon's `test` branch                          |
+| `npm run check:contrast` | Colour contrast of the theme tokens (WCAG)                      |
+| `npm run test:e2e`       | Builds the app, then browser tests (desktop and phone) with axe |
+| `npm run build`          | Production build                                                |
+
+The first time, `npx playwright install chromium` downloads the browser
+the end-to-end tests use. Next allows one dev server per folder, so if
+`npm run dev` is already running, point the browser tests at it:
+`E2E_BASE_URL=http://localhost:3001 npm run test:e2e`. The browser tests
+make accounts named `e2e-...@example.com` on the dev branch and delete
+them at the end (`e2e/global-teardown.ts`).
 
 ## Workspaces
 
@@ -136,30 +266,18 @@ colours.
   days after the project's start). Names are unique per workspace;
   Settings lists them, and the owner can delete them.
 
-## Install it like an app
+## Tasks
 
-- ClientFlow has a web app manifest (`src/app/manifest.ts`) and icons
-  (`public/icons`, rendered from `src/app/icon.svg`), so phones and
-  computers offer to install it; it opens on Today.
-- A small service worker (`public/sw.js`, production only) shows a friendly
-  offline page when a page can't load. It **never stores pages or data**:
-  they're private and change all the time.
-- With the connection gone, the app says so at the top; page changes and
-  saves wait and go through when it's back (Next's experimental
-  `useOffline`).
-
-## Today and the week in review
-
-- **`/today`** (in the menu): unfinished tasks due today or late (tick them
-  off right there), the next 7 days' tasks, the leads to follow up, and the
-  time logged today and this week. From Friday to Sunday it invites a look
-  back at the week.
-- **`/review`**: a week (Monday to Sunday, in the workspace's time zone)
-  with the tasks finished, what **slipped** (due that week before today and
-  still not done), projects completed, time per project, and leads
-  contacted, won (with their value) and added, each compared with the week
-  before. Previous / next week; `?week=` takes any day of a week, and a
-  future or odd one shows this week.
+- `/tasks`: add a task in one line (title, and if wanted a project, due
+  date and priority), tick it off with its checkbox (mouse or keyboard;
+  shown at once, undone if saving fails).
+- Filters: status (open by default), priority, project, and due: overdue,
+  today, the next 7 days or no date, all counted from today in the
+  workspace's time zone. Sorted by due date, then priority.
+- A task can belong to a project of the same workspace only. Done tasks
+  remember when they were completed.
+- Project pages list their tasks (with their own quick add) and show
+  progress, "3 of 5 tasks done"; the projects list shows it too.
 
 ## Time and client health
 
@@ -197,19 +315,6 @@ colours.
   again later (like a shared document link). Anyone who sees the database
   could open the status pages, which hold nothing private.
 
-## Tasks
-
-- `/tasks`: add a task in one line (title, and if wanted a project, due
-  date and priority), tick it off with its checkbox (mouse or keyboard;
-  shown at once, undone if saving fails).
-- Filters: status (open by default), priority, project, and due: overdue,
-  today, the next 7 days or no date, all counted from today in the
-  workspace's time zone. Sorted by due date, then priority.
-- A task can belong to a project of the same workspace only. Done tasks
-  remember when they were completed.
-- Project pages list their tasks (with their own quick add) and show
-  progress, "3 of 5 tasks done"; the projects list shows it too.
-
 ## Dashboard
 
 - The overview shows four numbers, each opening the matching list: active
@@ -226,6 +331,31 @@ colours.
   client, a lead, a project and a task.
 - `/activity`: every change in the workspace, newest first, filtered by
   type, 25 per page. An entry links to its record while it still exists.
+
+## Today and the week in review
+
+- **`/today`** (in the menu): unfinished tasks due today or late (tick them
+  off right there), the next 7 days' tasks, the leads to follow up, and the
+  time logged today and this week. From Friday to Sunday it invites a look
+  back at the week.
+- **`/review`**: a week (Monday to Sunday, in the workspace's time zone)
+  with the tasks finished, what **slipped** (due that week before today and
+  still not done), projects completed, time per project, and leads
+  contacted, won (with their value) and added, each compared with the week
+  before. Previous / next week; `?week=` takes any day of a week, and a
+  future or odd one shows this week.
+
+## Install it like an app
+
+- ClientFlow has a web app manifest (`src/app/manifest.ts`) and icons
+  (`public/icons`, rendered from `src/app/icon.svg`), so phones and
+  computers offer to install it; it opens on Today.
+- A small service worker (`public/sw.js`, production only) shows a friendly
+  offline page when a page can't load. It **never stores pages or data**:
+  they're private and change all the time.
+- With the connection gone, the app says so at the top; page changes and
+  saves wait and go through when it's back (Next's experimental
+  `useOffline`).
 
 ## Using it on any screen
 
@@ -380,45 +510,28 @@ The schema is in `prisma/schema.prisma`, with a comment on each rule.
   (only the account owner can open them); the public address is the one
   above. Branch previews have no settings, so only `main` is deployed.
 
-## Checks
-
-| Command                  | What it does                                                    |
-| ------------------------ | --------------------------------------------------------------- |
-| `npm run check`          | All of the below except the end-to-end tests                    |
-| `npm run format:check`   | Prettier formatting                                             |
-| `npm run lint`           | ESLint                                                          |
-| `npm run typecheck`      | Prisma client and route types, then TypeScript                  |
-| `npm test`               | Unit tests (Vitest)                                             |
-| `npm run test:db`        | Database tests on Neon's `test` branch                          |
-| `npm run check:contrast` | Colour contrast of the theme tokens (WCAG)                      |
-| `npm run test:e2e`       | Builds the app, then browser tests (desktop and phone) with axe |
-| `npm run build`          | Production build                                                |
-
-The first time, `npx playwright install chromium` downloads the browser
-the end-to-end tests use. Next allows one dev server per folder, so if
-`npm run dev` is already running, point the browser tests at it:
-`E2E_BASE_URL=http://localhost:3001 npm run test:e2e`. The browser tests
-make accounts named `e2e-...@example.com` on the dev branch and delete
-them at the end (`e2e/global-teardown.ts`).
-
 ## Project structure
 
 ```
-prisma/             schema and migrations
+prisma/               schema and migrations (some finished by hand: CHECK constraints)
 src/
-  app/              pages and layouts (the (app) group sits in the shell)
-  components/ui/    shadcn components (generated, then adjusted)
-  components/auth/  sign-in and sign-up forms
-  components/workspace/ onboarding and settings forms
-  components/shell/ side bar, phone menu, account menu, page header
-  components/theme/ light / dark / system theme
-  generated/        the Prisma client (generated, not committed)
-  lib/              shared helpers (each with its own *.test.ts)
-  server/           server-only code: database, auth, settings
-  proxy.ts          sends signed-out visitors to /sign-in
-  test/             test helpers (database setup)
-e2e/                Playwright tests
-scripts/            small tools (contrast check)
+  app/                pages and layouts; (app) is the signed-in shell, (auth)
+                      sign-in and sign-up, welcome the landing page, status
+                      the clients' status pages, manifest.ts the PWA manifest
+  components/         by area: clients, leads, projects, tasks, time, dashboard,
+                      demo, pwa, shell, forms, marketing; ui/ holds shadcn parts
+  lib/                rules shared by forms and server, each with *.test.ts:
+                      money, time, health, followups, templates, review, dates...
+  server/             server-only: one folder per area (clients, leads, projects,
+                      tasks, time, review, templates, demo, dashboard, search,
+                      workspace, auth), each a service.ts (rules, tested against
+                      the database) and actions.ts (Server Actions)
+  server/sample/      the sample data, for the seed script and the demo
+  proxy.ts            sends signed-out visitors to /sign-in (public pages excepted)
+e2e/                  Playwright tests (desktop and phone), with axe
+public/               sky photos, icons, sw.js and offline.html
+scripts/              seed-sample.ts, contrast.mjs
+docs/screenshots/     the README's pictures
 ```
 
 ## Decisions
@@ -497,3 +610,27 @@ scripts/            small tools (contrast check)
 - The Content Security Policy allows inline scripts: Next.js puts page data
   in them, and the per-request nonce that would avoid it doesn't work with
   prerendered pages. Scripts from other sites are still blocked.
+- **The demo** is capped at 30 new workspaces an hour site-wide; past that,
+  visitors are asked to come back in a few minutes. Making one takes a few
+  seconds: it writes the sample data through the app's own rules.
+- A lead's "added" day for coldness is read in UTC, so near midnight it can
+  be a day off in far time zones (the badge and the filter agree).
+- Changing a workspace's currency relabels amounts; it never converts them.
+- Hosting is Vercel's free Hobby plan, which is for non-commercial use.
+
+## Roadmap
+
+What would come next, roughly in order:
+
+- **Email**, once there's a domain to send from: password reset, email
+  verification (then sign-up stops saying whether an address exists), and
+  a morning digest of Today.
+- **Team workspaces**: invitations and the Member role in the interface
+  (the tables and the rules already handle owners and members).
+- **Invoices from projects**: the fee and logged time are already there.
+- **Client portal, part two**: the client approves a step or leaves a
+  comment on the status page.
+- **Exchange rates** for workspaces paid in several currencies.
+- **Calendar export** (an iCal feed of due dates and follow-ups).
+- A paid plan would need moving off Vercel's Hobby plan, which is for
+  non-commercial use.
