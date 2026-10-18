@@ -4,6 +4,7 @@ import {
   LayoutDashboardIcon,
   ListChecksIcon,
   SettingsIcon,
+  SunIcon,
   TargetIcon,
   UsersIcon,
   type LucideIcon,
@@ -15,6 +16,7 @@ export type NavItem = { href: string; label: string; icon: LucideIcon };
 // nowhere.
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Overview", icon: LayoutDashboardIcon },
+  { href: "/today", label: "Today", icon: SunIcon },
   { href: "/clients", label: "Clients", icon: UsersIcon },
   { href: "/leads", label: "Leads", icon: TargetIcon },
   { href: "/projects", label: "Projects", icon: FolderKanbanIcon },

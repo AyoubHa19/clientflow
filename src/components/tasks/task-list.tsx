@@ -76,17 +76,18 @@ export function TaskList({
               <Link
                 href={`/tasks/${task.id}`}
                 className={cn(
-                  "block truncate text-sm font-medium underline-offset-4 transition-colors hover:underline",
+                  // py-0.5 and min-h-6: at least 24px tall, big enough for a finger (WCAG 2.5.8).
+                  "block truncate py-0.5 text-sm font-medium underline-offset-4 transition-colors hover:underline",
                   done && "text-muted-foreground line-through",
                 )}
               >
                 {task.title}
               </Link>
-              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                 {showProject && task.project && (
                   <Link
                     href={`/projects/${task.project.id}`}
-                    className="max-w-48 truncate underline-offset-4 hover:underline"
+                    className="inline-block max-w-48 truncate align-middle leading-6 underline-offset-4 hover:underline"
                   >
                     {task.project.name}
                   </Link>

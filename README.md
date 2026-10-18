@@ -126,6 +126,19 @@ colours.
   time zone**, and disappear once a project is completed or cancelled.
 - A client's page lists their projects and starts a new one for them.
 
+## Today and the week in review
+
+- **`/today`** (in the menu): unfinished tasks due today or late (tick them
+  off right there), the next 7 days' tasks, the leads to follow up, and the
+  time logged today and this week. From Friday to Sunday it invites a look
+  back at the week.
+- **`/review`**: a week (Monday to Sunday, in the workspace's time zone)
+  with the tasks finished, what **slipped** (due that week before today and
+  still not done), projects completed, time per project, and leads
+  contacted, won (with their value) and added, each compared with the week
+  before. Previous / next week; `?week=` takes any day of a week, and a
+  future or odd one shows this week.
+
 ## Time and client health
 
 - Each project has a **Time** card: a timer (start it there; while it runs,

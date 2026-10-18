@@ -381,7 +381,16 @@ end of every stage.
   useSyncExternalStore), `HealthBadge` + a Health card on the client page;
   the clients table's Phone column became Health. Dev sample: Atlas Café is
   At risk (3 overdue), its menu project has ~2h 33m logged.
-- **Next: Stage 18, "Today" page and weekly review** (see above). Then
+- **Stage 18, Today and week in review: done (2026-10-18).** `/today`
+  (`src/app/(app)/today/page.tsx`, "Today" in `NAV_ITEMS` after Overview)
+  and `/review` (`?week=`, `parseWeekParam` in `src/lib/review.ts`).
+  Service `src/server/review/service.ts` (`getToday`, `getWeekReview`);
+  `openTasksDue` added to the task service. "Projects completed" reads the
+  activity log (projects have no completedAt). Found on the way: in the
+  shared `TaskList`, the task and project links were under 24px at 320px
+  (axe target-size): now `py-0.5` and `leading-6`. After adding an export,
+  restart `npm run dev` ("x is not a function").
+- **Next: project templates and installing as an app (PWA)** (small), then
   **Stage 13, portfolio and product readiness** (PRD 14): README,
   screenshots, architecture summary, feature list, setup, demo data
   strategy (the shared demo account could be changed by visitors: decide

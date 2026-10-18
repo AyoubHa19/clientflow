@@ -102,6 +102,32 @@ export async function listTasks(
   return { items, total, page, pageCount, pageSize: TASKS_PER_PAGE };
 }
 
+/**
+ * Unfinished tasks due from `from` to `to` (days, both included); with no
+ * `from`, every earlier day too, so overdue ones come first. Soonest due
+ * first, then the highest priority. Plus how many there are in all.
+ */
+export async function openTasksDue(
+  db: Db,
+  ctx: WorkspaceContext,
+  range: { from: string | null; to: string },
+  take = 50,
+) {
+  const where: Prisma.TaskWhereInput = {
+    workspaceId: ctx.workspace.id,
+    status: { not: "DONE" },
+    dueDate: {
+      ...(range.from && { gte: new Date(`${range.from}T00:00:00Z`) }),
+      lte: new Date(`${range.to}T00:00:00Z`),
+    },
+  };
+  const [items, total] = await Promise.all([
+    db.task.findMany({ where, orderBy: SORTS.due, take, select: taskFields }),
+    db.task.count({ where }),
+  ]);
+  return { items, total };
+}
+
 export async function getTask(db: Db, ctx: WorkspaceContext, id: string) {
   if (!isUuid(id)) return null;
   return db.task.findFirst({ where: { id, workspaceId: ctx.workspace.id }, select: taskFields });
