@@ -27,6 +27,7 @@ export type ProjectFormValues = {
   status: ProjectStatus;
   startDate: string;
   dueDate: string;
+  fee: string;
 };
 
 const STATUS_OPTIONS = PROJECT_STATUSES.map((status) => ({
@@ -41,12 +42,15 @@ export function ProjectForm({
   initial,
   submitLabel,
   cancelHref,
+  currency,
 }: {
   action: (state: ProjectFormState, formData: FormData) => Promise<ProjectFormState>;
   clients: { id: string; name: string }[];
   initial?: Partial<ProjectFormValues>;
   submitLabel: string;
   cancelHref: string;
+  /** The workspace's currency, for the fee field. */
+  currency: string;
 }) {
   const form = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState(action, {});
@@ -121,6 +125,17 @@ export function ProjectForm({
         type="date"
         defaultValue={values.dueDate}
         error={errors.dueDate}
+        disabled={pending}
+      />
+      <FormField
+        key={`fee-${values.fee}`}
+        label={`Fee in ${currency} (optional)`}
+        name="fee"
+        inputMode="decimal"
+        autoComplete="off"
+        defaultValue={values.fee}
+        hint="What the client pays for it, like 1500 or 1,500.50."
+        error={errors.fee}
         disabled={pending}
       />
       <div className="sm:col-span-2">

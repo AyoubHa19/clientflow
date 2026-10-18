@@ -20,7 +20,21 @@ describe("workspaceSchema", () => {
   it("accepts a name and time zone, trimming the name", () => {
     expect(
       workspaceSchema.parse({ name: "  Studio (sample) ", timezone: "Africa/Casablanca" }),
-    ).toEqual({ name: "Studio (sample)", timezone: "Africa/Casablanca" });
+    ).toEqual({ name: "Studio (sample)", timezone: "Africa/Casablanca", currency: "MAD" });
+  });
+
+  it("takes a currency from the list, or guesses one from the time zone", () => {
+    expect(
+      workspaceSchema.parse({ name: "Studio", timezone: "Africa/Casablanca", currency: "EUR" })
+        .currency,
+    ).toBe("EUR");
+    expect(workspaceSchema.parse({ name: "Studio", timezone: "Europe/Paris" }).currency).toBe(
+      "EUR",
+    );
+    const result = workspaceSchema.safeParse({ name: "Studio", timezone: "UTC", currency: "XYZ" });
+    expect(result.success).toBe(false);
+    if (result.success) return;
+    expect(fieldErrors(result.error)).toEqual({ currency: "Choose a currency from the list." });
   });
 
   it("explains what's wrong", () => {

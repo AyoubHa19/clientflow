@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { formatDate, formatDateOnly, todayIn, toDateOnly } from "@/lib/dates";
+import { formatMoney } from "@/lib/money";
 import { db } from "@/server/db";
 import { getProject } from "@/server/projects/service";
 import { projectProgress, tasksForProject } from "@/server/tasks/service";
@@ -116,6 +117,9 @@ async function ProjectDetails({ params }: { params: PageProps<"/projects/[id]">[
                 {project.startDate && formatDateOnly(project.startDate)}
               </Detail>
               <Detail label="Due">{project.dueDate && formatDateOnly(project.dueDate)}</Detail>
+              <Detail label="Fee">
+                {project.fee !== null && formatMoney(project.fee, ctx.workspace.currency)}
+              </Detail>
               <Detail label="Added">{formatDate(project.createdAt, tz)}</Detail>
               <Detail label="Updated">{formatDate(project.updatedAt, tz)}</Detail>
             </dl>

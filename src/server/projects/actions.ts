@@ -18,7 +18,15 @@ export type ProjectFormState = {
   values?: Record<string, string>;
 };
 
-const FIELDS = ["name", "clientId", "description", "status", "startDate", "dueDate"] as const;
+const FIELDS = [
+  "name",
+  "clientId",
+  "description",
+  "status",
+  "startDate",
+  "dueDate",
+  "fee",
+] as const;
 
 function readForm(formData: FormData) {
   return Object.fromEntries(FIELDS.map((field) => [field, String(formData.get(field) ?? "")]));

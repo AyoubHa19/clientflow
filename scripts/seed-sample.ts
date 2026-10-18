@@ -125,6 +125,7 @@ async function main() {
       phone: "+212 661 11 22 33",
       source: "Referral",
       status: "QUALIFIED",
+      value: "18000",
       notes: "Needs a booking site before the high season.",
     });
     const converted = must(await convertLead(db, ctx, karim.id), "convert Karim");
@@ -133,6 +134,7 @@ async function main() {
     for (const { addedDaysAgo, ...data } of [
       {
         contactName: "Leila Haddad (sample)",
+        value: "6500",
         company: "Studio Leila",
         source: "Instagram",
         status: "QUALIFIED",
@@ -141,6 +143,7 @@ async function main() {
       },
       {
         contactName: "Omar Tazi (sample)",
+        value: "3200",
         email: "omar.tazi@example.com",
         source: "Website",
         status: "CONTACTED",
@@ -149,6 +152,7 @@ async function main() {
       },
       {
         contactName: "Hiba Alaoui (sample)",
+        value: "12000",
         company: "Alaoui & Co",
         source: "LinkedIn",
         status: "CONTACTED",
@@ -157,6 +161,7 @@ async function main() {
       },
       {
         contactName: "Nadia Fassi (sample)",
+        value: "9000",
         company: "Fassi Textiles",
         source: "Event",
         status: "CONTACTED",
@@ -166,6 +171,7 @@ async function main() {
       { contactName: "Youssef Ait (sample)", source: "Website", status: "NEW", addedDaysAgo: 18 },
       {
         contactName: "Salma Idrissi (sample)",
+        value: "4500",
         company: "Idrissi Bakery",
         source: "Referral",
         status: "LOST",
@@ -191,6 +197,7 @@ async function main() {
       must(await createProject(db, ctx, data), `project ${data.name}`);
     const menu = await project({
       name: "Atlas Café menu design (sample)",
+      fee: "7500",
       clientId: atlas.id,
       status: "IN_PROGRESS",
       startDate: day(today, -27),
@@ -199,6 +206,7 @@ async function main() {
     });
     const booking = await project({
       name: "Riad Yasmine booking site (sample)",
+      fee: "18000",
       clientId: converted.client.id,
       status: "IN_PROGRESS",
       startDate: day(today, -16),
@@ -207,6 +215,7 @@ async function main() {
     });
     const plans = await project({
       name: "Nour office plans (sample)",
+      fee: "25000",
       clientId: nour.id,
       status: "PLANNING",
       dueDate: day(today, 44),
@@ -214,6 +223,7 @@ async function main() {
     const portfolio = await project({ name: "Portfolio refresh (sample)", status: "ON_HOLD" });
     await project({
       name: "Riad Group brochure (sample)",
+      fee: "4800",
       status: "COMPLETED",
       startDate: day(today, -60),
       dueDate: day(today, -30),

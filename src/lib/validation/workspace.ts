@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { currencyForTimeZone, isCurrencyCode, type CurrencyCode } from "@/lib/money";
 import { hasNoControlCharacters, UNUSUAL_CHARACTERS } from "./fields";
 
 // Shared by the onboarding and settings forms and the server.
@@ -16,17 +17,30 @@ export function isValidTimeZone(value: string) {
   }
 }
 
-export const workspaceSchema = z.object({
-  name: z
-    .string({ error: "Enter a name for your workspace." })
-    .trim()
-    .min(1, { error: "Enter a name for your workspace." })
-    .max(WORKSPACE_NAME_MAX, { error: `Use ${WORKSPACE_NAME_MAX} characters or fewer.` })
-    .refine(hasNoControlCharacters, { error: UNUSUAL_CHARACTERS }),
-  timezone: z
-    .string({ error: "Choose a time zone." })
-    .refine(isValidTimeZone, { error: "Choose a time zone from the list." }),
-});
+export const workspaceSchema = z
+  .object({
+    name: z
+      .string({ error: "Enter a name for your workspace." })
+      .trim()
+      .min(1, { error: "Enter a name for your workspace." })
+      .max(WORKSPACE_NAME_MAX, { error: `Use ${WORKSPACE_NAME_MAX} characters or fewer.` })
+      .refine(hasNoControlCharacters, { error: UNUSUAL_CHARACTERS }),
+    timezone: z
+      .string({ error: "Choose a time zone." })
+      .refine(isValidTimeZone, { error: "Choose a time zone from the list." }),
+    // Empty or missing: guessed from the time zone (the forms always send one).
+    currency: z
+      .string()
+      .trim()
+      .optional()
+      .refine((value) => !value || isCurrencyCode(value), {
+        error: "Choose a currency from the list.",
+      }),
+  })
+  .transform((workspace) => ({
+    ...workspace,
+    currency: (workspace.currency || currencyForTimeZone(workspace.timezone)) as CurrencyCode,
+  }));
 
 export type WorkspaceInput = z.infer<typeof workspaceSchema>;
 

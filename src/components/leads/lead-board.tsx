@@ -47,11 +47,15 @@ export type BoardLead = {
   converted: boolean;
   /** Where its follow-up stands, worked out on the server for today. */
   followUp: FollowUpState | null;
+  /** Its expected value, formatted on the server ("MAD 12,000"). */
+  value: string | null;
 };
 
 export type BoardColumnData = {
   status: LeadStatus;
   total: number;
+  /** The value of every lead in the column, formatted; null when none has one. */
+  value: string | null;
   items: BoardLead[];
   seeAllHref: string;
 };
@@ -233,15 +237,25 @@ function BoardColumn({
         isOver && "border-ring! bg-brand-soft/70!",
       )}
     >
-      <header className="flex items-center justify-between px-1.5 pt-1">
-        <h2 id={headingId} className="flex items-center gap-2 text-sm font-semibold">
-          <span aria-hidden className={cn("size-2 rounded-full", STATUS_DOT[column.status])} />
-          {label}
-        </h2>
-        <span className="rounded-full bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground ring-1 ring-border">
-          <span className="sr-only">{column.total === 1 ? "1 lead" : `${column.total} leads`}</span>
-          <span aria-hidden>{column.total}</span>
-        </span>
+      <header className="grid gap-0.5 px-1.5 pt-1">
+        <div className="flex items-center justify-between">
+          <h2 id={headingId} className="flex items-center gap-2 text-sm font-semibold">
+            <span aria-hidden className={cn("size-2 rounded-full", STATUS_DOT[column.status])} />
+            {label}
+          </h2>
+          <span className="rounded-full bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground ring-1 ring-border">
+            <span className="sr-only">
+              {column.total === 1 ? "1 lead" : `${column.total} leads`}
+            </span>
+            <span aria-hidden>{column.total}</span>
+          </span>
+        </div>
+        {column.value && (
+          <p className="pl-4 text-xs text-muted-foreground tabular-nums">
+            <span className="sr-only">Worth </span>
+            {column.value}
+          </p>
+        )}
       </header>
       {column.items.length === 0 ? (
         <p className="rounded-lg border border-dashed px-3 py-6 text-center text-xs text-muted-foreground">
@@ -350,6 +364,9 @@ function CardBody({
             <UserCheckIcon aria-hidden className="size-3.5" />
             Client
           </span>
+        )}
+        {lead.value && (
+          <span className="font-medium text-foreground tabular-nums">{lead.value}</span>
         )}
         {lead.source && <span>{lead.source}</span>}
         <span>Updated {lead.updated}</span>

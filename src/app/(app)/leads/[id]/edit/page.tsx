@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { toDateOnly } from "@/lib/dates";
+import { amountInputValue } from "@/lib/money";
 import { db } from "@/server/db";
 import { updateLeadAction } from "@/server/leads/actions";
 import { getLead } from "@/server/leads/service";
@@ -48,7 +49,9 @@ async function EditLead({ params }: { params: PageProps<"/leads/[id]/edit">["par
               status: lead.status,
               lastContactedOn: lead.lastContactedOn ? toDateOnly(lead.lastContactedOn) : "",
               nextFollowUpOn: lead.nextFollowUpOn ? toDateOnly(lead.nextFollowUpOn) : "",
+              value: amountInputValue(lead.value),
             }}
+            currency={ctx.workspace.currency}
             statusLocked={lead.convertedClient !== null}
             submitLabel="Save changes"
             cancelHref={`/leads/${lead.id}`}

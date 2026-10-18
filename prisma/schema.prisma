@@ -45,6 +45,9 @@ model Workspace {
   // An IANA time zone such as "Africa/Casablanca": decides what "today"
   // and "overdue" mean for this workspace.
   timezone  String   @default("UTC") @db.VarChar(64)
+  // ISO 4217 code ("MAD") for every amount in the workspace (Stage 15).
+  // Changing it relabels amounts; it doesn't convert them.
+  currency  String   @default("USD") @db.VarChar(3)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -136,6 +139,10 @@ model Lead {
   // get back to them. With neither recent, an open lead goes cold.
   lastContactedOn   DateTime?  @db.Date
   nextFollowUpOn    DateTime?  @db.Date
+  // Money (Stage 15): the expected value, in minor units (cents) of the
+  // workspace's currency, and when the lead was last moved to Won.
+  value             Int?
+  wonAt             DateTime?
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
@@ -170,6 +177,9 @@ model Project {
   status      ProjectStatus @default(PLANNING)
   startDate   DateTime?     @db.Date
   dueDate     DateTime?     @db.Date
+  // What the client pays for it, in minor units (cents) of the workspace's
+  // currency (Stage 15).
+  fee         Int?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 

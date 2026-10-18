@@ -21,13 +21,16 @@ async function Settings() {
           <CardTitle>
             <h2>Workspace</h2>
           </CardTitle>
-          <CardDescription>The name people see, and the time zone for dates.</CardDescription>
+          <CardDescription>
+            The name people see, the time zone for dates, and the currency for amounts.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <SettingsForm
             zones={timeZoneOptions()}
             name={workspace.name}
             timezone={workspace.timezone}
+            currency={workspace.currency}
             canEdit={role === "OWNER"}
           />
         </CardContent>

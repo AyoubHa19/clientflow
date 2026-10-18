@@ -40,6 +40,8 @@ const leadFields = {
   convertedAt: true,
   lastContactedOn: true,
   nextFollowUpOn: true,
+  value: true,
+  wonAt: true,
   createdAt: true,
   updatedAt: true,
   convertedClient: { select: { id: true, name: true } },
@@ -61,6 +63,7 @@ const SORTS: Record<LeadListParams["sort"], Prisma.LeadOrderByWithRelationInput[
   updated: [{ updatedAt: "desc" }, { id: "desc" }],
   name: [{ contactName: "asc" }, { id: "asc" }],
   newest: [{ createdAt: "desc" }, { id: "desc" }],
+  value: [{ value: { sort: "desc", nulls: "last" } }, { updatedAt: "desc" }, { id: "desc" }],
   followUp: [
     { nextFollowUpOn: { sort: "asc", nulls: "last" } },
     { updatedAt: "desc" },
@@ -145,9 +148,15 @@ export async function listLeads(
   return { items, total, page, pageCount, pageSize: LEADS_PER_PAGE };
 }
 
-export type BoardColumn = { status: LeadStatus; total: number; items: LeadRecord[] };
+export type BoardColumn = {
+  status: LeadStatus;
+  total: number;
+  /** The value of all its leads (not only the cards shown), in minor units. */
+  value: number;
+  items: LeadRecord[];
+};
 
-/** The board: each status with its count and most recently updated leads. */
+/** The board: each status with its count, value and most recently updated leads. */
 export async function boardLeads(
   db: Db,
   ctx: WorkspaceContext,
@@ -157,8 +166,9 @@ export async function boardLeads(
   return Promise.all(
     LEAD_STATUSES.map(async (status) => {
       const columnWhere = { ...where, status };
-      const [total, items] = await Promise.all([
+      const [total, sum, items] = await Promise.all([
         db.lead.count({ where: columnWhere }),
+        db.lead.aggregate({ where: columnWhere, _sum: { value: true } }),
         db.lead.findMany({
           where: columnWhere,
           orderBy: SORTS.updated,
@@ -166,7 +176,7 @@ export async function boardLeads(
           select: leadFields,
         }),
       ]);
-      return { status, total, items };
+      return { status, total, value: sum._sum.value ?? 0, items };
     }),
   );
 }
@@ -211,6 +221,16 @@ function logActivity(
 
 const STAYS_WON = "This lead became a client, so it stays Won.";
 
+/**
+ * When a lead was won: set as it moves to Won, kept while it stays Won
+ * (an edit doesn't move the day), cleared when it leaves. "Won this month"
+ * on the dashboard counts from it.
+ */
+function wonAtFor(status: LeadStatus, existing: { status: LeadStatus; wonAt: Date | null } | null) {
+  if (status !== "WON") return null;
+  return existing?.status === "WON" ? (existing.wonAt ?? new Date()) : new Date();
+}
+
 /** A contact day must have happened: today at the latest, in the workspace's time zone. */
 const inFuture = (date: Date | null, today: string) => date !== null && toDateOnly(date) > today;
 
@@ -227,7 +247,11 @@ export async function createLead(
   }
   const lead = await db.$transaction(async (tx) => {
     const created = await tx.lead.create({
-      data: { ...parsed.data, workspaceId: ctx.workspace.id },
+      data: {
+        ...parsed.data,
+        wonAt: wonAtFor(parsed.data.status, null),
+        workspaceId: ctx.workspace.id,
+      },
       select: leadFields,
     });
     await logActivity(
@@ -272,7 +296,11 @@ export async function updateLead(
     if (existing.convertedClient && parsed.data.status !== "WON") {
       return invalidFields({ status: STAYS_WON });
     }
-    const updated = await tx.lead.update({ where: { id }, data: parsed.data, select: leadFields });
+    const updated = await tx.lead.update({
+      where: { id },
+      data: { ...parsed.data, wonAt: wonAtFor(parsed.data.status, existing) },
+      select: leadFields,
+    });
     await logActivity(
       tx,
       ctx,
@@ -302,7 +330,7 @@ export async function setLeadStatus(
     if (existing.convertedClient) return conflict(STAYS_WON);
     const updated = await tx.lead.update({
       where: { id },
-      data: { status: parsed.data },
+      data: { status: parsed.data, wonAt: wonAtFor(parsed.data, existing) },
       select: leadFields,
     });
     await logActivity(
@@ -519,7 +547,12 @@ export async function convertLead(
 
     const updated = await tx.lead.update({
       where: { id },
-      data: { status: "WON", convertedClientId: client.id, convertedAt: new Date() },
+      data: {
+        status: "WON",
+        wonAt: wonAtFor("WON", lead),
+        convertedClientId: client.id,
+        convertedAt: new Date(),
+      },
       select: leadFields,
     });
     await logActivity(

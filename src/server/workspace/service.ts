@@ -7,7 +7,7 @@ import { forbidden, invalid, ok, type ServiceResult } from "@/server/result";
 // tests can run them against the test database. The pages and Server
 // Actions call these with the context from requireWorkspace().
 
-export type WorkspaceSummary = { id: string; name: string; timezone: string };
+export type WorkspaceSummary = { id: string; name: string; timezone: string; currency: string };
 
 /**
  * Who is asking and in which workspace. Always built on the server from
@@ -19,7 +19,7 @@ export type WorkspaceContext = {
   role: MemberRole;
 };
 
-const summary = { id: true, name: true, timezone: true } as const;
+const summary = { id: true, name: true, timezone: true, currency: true } as const;
 
 /** The user's workspace and role there, or null if they have none yet. */
 export async function findMembership(db: Db, userId: string) {
@@ -81,7 +81,11 @@ export async function updateWorkspaceSettings(
   if (!parsed.success) return invalid(parsed.error);
   const workspace = await db.workspace.update({
     where: { id: ctx.workspace.id },
-    data: { name: parsed.data.name, timezone: parsed.data.timezone },
+    data: {
+      name: parsed.data.name,
+      timezone: parsed.data.timezone,
+      currency: parsed.data.currency,
+    },
     select: summary,
   });
   return ok(workspace);

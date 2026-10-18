@@ -48,10 +48,13 @@ colours.
 
 ## Workspaces
 
-- After signing up, `/onboarding` asks for a workspace name and time zone
-  (the browser's is picked). The creator is its **owner**. For now each
-  person has one workspace; the tables already allow more later.
-- `/settings`: the owner renames the workspace or changes its time zone.
+- After signing up, `/onboarding` asks for a workspace name, time zone
+  (the browser's is picked) and **currency** (guessed from the time zone:
+  Casablanca → MAD, Paris → EUR...; it follows the zone until picked). The
+  creator is its **owner**. For now each person has one workspace; the
+  tables already allow more later.
+- `/settings`: the owner renames the workspace or changes its time zone or
+  currency. Changing the currency relabels amounts; it doesn't convert them.
 - `requireWorkspace()` (`src/server/workspace/context.ts`) gives every
   page and action the user, their workspace and role, read from the
   session and the membership table. **The workspace id never comes from
@@ -94,6 +97,22 @@ colours.
   in 5 days" or "No contact for 20 days"; won and lost leads have none.
 - The list filters by follow-up (due today or late, gone cold, planned) and
   sorts by next follow-up.
+
+## Money
+
+- A lead can have an **expected value** and a project a **fee**, in the
+  workspace's currency. Forms take "1500", "1500.50", "1,500.50" or
+  "1 500,50"; anything else is explained. Up to 10,000,000.
+- Amounts are stored as **whole numbers of minor units** (cents): no
+  floating point, so totals never drift. The database also refuses
+  negative or too-large amounts (CHECK constraints). `src/lib/money.ts`.
+- The dashboard's **Money** card: the pipeline (open leads with a value),
+  **won this month** (by the day each lead was moved to Won, in the
+  workspace's time zone; `Lead.wonAt`), and the fees of open projects. Each
+  says how many records it counts.
+- The board shows each lead's value and what each column is worth; the
+  list sorts by value; projects show their fee, and a client's page adds up
+  their projects' fees (cancelled ones left out).
 
 ## Projects
 

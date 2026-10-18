@@ -339,8 +339,21 @@ end of every stage.
   Martin cold (its `createdAt` moved back 18 days by a script, as the app
   can't). After a migration, restart `npm run dev` (it keeps the old
   Prisma client: "Unknown field").
-- **Next: Stage 15, money** (lead value and project fee; see above). Then
-  **Stage 13, portfolio and product readiness** (PRD 14): README,
+- **Stage 15, money: done (2026-10-18).** `Workspace.currency` (ISO code,
+  default USD; the migration `money` set Casablanca workspaces to MAD),
+  guessed by `currencyForTimeZone` in onboarding, changeable in Settings
+  (relabels, never converts). `Lead.value`, `Project.fee` (Int, minor units,
+  CHECK 0..1e9 in the migration SQL), `Lead.wonAt` (set on moving to Won,
+  kept while Won, cleared on leaving; backfilled from convertedAt or
+  updatedAt). Rules in `src/lib/money.ts` (`parseAmount`, `optionalAmount`,
+  `formatMoney` in en-US with the code: "MAD 1,500"). `getMoney()` in the
+  dashboard service → `MoneyCard`; board column totals from an aggregate
+  (all leads, not only the 50 cards); `clientFees()`. The leads table's
+  Source column became Value, the projects table's Start became Fee (both
+  still on the cards and pages). Dev sample: Omar 3,200, Leila 6,500, Hiba
+  12,000, Thomas 4,000.50, Karim 18,000 (won); fees on three open projects.
+- **Next: Stage 16, client portal** (a private status link per project; see
+  above). Then **Stage 13, portfolio and product readiness** (PRD 14): README,
   screenshots, architecture summary, feature list, setup, demo data
   strategy (the shared demo account could be changed by visitors: decide
   read-only, a reset, or per-visitor demos; Claude proposed a "Try the

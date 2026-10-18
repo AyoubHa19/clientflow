@@ -13,9 +13,10 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/componen
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { formatDate, todayIn } from "@/lib/dates";
+import { formatMoney } from "@/lib/money";
 import { getClient } from "@/server/clients/service";
 import { db } from "@/server/db";
-import { projectsForClient } from "@/server/projects/service";
+import { clientFees, projectsForClient } from "@/server/projects/service";
 import { requireWorkspace } from "@/server/workspace/context";
 
 // The record's name in the browser tab (it streams in with the page).
@@ -49,7 +50,10 @@ async function ClientDetails({ params }: { params: PageProps<"/clients/[id]">["p
   const client = await getClient(db, ctx, id);
   // Missing, malformed, or another workspace's: the same "not found".
   if (!client) notFound();
-  const projects = await projectsForClient(db, ctx, client.id);
+  const [projects, fees] = await Promise.all([
+    projectsForClient(db, ctx, client.id),
+    clientFees(db, ctx, client.id),
+  ]);
 
   return (
     <>
@@ -111,6 +115,9 @@ async function ClientDetails({ params }: { params: PageProps<"/clients/[id]">["p
           </CardHeader>
           <CardContent>
             <dl className="grid gap-3 text-sm sm:grid-cols-[6rem_minmax(0,1fr)]">
+              <Detail label="Project fees">
+                {fees.withFee > 0 && formatMoney(fees.total, ctx.workspace.currency)}
+              </Detail>
               <Detail label="Added">{formatDate(client.createdAt, ctx.workspace.timezone)}</Detail>
               <Detail label="Updated">
                 {formatDate(client.updatedAt, ctx.workspace.timezone)}
@@ -152,6 +159,7 @@ async function ClientDetails({ params }: { params: PageProps<"/clients/[id]">["p
                 projects={projects}
                 today={todayIn(ctx.workspace.timezone)}
                 showClient={false}
+                currency={ctx.workspace.currency}
               />
             ) : (
               <p className="text-sm text-muted-foreground">No projects for this client yet.</p>

@@ -253,3 +253,43 @@ export async function listActivity(
     pageSize: perPage,
   };
 }
+
+/**
+ * The money on the dashboard (Stage 15), in minor units of the workspace's
+ * currency: what open leads could bring in, what was won this month (by
+ * the day each lead was won, in the workspace's time zone), and the fees of
+ * open projects. Each with how many records it counts.
+ */
+export async function getMoney(db: Db, ctx: WorkspaceContext, today: string) {
+  const workspaceId = ctx.workspace.id;
+  const monthStart = startOfDayInZone(`${today.slice(0, 8)}01`, ctx.workspace.timezone);
+  const [pipeline, won, booked] = await Promise.all([
+    db.lead.aggregate({
+      where: {
+        workspaceId,
+        status: { in: ["NEW", "CONTACTED", "QUALIFIED"] },
+        value: { not: null },
+      },
+      _sum: { value: true },
+      _count: { _all: true },
+    }),
+    db.lead.aggregate({
+      where: { workspaceId, status: "WON", wonAt: { gte: monthStart } },
+      _sum: { value: true },
+      _count: { _all: true },
+    }),
+    db.project.aggregate({
+      where: { workspaceId, status: { notIn: ["COMPLETED", "CANCELLED"] }, fee: { not: null } },
+      _sum: { fee: true },
+      _count: { _all: true },
+    }),
+  ]);
+  return {
+    currency: ctx.workspace.currency,
+    pipeline: { total: pipeline._sum.value ?? 0, count: pipeline._count._all },
+    wonThisMonth: { total: won._sum.value ?? 0, count: won._count._all },
+    openProjects: { total: booked._sum.fee ?? 0, count: booked._count._all },
+  };
+}
+
+export type Money = Awaited<ReturnType<typeof getMoney>>;

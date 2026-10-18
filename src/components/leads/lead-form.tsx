@@ -31,6 +31,7 @@ export type LeadFormValues = {
   status: LeadStatus;
   lastContactedOn: string;
   nextFollowUpOn: string;
+  value: string;
 };
 
 const STATUS_OPTIONS = LEAD_STATUSES.map((status) => ({
@@ -44,12 +45,15 @@ export function LeadForm({
   initial,
   submitLabel,
   cancelHref,
+  currency,
   statusLocked = false,
 }: {
   action: (state: LeadFormState, formData: FormData) => Promise<LeadFormState>;
   initial?: Partial<LeadFormValues>;
   submitLabel: string;
   cancelHref: string;
+  /** The workspace's currency, for the value field. */
+  currency: string;
   /** A converted lead stays Won. */
   statusLocked?: boolean;
 }) {
@@ -155,6 +159,18 @@ export function LeadForm({
           disabled={pending}
         />
       )}
+      <FormField
+        key={`value-${values.value}`}
+        label={`Expected value in ${currency} (optional)`}
+        name="value"
+        inputMode="decimal"
+        autoComplete="off"
+        defaultValue={values.value}
+        hint="What the work could be worth, like 1500 or 1,500.50."
+        error={errors.value}
+        disabled={pending}
+      />
+      <div aria-hidden className="hidden sm:block" />
       <FormField
         key={`lastContactedOn-${values.lastContactedOn}`}
         label="Last contacted (optional)"

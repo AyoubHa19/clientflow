@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDate, todayIn } from "@/lib/dates";
 import { asFollowUpLead, followUpState } from "@/lib/followups";
+import { formatMoney } from "@/lib/money";
 import { leadsHref, parseLeadListParams } from "@/lib/validation/lead";
 import { db } from "@/server/db";
 import { boardLeads, leadSources, listLeads } from "@/server/leads/service";
@@ -72,7 +73,12 @@ async function Leads({ searchParams }: { searchParams: PageProps<"/leads">["sear
           <NoLeads filtered={filtered} />
         ) : (
           <>
-            <LeadList leads={result.items} timeZone={tz} today={today} />
+            <LeadList
+              leads={result.items}
+              timeZone={tz}
+              today={today}
+              currency={ctx.workspace.currency}
+            />
             <Pagination
               page={result.page}
               pageCount={result.pageCount}
@@ -92,6 +98,7 @@ async function Leads({ searchParams }: { searchParams: PageProps<"/leads">["sear
   const columns: BoardColumnData[] = board.map((column) => ({
     status: column.status,
     total: column.total,
+    value: column.value > 0 ? formatMoney(column.value, ctx.workspace.currency) : null,
     seeAllHref: leadsHref({
       view: "list",
       q: params.q,
@@ -106,6 +113,7 @@ async function Leads({ searchParams }: { searchParams: PageProps<"/leads">["sear
       updated: formatDate(lead.updatedAt, tz),
       converted: lead.convertedClient !== null,
       followUp: followUpState(asFollowUpLead(lead), today),
+      value: lead.value === null ? null : formatMoney(lead.value, ctx.workspace.currency),
     })),
   }));
 

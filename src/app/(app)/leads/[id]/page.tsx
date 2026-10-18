@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { formatDate, formatDateOnly, todayIn, toDateOnly } from "@/lib/dates";
 import { asFollowUpLead, followUpState, isOpenLead } from "@/lib/followups";
+import { formatMoney } from "@/lib/money";
 import { logContactAction } from "@/server/leads/actions";
 import { db } from "@/server/db";
 import { findMatchingClient, getLead } from "@/server/leads/service";
@@ -129,6 +130,9 @@ async function LeadDetails({ params }: { params: PageProps<"/leads/[id]">["param
                   )}
                 </Detail>
                 <Detail label="Company">{lead.company}</Detail>
+                <Detail label="Expected value">
+                  {lead.value === null ? null : formatMoney(lead.value, ctx.workspace.currency)}
+                </Detail>
                 <Detail label="Source">{lead.source}</Detail>
               </dl>
             </CardContent>

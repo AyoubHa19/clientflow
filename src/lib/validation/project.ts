@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { optionalAmount } from "@/lib/money";
 import {
   choiceParam,
   firstParam,
@@ -54,6 +55,8 @@ export const projectSchema = z
       .default("PLANNING"),
     startDate: optionalDay("Enter a valid start date."),
     dueDate: optionalDay("Enter a valid due date."),
+    // What the client pays, in the workspace's currency (minor units).
+    fee: optionalAmount,
   })
   .refine(
     (project) => !project.startDate || !project.dueDate || project.dueDate >= project.startDate,

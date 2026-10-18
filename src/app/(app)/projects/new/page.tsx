@@ -30,6 +30,7 @@ async function NewProject({
       clients={clients}
       initial={{ clientId }}
       submitLabel="Add project"
+      currency={ctx.workspace.currency}
       cancelHref={clientId ? `/clients/${clientId}` : "/projects"}
     />
   );

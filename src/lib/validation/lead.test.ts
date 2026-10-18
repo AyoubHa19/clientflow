@@ -14,6 +14,7 @@ describe("leadSchema", () => {
       status: "NEW",
       lastContactedOn: null,
       nextFollowUpOn: null,
+      value: null,
     });
   });
 

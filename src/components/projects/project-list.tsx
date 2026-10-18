@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatDateOnly, toDateOnly } from "@/lib/dates";
+import { formatMoney } from "@/lib/money";
 import { ProgressBar } from "@/components/progress-bar";
 import type { ProjectRecord } from "@/server/projects/service";
 import type { Progress } from "@/server/tasks/service";
@@ -13,6 +14,7 @@ export function ProjectList({
   today,
   showClient = true,
   progress,
+  currency,
 }: {
   projects: ProjectRecord[];
   /** Today in the workspace's time zone, "YYYY-MM-DD". */
@@ -20,6 +22,8 @@ export function ProjectList({
   showClient?: boolean;
   /** Tasks done per project id, when known. */
   progress?: Record<string, Progress>;
+  /** The workspace's currency, for the fees. */
+  currency: string;
 }) {
   const due = (project: ProjectRecord) => (project.dueDate ? toDateOnly(project.dueDate) : null);
   const headings = [
@@ -27,7 +31,7 @@ export function ProjectList({
     ...(showClient ? ["Client"] : []),
     "Status",
     ...(progress ? ["Tasks"] : []),
-    "Start",
+    "Fee",
     "Due",
   ];
   const progressOf = (project: ProjectRecord) => progress?.[project.id] ?? { done: 0, total: 0 };
@@ -68,8 +72,8 @@ export function ProjectList({
                     <ProgressBar {...progressOf(project)} compact />
                   </td>
                 )}
-                <td className="px-4 py-3 whitespace-nowrap text-muted-foreground">
-                  {project.startDate ? formatDateOnly(project.startDate) : dash}
+                <td className="px-4 py-3 whitespace-nowrap tabular-nums">
+                  {project.fee === null ? dash : formatMoney(project.fee, currency)}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap items-center gap-2 whitespace-nowrap">
@@ -103,6 +107,11 @@ export function ProjectList({
                 </div>
               )}
               <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                {project.fee !== null && (
+                  <span className="font-medium text-foreground tabular-nums">
+                    {formatMoney(project.fee, currency)} ·
+                  </span>
+                )}
                 {project.dueDate ? `Due ${formatDateOnly(project.dueDate)}` : "No due date"}
                 <DueBadge due={due(project)} today={today} status={project.status} />
               </div>

@@ -13,11 +13,13 @@ export function SettingsForm({
   zones,
   name,
   timezone,
+  currency,
   canEdit,
 }: {
   zones: string[];
   name: string;
   timezone: string;
+  currency: string;
   canEdit: boolean;
 }) {
   const form = useRef<HTMLFormElement>(null);
@@ -35,7 +37,7 @@ export function SettingsForm({
     }
   }, [state]);
 
-  const values = state.values ?? { name, timezone };
+  const values = state.values ?? { name, timezone, currency };
 
   return (
     <form ref={form} action={formAction} noValidate className="grid gap-5">
@@ -45,6 +47,7 @@ export function SettingsForm({
         key={JSON.stringify(values)}
         defaultName={values.name}
         defaultTimeZone={values.timezone}
+        defaultCurrency={values.currency}
         errors={state.errors}
         disabled={pending || !canEdit}
       />

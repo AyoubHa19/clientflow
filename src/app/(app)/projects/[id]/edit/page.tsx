@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { toDateOnly } from "@/lib/dates";
+import { amountInputValue } from "@/lib/money";
 import { db } from "@/server/db";
 import { updateProjectAction } from "@/server/projects/actions";
 import { clientOptions, getProject } from "@/server/projects/service";
@@ -47,7 +48,9 @@ async function EditProject({ params }: { params: PageProps<"/projects/[id]/edit"
               status: project.status,
               startDate: project.startDate ? toDateOnly(project.startDate) : "",
               dueDate: project.dueDate ? toDateOnly(project.dueDate) : "",
+              fee: amountInputValue(project.fee),
             }}
+            currency={ctx.workspace.currency}
             submitLabel="Save changes"
             cancelHref={`/projects/${project.id}`}
           />

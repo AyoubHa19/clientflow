@@ -34,6 +34,7 @@ const FIELDS = [
   "status",
   "lastContactedOn",
   "nextFollowUpOn",
+  "value",
 ] as const;
 
 function readForm(formData: FormData) {

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { optionalAmount } from "@/lib/money";
 import {
   choiceParam,
   CONTACT_LIMITS,
@@ -48,6 +49,8 @@ export const leadSchema = z.object({
   // Not after today: the server checks that, as it knows the workspace's today.
   lastContactedOn: optionalDay("Enter a valid date, or leave it empty."),
   nextFollowUpOn: optionalDay("Enter a valid date, or leave it empty."),
+  // What the work could be worth, in the workspace's currency (minor units).
+  value: optionalAmount,
 });
 
 export type LeadInput = z.infer<typeof leadSchema>;
@@ -126,7 +129,7 @@ export const LEAD_FOLLOW_UP_FILTER_LABELS: Record<LeadFollowUpFilter, string> = 
   planned: "Planned for later",
 };
 
-export const LEAD_SORTS = ["updated", "name", "newest", "followUp"] as const;
+export const LEAD_SORTS = ["updated", "name", "newest", "followUp", "value"] as const;
 export type LeadSort = (typeof LEAD_SORTS)[number];
 
 export const LEAD_SORT_LABELS: Record<LeadSort, string> = {
@@ -134,6 +137,7 @@ export const LEAD_SORT_LABELS: Record<LeadSort, string> = {
   name: "Name (A to Z)",
   newest: "Newest first",
   followUp: "Next follow-up first",
+  value: "Highest value first",
 };
 
 export const LEADS_PER_PAGE = 20;

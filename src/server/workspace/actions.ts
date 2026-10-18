@@ -2,8 +2,9 @@
 
 // Server Actions for the onboarding and settings forms. Next checks that
 // every Server Action call comes from this site (Origin header), so these
-// are safe from cross-site requests. They only read `name` and `timezone`
-// from the form: which user and workspace always come from the session.
+// are safe from cross-site requests. They only read `name`, `timezone` and
+// `currency` from the form: which user and workspace always come from the
+// session.
 
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
@@ -16,13 +17,14 @@ export type WorkspaceFormState = {
   errors?: Record<string, string>;
   message?: string;
   saved?: boolean;
-  values?: { name: string; timezone: string };
+  values?: { name: string; timezone: string; currency: string };
 };
 
 function readForm(formData: FormData) {
   return {
     name: String(formData.get("name") ?? ""),
     timezone: String(formData.get("timezone") ?? ""),
+    currency: String(formData.get("currency") ?? ""),
   };
 }
 
@@ -50,5 +52,12 @@ export async function updateWorkspaceAction(
   if (!result.ok) return { errors: result.errors, message: result.message, values };
   // Redraw the page, so the side bar shows the new name too.
   refresh();
-  return { saved: true, values: { name: result.value.name, timezone: result.value.timezone } };
+  return {
+    saved: true,
+    values: {
+      name: result.value.name,
+      timezone: result.value.timezone,
+      currency: result.value.currency,
+    },
+  };
 }

@@ -73,6 +73,7 @@ async function Projects({
             projects={result.items}
             today={todayIn(ctx.workspace.timezone)}
             progress={progress}
+            currency={ctx.workspace.currency}
           />
           <Pagination
             page={result.page}

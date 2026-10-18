@@ -27,6 +27,7 @@ export function OnboardingForm({ zones }: { zones: string[] }) {
         key={JSON.stringify(state.values ?? {})}
         defaultName={state.values?.name}
         defaultTimeZone={state.values?.timezone}
+        defaultCurrency={state.values?.currency}
         guessTimeZone={!state.values}
         errors={state.errors}
         disabled={pending}

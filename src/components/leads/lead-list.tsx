@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatDate } from "@/lib/dates";
 import { asFollowUpLead, followUpState } from "@/lib/followups";
+import { formatMoney } from "@/lib/money";
 import type { LeadRecord } from "@/server/leads/service";
 import { FollowUpBadge } from "./follow-up-badge";
 import { LeadStatusBadge } from "./lead-status-badge";
@@ -12,11 +13,13 @@ export function LeadList({
   leads,
   timeZone,
   today,
+  currency,
 }: {
   leads: LeadRecord[];
   timeZone: string;
   /** Today in the workspace, for the follow-up badges. */
   today: string;
+  currency: string;
 }) {
   return (
     <>
@@ -25,7 +28,7 @@ export function LeadList({
           <caption className="sr-only">Leads</caption>
           <thead className="bg-muted/50 text-xs text-muted-foreground">
             <tr>
-              {["Contact", "Company", "Source", "Stage", "Follow-up", "Updated"].map((heading) => (
+              {["Contact", "Company", "Value", "Stage", "Follow-up", "Updated"].map((heading) => (
                 <th key={heading} scope="col" className="px-4 py-3 font-medium whitespace-nowrap">
                   {heading}
                 </th>
@@ -44,7 +47,9 @@ export function LeadList({
                   </Link>
                 </td>
                 <td className="max-w-48 truncate px-4 py-3">{lead.company ?? dash}</td>
-                <td className="max-w-32 truncate px-4 py-3">{lead.source ?? dash}</td>
+                <td className="px-4 py-3 whitespace-nowrap tabular-nums">
+                  {lead.value === null ? dash : formatMoney(lead.value, currency)}
+                </td>
                 <td className="px-4 py-3">
                   <LeadStatusBadge status={lead.status} />
                 </td>
@@ -76,6 +81,11 @@ export function LeadList({
               )}
               <FollowUpBadge state={followUpState(asFollowUpLead(lead), today)} className="mt-2" />
               <p className="mt-2 text-xs text-muted-foreground">
+                {lead.value !== null && (
+                  <span className="font-medium text-foreground tabular-nums">
+                    {formatMoney(lead.value, currency)} ·{" "}
+                  </span>
+                )}
                 {lead.source ? `${lead.source} · ` : ""}Updated{" "}
                 {formatDate(lead.updatedAt, timeZone)}
               </p>

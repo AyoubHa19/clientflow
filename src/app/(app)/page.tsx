@@ -6,11 +6,12 @@ import { FollowUps } from "@/components/dashboard/follow-ups";
 import { GettingStarted } from "@/components/dashboard/getting-started";
 import { KpiCards } from "@/components/dashboard/kpi-cards";
 import { LeadFunnel } from "@/components/dashboard/lead-funnel";
+import { MoneyCard } from "@/components/dashboard/money-card";
 import { WeeklyChart } from "@/components/dashboard/weekly-chart";
 import { PageContainer, PageHeader } from "@/components/shell/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
 import { todayIn } from "@/lib/dates";
-import { getDashboard, listActivity } from "@/server/dashboard/service";
+import { getDashboard, getMoney, listActivity } from "@/server/dashboard/service";
 import { db } from "@/server/db";
 import { followUps } from "@/server/leads/service";
 import { requireWorkspace } from "@/server/workspace/context";
@@ -20,10 +21,11 @@ async function Overview() {
   const ctx = { user, workspace, ...rest };
   const now = new Date();
   const today = todayIn(workspace.timezone, now);
-  const [dashboard, activity, toFollowUp] = await Promise.all([
+  const [dashboard, activity, toFollowUp, money] = await Promise.all([
     getDashboard(db, ctx, today),
     listActivity(db, ctx, { type: "all", page: 1, perPage: 6 }),
     followUps(db, ctx, today),
+    getMoney(db, ctx, today),
   ]);
   const firstName = user.name.trim().split(/\s+/)[0] ?? user.name;
   const allStarted = Object.values(dashboard.started).every(Boolean);
@@ -38,6 +40,7 @@ async function Overview() {
       <div className="grid grid-cols-[minmax(0,1fr)] gap-4 xl:grid-cols-[minmax(0,1fr)_19rem]">
         <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-4">
           <KpiCards counts={dashboard.counts} trends={dashboard.trends} />
+          <MoneyCard money={money} />
           <Deadlines deadlines={dashboard.deadlines} today={today} />
           <WeeklyChart weekly={dashboard.weekly} />
         </div>

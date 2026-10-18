@@ -29,6 +29,7 @@ const projectFields = {
   status: true,
   startDate: true,
   dueDate: true,
+  fee: true,
   createdAt: true,
   updatedAt: true,
   client: { select: { id: true, name: true } },
@@ -98,6 +99,25 @@ export async function projectsForClient(db: Db, ctx: WorkspaceContext, clientId:
     take: 50,
     select: projectFields,
   });
+}
+
+/**
+ * What a client's projects add up to (cancelled ones left out), and how
+ * many of them have a fee: every project, not only the 50 listed.
+ */
+export async function clientFees(db: Db, ctx: WorkspaceContext, clientId: string) {
+  if (!isUuid(clientId)) return { total: 0, withFee: 0 };
+  const result = await db.project.aggregate({
+    where: {
+      workspaceId: ctx.workspace.id,
+      clientId,
+      status: { not: "CANCELLED" },
+      fee: { not: null },
+    },
+    _sum: { fee: true },
+    _count: { _all: true },
+  });
+  return { total: result._sum.fee ?? 0, withFee: result._count._all };
 }
 
 /**
