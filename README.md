@@ -126,6 +126,25 @@ colours.
   time zone**, and disappear once a project is completed or cancelled.
 - A client's page lists their projects and starts a new one for them.
 
+## Time and client health
+
+- Each project has a **Time** card: a timer (start it there; while it runs,
+  a bar with its clock and a Stop button sits at the top of every page),
+  time added by hand ("1:30", "1h 30m", "90m" or "1.5" hours, on a day that
+  has happened, optionally on one of the project's tasks, with a note), and
+  the entries. Starting a timer stops and saves the one already running.
+  One person has at most one running timer (the database enforces it too);
+  a timer forgotten for days is saved as 24 hours, and says so.
+- **Real hourly rate:** the project's fee over the hours logged. Rates are
+  shown in whole units ("MAD 300/h").
+- **Client health**, on the clients list and each client's page: Good,
+  Watch, At risk or Not enough data, always with its reasons. It compares
+  what the client pays per hour (fees of their projects that have both a
+  fee and logged time, over those hours) with the workspace's average, and
+  counts their overdue projects and tasks. Below 85% of the average or 1
+  overdue item: Watch; below 60% or 3 overdue: At risk (`src/lib/health.ts`).
+- You delete your own entries; the owner can delete anyone's.
+
 ## Sharing with a client
 
 - On a project's page, **Share with client** makes a link to a status page

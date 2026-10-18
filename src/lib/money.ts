@@ -154,3 +154,8 @@ export function amountInputValue(minor: number | null | undefined) {
 export function sumAmounts(amounts: (number | null | undefined)[]) {
   return amounts.reduce<number>((sum, amount) => sum + (amount ?? 0), 0);
 }
+
+/** An hourly rate, in whole units: "MAD 2,980/h" (cents would be false precision). */
+export function formatRate(minorPerHour: number, currency: string) {
+  return `${formatMoney(Math.round(minorPerHour / 100) * 100, currency)}/h`;
+}

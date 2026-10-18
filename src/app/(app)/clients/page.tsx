@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { clientListHref, parseClientListParams } from "@/lib/validation/client";
 import { listClients } from "@/server/clients/service";
+import { clientsHealth } from "@/server/time/service";
 import { db } from "@/server/db";
 import { requireWorkspace } from "@/server/workspace/context";
 
@@ -22,6 +23,11 @@ async function Clients({ searchParams }: { searchParams: PageProps<"/clients">["
   const ctx = await requireWorkspace();
   const params = parseClientListParams(await searchParams);
   const result = await listClients(db, ctx, params);
+  const health = await clientsHealth(
+    db,
+    ctx,
+    result.items.map((client) => client.id),
+  );
   const filtered = params.q !== "" || params.status !== "open";
 
   return (
@@ -53,7 +59,13 @@ async function Clients({ searchParams }: { searchParams: PageProps<"/clients">["
         )
       ) : (
         <>
-          <ClientList clients={result.items} timeZone={ctx.workspace.timezone} />
+          <ClientList
+            clients={result.items}
+            timeZone={ctx.workspace.timezone}
+            health={Object.fromEntries(
+              Object.entries(health).map(([id, row]) => [id, row.health.level]),
+            )}
+          />
           <Pagination
             page={result.page}
             pageCount={result.pageCount}

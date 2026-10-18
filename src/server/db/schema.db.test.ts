@@ -69,6 +69,7 @@ describe("migrations", () => {
       "rate_limits",
       "sessions",
       "tasks",
+      "time_entries",
       "users",
       "verifications",
       "workspace_memberships",

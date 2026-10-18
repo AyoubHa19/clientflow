@@ -3,6 +3,7 @@ import {
   amountInputValue,
   currencyForTimeZone,
   formatMoney,
+  formatRate,
   isCurrencyCode,
   optionalAmount,
   parseAmount,
@@ -47,6 +48,8 @@ describe("formatMoney", () => {
     expect(formatMoney(150050, "EUR")).toBe("EUR 1,500.50");
     expect(formatMoney(0, "USD")).toBe("USD 0");
     expect(formatMoney(1250000, "MAD", { compact: true })).toBe("MAD 12.5K");
+    expect(formatRate(298013, "MAD")).toBe("MAD 2,980/h");
+    expect(formatRate(298050, "MAD")).toBe("MAD 2,981/h");
   });
 });
 

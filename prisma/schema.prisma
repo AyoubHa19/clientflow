@@ -33,6 +33,7 @@ model User {
 
   memberships WorkspaceMembership[]
   activities  Activity[]
+  timeEntries TimeEntry[]
   sessions    Session[]
   accounts    Account[]
 
@@ -57,6 +58,7 @@ model Workspace {
   projects    Project[]
   tasks       Task[]
   activities  Activity[]
+  timeEntries TimeEntry[]
 
   @@map("workspaces")
 }
@@ -190,9 +192,10 @@ model Project {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  client    Client?   @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  workspace Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  client    Client?     @relation(fields: [clientId], references: [id], onDelete: SetNull)
   tasks     Task[]
+  time      TimeEntry[]
 
   @@index([workspaceId, status, updatedAt])
   @@index([workspaceId, dueDate])
@@ -226,13 +229,50 @@ model Task {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  project   Project?  @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  workspace Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project   Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  time      TimeEntry[]
 
   @@index([workspaceId, status, dueDate])
   @@index([workspaceId, updatedAt])
   @@index([projectId])
   @@map("tasks")
+}
+
+// ---------------------------------------------------------------------------
+// Time tracking (Stage 17)
+// ---------------------------------------------------------------------------
+
+// Time spent on a project (and maybe one of its tasks). A running timer is
+// an entry with startedAt and no minutes yet; stopping it fills in the
+// minutes. The migration adds what Prisma can't express: minutes between 1
+// and 1440, and at most one running timer per person.
+model TimeEntry {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  workspaceId String    @db.Uuid
+  // Deleting the project deletes its time.
+  projectId   String    @db.Uuid
+  // Deleting the task keeps the time, on the project.
+  taskId      String?   @db.Uuid
+  // Who logged it; kept (without a name) if their account is deleted.
+  userId      String?
+  // The day the work was done, in the workspace's time zone.
+  day         DateTime  @db.Date
+  minutes     Int?
+  startedAt   DateTime?
+  note        String?   @db.VarChar(200)
+  createdAt   DateTime  @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task      Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, projectId])
+  @@index([workspaceId, day])
+  @@index([userId])
+  @@index([taskId])
+  @@map("time_entries")
 }
 
 // ---------------------------------------------------------------------------

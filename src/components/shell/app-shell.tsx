@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FolderKanbanIcon, PlusIcon, TargetIcon, UsersIcon } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { CommandMenu } from "@/components/search/command-menu";
+import { CurrentTimer } from "@/components/time/current-timer";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { CurrentUserMenu } from "./current-user-menu";
 import { CurrentWorkspace } from "./current-workspace";
@@ -87,8 +88,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <div className="mx-auto flex w-full max-w-6xl items-center gap-3 px-4 pt-4 sm:px-6 lg:px-8 lg:pt-6">
+          <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-3 px-4 pt-4 sm:px-6 lg:px-8 lg:pt-6">
             <CommandMenu className="lg:max-w-md" />
+            <CurrentTimer />
             <div className="ml-auto hidden lg:block">
               <ThemeToggle />
             </div>

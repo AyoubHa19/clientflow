@@ -366,8 +366,23 @@ end of every stage.
   `proxy.ts`, with no-referrer and noindex headers in `next.config.ts`.
   `ShareCard` on the project page. Dev sample: "Atlas Café menu design
   (sample)" is shared.
-- **Next: Stage 17, client health** (time tracking, real hourly rate; see
-  above). Then Stage 18, then **Stage 13, portfolio and product readiness** (PRD 14): README,
+- **Stage 17, time and client health: done (2026-10-18).** `TimeEntry`
+  (`time_entries`: project, optional task, user, `day` DATE, `minutes` null
+  while a timer runs, `startedAt`, note). Migration `time_tracking`
+  (hand-finished: CHECK minutes 1..1440, a running entry needs startedAt,
+  partial unique index = one running timer per user). Rules:
+  `src/lib/time.ts` (`parseDuration`, `timerMinutes` caps at a day,
+  `hourlyRate`), `src/lib/health.ts` (`clientHealth`, thresholds as
+  constants), `formatRate` in money.ts. Service `src/server/time/service.ts`
+  (`startTimer` stops a running one first, `stopTimer`, `logTime`,
+  `deleteTimeEntry`, `projectTime`, `clientsHealth`), actions in
+  `actions.ts`. UI: `components/time/` (`TimeCard` on the project page,
+  `CurrentTimer` bar in the shell's search row, `TimerClock` ticks with
+  useSyncExternalStore), `HealthBadge` + a Health card on the client page;
+  the clients table's Phone column became Health. Dev sample: Atlas Café is
+  At risk (3 overdue), its menu project has ~2h 33m logged.
+- **Next: Stage 18, "Today" page and weekly review** (see above). Then
+  **Stage 13, portfolio and product readiness** (PRD 14): README,
   screenshots, architecture summary, feature list, setup, demo data
   strategy (the shared demo account could be changed by visitors: decide
   read-only, a reset, or per-visitor demos; Claude proposed a "Try the

@@ -1,12 +1,23 @@
 import Link from "next/link";
 import { formatDate } from "@/lib/dates";
+import type { HealthLevel } from "@/lib/health";
 import type { ClientRecord } from "@/server/clients/service";
 import { ClientStatusBadge } from "./client-status-badge";
+import { HealthBadge } from "./health-badge";
 
 const dash = <span className="text-muted-foreground">—</span>;
 
 /** The clients as a table on wide screens and as cards on phones. */
-export function ClientList({ clients, timeZone }: { clients: ClientRecord[]; timeZone: string }) {
+export function ClientList({
+  clients,
+  timeZone,
+  health,
+}: {
+  clients: ClientRecord[];
+  timeZone: string;
+  /** Each client's health level, by id. */
+  health: Record<string, HealthLevel>;
+}) {
   return (
     <>
       <div className="hidden overflow-x-auto surface md:block">
@@ -24,7 +35,7 @@ export function ClientList({ clients, timeZone }: { clients: ClientRecord[]; tim
                 Email
               </th>
               <th scope="col" className="px-4 py-3 font-medium">
-                Phone
+                Health
               </th>
               <th scope="col" className="px-4 py-3 font-medium">
                 Status
@@ -47,7 +58,9 @@ export function ClientList({ clients, timeZone }: { clients: ClientRecord[]; tim
                 </td>
                 <td className="max-w-48 truncate px-4 py-3">{client.company ?? dash}</td>
                 <td className="max-w-56 truncate px-4 py-3">{client.email ?? dash}</td>
-                <td className="px-4 py-3 whitespace-nowrap">{client.phone ?? dash}</td>
+                <td className="px-4 py-3">
+                  <HealthBadge level={health[client.id] ?? "unknown"} />
+                </td>
                 <td className="px-4 py-3">
                   <ClientStatusBadge status={client.status} />
                 </td>
@@ -75,9 +88,10 @@ export function ClientList({ clients, timeZone }: { clients: ClientRecord[]; tim
                 <p className="mt-1 truncate text-sm text-muted-foreground">{client.company}</p>
               )}
               {client.email && <p className="mt-1 truncate text-sm">{client.email}</p>}
-              <p className="mt-2 text-xs text-muted-foreground">
+              <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <HealthBadge level={health[client.id] ?? "unknown"} />
                 Updated {formatDate(client.updatedAt, timeZone)}
-              </p>
+              </div>
             </Link>
           </li>
         ))}

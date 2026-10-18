@@ -18,6 +18,7 @@ import { createAuth } from "@/server/auth/config";
 import { createClient, setClientArchived } from "@/server/clients/service";
 import { createPrismaClient } from "@/server/db/client";
 import { convertLead, createLead } from "@/server/leads/service";
+import { logTime } from "@/server/time/service";
 import { createProject } from "@/server/projects/service";
 import { createTask } from "@/server/tasks/service";
 import { createWorkspace, type WorkspaceContext } from "@/server/workspace/service";
@@ -221,6 +222,26 @@ async function main() {
       dueDate: day(today, 44),
     });
     const portfolio = await project({ name: "Portfolio refresh (sample)", status: "ON_HOLD" });
+
+    // Time: the menu pays about MAD 417/h (18h), the booking site MAD 600/h
+    // (30h), the office plans MAD 2,500/h so far (10h).
+    for (const [projectId, entries] of [
+      [menu.id, ["6", "5:30", "4", "2:30"]],
+      [booking.id, ["8", "7", "6:30", "8:30"]],
+      [plans.id, ["4", "6"]],
+    ] as const) {
+      for (const [index, duration] of entries.entries()) {
+        must(
+          await logTime(db, ctx, {
+            projectId,
+            day: day(today, -2 * (index + 1)),
+            duration,
+            note: "Design work (sample)",
+          }),
+          `time on ${projectId}`,
+        );
+      }
+    }
     await project({
       name: "Riad Group brochure (sample)",
       fee: "4800",

@@ -14,7 +14,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { formatDate, formatDateOnly, todayIn, toDateOnly } from "@/lib/dates";
-import { formatMoney } from "@/lib/money";
+import { formatMoney, formatRate } from "@/lib/money";
+import { formatDuration, hourlyRate } from "@/lib/time";
+import { TimeCard } from "@/components/time/time-card";
+import { projectTime, runningTimer } from "@/server/time/service";
 import { ShareCard } from "@/components/projects/share-card";
 import { getShareState, shareUrl } from "@/server/projects/sharing";
 import { db } from "@/server/db";
@@ -49,12 +52,16 @@ async function ProjectDetails({ params }: { params: PageProps<"/projects/[id]">[
   if (!project) notFound();
   const tz = ctx.workspace.timezone;
   const today = todayIn(tz);
-  const [tasks, progressById, share] = await Promise.all([
+  const [tasks, progressById, share, time, running] = await Promise.all([
     tasksForProject(db, ctx, project.id),
     projectProgress(db, ctx, [project.id]),
     getShareState(db, ctx, project.id),
+    projectTime(db, ctx, project.id),
+    runningTimer(db, ctx),
   ]);
   const progress = progressById[project.id] ?? { done: 0, total: 0 };
+  const rate = hourlyRate(project.fee, time.totalMinutes);
+  const runningHere = running?.project.id === project.id ? running : null;
 
   return (
     <>
@@ -160,6 +167,48 @@ async function ProjectDetails({ params }: { params: PageProps<"/projects/[id]">[
                 No tasks yet: add the first one above.
               </p>
             )}
+          </CardContent>
+        </Card>
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>
+              <h2>Time</h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TimeCard
+              projectId={project.id}
+              today={today}
+              tasks={tasks
+                .filter((task) => task.status !== "DONE")
+                .map((task) => ({ id: task.id, title: task.title }))}
+              running={
+                runningHere?.startedAt
+                  ? {
+                      startedAt: runningHere.startedAt.toISOString(),
+                      task: runningHere.task?.title ?? null,
+                    }
+                  : null
+              }
+              otherTimer={running && !runningHere ? running.project.name : null}
+              entries={time.entries.map((entry) => ({
+                id: entry.id,
+                day: formatDateOnly(entry.day),
+                duration: entry.minutes === null ? null : formatDuration(entry.minutes),
+                task: entry.task?.title ?? null,
+                note: entry.note,
+                who: entry.user?.name ?? "Someone",
+                canDelete: entry.userId === ctx.user.id || ctx.role === "OWNER",
+              }))}
+              total={formatDuration(time.totalMinutes)}
+              rate={{
+                value: rate === null ? null : formatRate(rate, ctx.workspace.currency),
+                hint:
+                  project.fee === null
+                    ? "Add a fee to the project to see what it pays per hour."
+                    : "Log time to see what the fee pays per hour.",
+              }}
+            />
           </CardContent>
         </Card>
       </div>

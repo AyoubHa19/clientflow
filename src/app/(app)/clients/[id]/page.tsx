@@ -13,7 +13,10 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/componen
 import { Skeleton } from "@/components/ui/skeleton";
 import { Breadcrumbs } from "@/components/shell/breadcrumbs";
 import { formatDate, todayIn } from "@/lib/dates";
-import { formatMoney } from "@/lib/money";
+import { formatMoney, formatRate } from "@/lib/money";
+import { formatDuration } from "@/lib/time";
+import { HealthBadge } from "@/components/clients/health-badge";
+import { clientsHealth } from "@/server/time/service";
 import { getClient } from "@/server/clients/service";
 import { db } from "@/server/db";
 import { clientFees, projectsForClient } from "@/server/projects/service";
@@ -50,10 +53,12 @@ async function ClientDetails({ params }: { params: PageProps<"/clients/[id]">["p
   const client = await getClient(db, ctx, id);
   // Missing, malformed, or another workspace's: the same "not found".
   if (!client) notFound();
-  const [projects, fees] = await Promise.all([
+  const [projects, fees, healthById] = await Promise.all([
     projectsForClient(db, ctx, client.id),
     clientFees(db, ctx, client.id),
+    clientsHealth(db, ctx, [client.id]),
   ]);
+  const health = healthById[client.id];
 
   return (
     <>
@@ -125,6 +130,49 @@ async function ClientDetails({ params }: { params: PageProps<"/clients/[id]">["p
             </dl>
           </CardContent>
         </Card>
+        {health && (
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>
+                <h2 className="flex flex-wrap items-center gap-3">
+                  Health <HealthBadge level={health.health.level} />
+                </h2>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+              <dl className="grid grid-cols-3 gap-3 text-sm">
+                <div>
+                  <dt className="text-muted-foreground">Per hour</dt>
+                  <dd className="text-lg font-semibold tabular-nums">
+                    {health.rate === null ? "—" : formatRate(health.rate, ctx.workspace.currency)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Hours</dt>
+                  <dd className="text-lg font-semibold tabular-nums">
+                    {formatDuration(health.minutes)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">Overdue</dt>
+                  <dd className="text-lg font-semibold tabular-nums">{health.overdue}</dd>
+                </div>
+              </dl>
+              <div className="text-sm">
+                <p className="font-medium">Why</p>
+                <ul className="mt-1 grid list-disc gap-1 pl-5 text-muted-foreground">
+                  {health.health.reasons.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Per hour: the fees of their projects that have both a fee and logged time, over
+                  those hours.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>
